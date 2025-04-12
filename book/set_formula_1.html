@@ -3,8 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Fadhil Books &amp; Notes</title>
-        <meta name="robots" content="noindex">
+        <title>Set formula - Fadhil Books &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -158,113 +157,7 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
-<p>Let me introduce my self, I'm Fadhil Riyanto (real-name), A self-taught programmer which live in Indonesian, This is some short &amp; dirty tutorial about computer science.</p>
-<h1 id="contributing"><a class="header" href="#contributing">Contributing</a></h1>
-<p>Found a mistake? You can freely DM me on <a href="https://t.me/fadhil_riyanto">telegram</a>.</p>
-<h1 id="language"><a class="header" href="#language">Language</a></h1>
-<p>Because I'm indonesian people, You may see an article written in indonesian, instead english.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="rust-stuff"><a class="header" href="#rust-stuff">Rust stuff</a></h1>
-<p>Welcome in this rust stuff section.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="rust-cursor-how-it-works"><a class="header" href="#rust-cursor-how-it-works">Rust cursor, How it works</a></h1>
-<p>Cursor in rust basically just a in-memory implementation of Seek. <a href="https://en.cppreference.com/w/c/io/fseek">see fseek() here</a></p>
-<p>Imagine, we have a file. and this is representation of contents</p>
-<pre><code class="language-txt">abcde
-</code></pre>
-<p>seek start from 1, is <code>bcde</code>, start from 2 is <code>cde</code> and so-on, this is also happen when we use seek from end, for example, seek end -1 is mean <code>e</code>, -2 is <code>de</code>, etc.</p>
-<h1 id="from-code-perspective"><a class="header" href="#from-code-perspective">From code perspective</a></h1>
-<p>this is signature of cursor</p>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>pub struct Cursor&lt;T&gt; {
-    inner: T,
-    pos: u64,
-}
-<span class="boring">}</span></code></pre></pre>
-<p>and also, this struct implement <a href="https://doc.rust-lang.org/src/std/io/cursor.rs.html#566">Write</a> and <a href="https://doc.rust-lang.org/src/std/io/cursor.rs.html#289">Seek</a></p>
-<p>so, in order to understanding this concept, let code first in C</p>
-<pre><code class="language-c">
-#include &lt;string.h&gt;
-#include &lt;stdlib.h&gt;
-#include &lt;stdio.h&gt;
-
-struct seekfd {
-    FILE                *file;
-};
-
-int start_open(struct seekfd *seekfd) {
-    seekfd-&gt;file = fopen("a.txt", "r");
-
-    if (seekfd-&gt;file == NULL) {
-        fprintf(stderr, "%s", "error");
-        return -1;
-    }
-}
-
-int do_op(struct seekfd *seekfd) {
-    char allocated_buf[2048];
-    memset(allocated_buf, 0, 2048);
-
-    fseek(seekfd-&gt;file, 1, SEEK_SET);
-    int ret = fread(allocated_buf, 1, 3, seekfd-&gt;file);
-
-    printf("%s", allocated_buf);
-}
-
-int main() {
-    struct seekfd seekfd;
-
-    int ret = start_open(&amp;seekfd);
-    if (ret &lt; 0) {
-        return -9;
-    }
-
-    ret = do_op(&amp;seekfd);
-    if (ret &lt; 0) {
-        return ret;
-    }
-}
-</code></pre>
-<p>compile with</p>
-<pre><code class="language-sh">clang fseek.c -o p -g
-</code></pre>
-<p>next step, create dummy files named a.txt with content <code>abcdefghijklmnopqr</code></p>
-<p>first run with <code>fseek(seekfd-&gt;file, 0, SEEK_SET);</code> = <code>abc</code>
-second run with <code>fseek(seekfd-&gt;file, 1, SEEK_SET);</code> = <code>bcd</code>
-etc...</p>
-<p>this concept is basically same in Rust</p>
-<h1 id="rust-context"><a class="header" href="#rust-context">Rust context</a></h1>
-<p>this is small example show Seek works (in-memory) instead utilize <em>real</em> file</p>
-<pre><pre class="playground"><code class="language-rust">use std::io::prelude::*;
-use std::io::{self, SeekFrom};
-use std::io::Cursor;
-
-fn write_bytes&lt;W: Write + Seek&gt;(mut w: W) -&gt; io::Result&lt;()&gt; {
-    w.seek(SeekFrom::Start(5))?;
-    
-    for i in 1..6 {
-        w.write(&amp;[i])?;
-    }
-
-    Ok(())
-}
-
-
-fn main() {
-    let mut buf = Cursor::new(vec![0; 20]);
-    write_bytes(&amp;mut buf).unwrap();
-    println!("{:?}", &amp;buf.get_ref()); // print vector
-}
-</code></pre></pre>
-<p>this is the output</p>
-<pre><code class="language-txt">[0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-</code></pre>
-<p>instead, we change <code>SeekFrom::Start(5)</code> with <code>SeekFrom::Start(10)</code>, the write will started at offset 10. this is the output</p>
-<pre><code class="language-txt">[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 0, 0, 0, 0, 0]
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="math"><a class="header" href="#math">Math</a></h1>
-<p>Welcome in this section.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="set-operations-formula"><a class="header" href="#set-operations-formula">Set operations formula</a></h1>
+                        <h1 id="set-operations-formula"><a class="header" href="#set-operations-formula">Set operations formula</a></h1>
 <h3 id="union-of-two-sets"><a class="header" href="#union-of-two-sets">Union of Two Sets</a></h3>
 <p>\[
 |A \cup B| = |A| + |B| - |A \cap B|
@@ -307,13 +200,18 @@ A \space \triangle \space B  =  B \space \triangle \space A
 (A \space \triangle \space A) =  \emptyset
 \)</li>
 </ul>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="random-gist"><a class="header" href="#random-gist">random gist</a></h1>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="readme-math.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
 
+                            <a rel="next prefetch" href="a.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
 
                         <div style="clear: both"></div>
                     </nav>
@@ -321,7 +219,13 @@ A \space \triangle \space B  =  B \space \triangle \space A
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="readme-math.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
 
+                    <a rel="next prefetch" href="a.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
             </nav>
 
         </div>
@@ -360,13 +264,6 @@ A \space \triangle \space B  =  B \space \triangle \space A
 
         <!-- Custom JS scripts -->
 
-        <script>
-        window.addEventListener('load', function() {
-            MathJax.Hub.Register.StartupHook('End', function() {
-                window.setTimeout(window.print, 100);
-            });
-        });
-        </script>
 
     </div>
     </body>
