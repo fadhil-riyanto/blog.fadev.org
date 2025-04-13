@@ -2,10 +2,10 @@
 
 [Introduction](README.md)
 
-- [Rust stuff](readme-rust-stuff.md)
-	- [Rust Cursor & fseek concept](./cursor_1.md)
+- [Rust stuff](./rust/readme-rust-stuff.md)
+	- [Rust Cursor & fseek concept](./rust/cursor_1.md)
+	- [Rust bytes has_remaining() method](./rust/bytes_has_remaining.md)
+	
 
-- [Math](readme-math.md)
-	- [Set formula](./set_formula_1.md)
-
-- [random gist](a.md)
+- [Math](./math/readme-math.md)
+	- [Set formula](./math/set_formula_1.md)

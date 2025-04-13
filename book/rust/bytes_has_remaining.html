@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Set formula - Fadhil Books &amp; Notes</title>
+        <title>Rust bytes has_remaining() method - Fadhil Books &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -12,21 +12,21 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff">
 
-        <link rel="icon" href="favicon.svg">
-        <link rel="shortcut icon" href="favicon.png">
-        <link rel="stylesheet" href="css/variables.css">
-        <link rel="stylesheet" href="css/general.css">
-        <link rel="stylesheet" href="css/chrome.css">
-        <link rel="stylesheet" href="css/print.css" media="print">
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="fonts/fonts.css">
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" id="highlight-css" href="highlight.css">
-        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
-        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
 
@@ -35,12 +35,12 @@
 
         <!-- Provide site root and default themes to javascript -->
         <script>
-            const path_to_root = "";
+            const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc.js"></script>
+        <script src="../toc.js"></script>
     </head>
     <body>
     <div id="body-container">
@@ -93,7 +93,7 @@
             <!-- populated by js -->
             <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
             <noscript>
-                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
             </noscript>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -128,7 +128,7 @@
                     <h1 class="menu-title">Fadhil Books &amp; Notes</h1>
 
                     <div class="right-buttons">
-                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
                         </a>
 
@@ -157,59 +157,65 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="set-operations-formula"><a class="header" href="#set-operations-formula">Set operations formula</a></h1>
-<h3 id="union-of-two-sets"><a class="header" href="#union-of-two-sets">Union of Two Sets</a></h3>
-<p>\[
-|A \cup B| = |A| + |B| - |A \cap B|
-\]</p>
-<p>how to read:
-whole <code>A</code> and <code>B</code> add together, its make a data duplication on center of venn diagram, we remove that duplication using \( |A \cap B|  \)</p>
-<h3 id="intersection-steps"><a class="header" href="#intersection-steps">Intersection (steps)</a></h3>
-<p>its flip of Union
-\[ |A \cup B| = |A| + |B| - |A \cap B| \]
-\[ |A \cap B| = |A| + |B| - |A \cup B| \]</p>
-<h3 id="intersection-of-three-sets"><a class="header" href="#intersection-of-three-sets">Intersection of three sets</a></h3>
-<p>\[ |A \cup B \cup C| = |A| + |B| + |C| + |A \cap B| - |A \cap C| - |B \cap C| - |A \cap B \cap C| \]</p>
-<p>This is proof of concept by nice guy on internet: <a href="https://www.youtube.com/watch?v=vVZwe3TCJT8">https://www.youtube.com/watch?v=vVZwe3TCJT8</a>.</p>
-<h3 id="difference"><a class="header" href="#difference">Difference</a></h3>
-<p>\[ |A - B| = |A| - |A \cup B| \]</p>
-<h3 id="symetric-difference"><a class="header" href="#symetric-difference">Symetric difference</a></h3>
-<h4 id="1-general-formula"><a class="header" href="#1-general-formula">1. General formula</a></h4>
-<p>\[
-A \space \triangle \space B = (A \cup B) - (A \cap B)
-\]
-Cardinals version:
-\[
-| A \space \triangle \space B | = |A - B| + |B - A|
-\]
-\[
-| A \space \triangle \space B | = |A| + |B| - 2|A \cap B|
-\]</p>
-<h4 id="2-symetric-difference-properties"><a class="header" href="#2-symetric-difference-properties">2. Symetric difference properties</a></h4>
-<ul>
-<li>\(
-A \space \triangle \space B  =  B \space \triangle \space A
-\)</li>
-<li>\(
-(A \space \triangle \space B) \space \triangle C  =  A \space \triangle \space (B \space \triangle C)
-\)</li>
-<li>\(
-(A \space \triangle \space \emptyset) =  A
-\) <a href="./gist/gist_1.html">why?</a></li>
-<li>\(
-(A \space \triangle \space A) =  \emptyset
-\)</li>
-</ul>
+                        <h1 id="rust-bytes-has_remaining-method"><a class="header" href="#rust-bytes-has_remaining-method">Rust bytes has_remaining() method</a></h1>
+<p>this function return whatever any best left on buffer. example, let make simple tcp/ip</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl Connection {
+    pub fn new(stream: TcpStream) -&gt; Connection {
+        Connection {
+            stream: BufWriter::new(stream),
+            buffer: BytesMut::with_capacity(4096)
+        }
+
+    }
+
+    pub async fn read(&amp;mut self) 
+        -&gt; std::result::Result&lt;Option&lt;Frame&gt;, Box&lt;dyn std::error::Error + Send + Sync&gt;&gt; {
+        
+        let _ = self.stream.read_buf(&amp;mut self.buffer).await;
+        println!("hasremaining: {}", self.buffer.has_remaining());
+        
+        while self.buffer.has_remaining() {
+            let bytes = self.buffer.get_u8();
+            println!("{} -&gt; {}", bytes as char, self.buffer.has_remaining());
+        }
+
+        println!("{}", self.buffer.has_remaining());
+        // Frame::check(&amp;mut self.buffer);
+
+        Ok(Some(Frame::Null))
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<p>let's see the server result using <code>ncat</code></p>
+<p><img src="../assets/tcp-ncat-snapshot.png" alt="ncat-result" /></p>
+<p>which the input is something look like this</p>
+<pre><code class="language-sh">[22:55:41] fadhil_riyanto@integral2 /home/fadhil_riyanto [SIGINT]
+&gt; ncat 127.0.0.1 6380
+abc
+
+</code></pre>
+<p>from this output, we know</p>
+<pre><code class="language-txt">hasremaining: true &lt;--- this is initial, didn't mean anything
+a -&gt; true &lt;--- a already read, but next char is b, why this is true
+b -&gt; true &lt;--- next is c, also true
+c -&gt; true &lt;--- next is \n char, also true
+
+ -&gt; false &lt;--- this is false because no next chars
+false &lt;--- confirm
+</code></pre>
+<p>Also, <code>get_u8</code> returns the first byte in the buffer. Each time it's called, it advances the position, so subsequent calls return the next bytes.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="readme-math.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../rust/cursor_1.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="a.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../math/readme-math.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -219,33 +225,17 @@ A \space \triangle \space B  =  B \space \triangle \space A
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="readme-math.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../rust/cursor_1.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="a.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../math/readme-math.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 
@@ -254,13 +244,13 @@ A \space \triangle \space B  =  B \space \triangle \space A
         </script>
 
 
-        <script src="elasticlunr.min.js"></script>
-        <script src="mark.min.js"></script>
-        <script src="searcher.js"></script>
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
 
-        <script src="clipboard.min.js"></script>
-        <script src="highlight.js"></script>
-        <script src="book.js"></script>
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
 
         <!-- Custom JS scripts -->
 

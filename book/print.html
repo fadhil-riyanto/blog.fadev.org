@@ -161,9 +161,7 @@
                         <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
 <p>Let me introduce my self, I'm Fadhil Riyanto (real-name), A self-taught programmer which live in Indonesian, This is some short &amp; dirty tutorial about computer science.</p>
 <h1 id="contributing"><a class="header" href="#contributing">Contributing</a></h1>
-<p>Found a mistake? You can freely DM me on <a href="https://t.me/fadhil_riyanto">telegram</a>.</p>
-<h1 id="language"><a class="header" href="#language">Language</a></h1>
-<p>Because I'm indonesian people, You may see an article written in indonesian, instead english.</p>
+<p>Found a mistake? You can freely DM me on <a href="https://t.me/fadhil_riyanto">telegram</a> or just emailed me on <a href="mailto:me@fadev.org">me@fadev.org</a>.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-stuff"><a class="header" href="#rust-stuff">Rust stuff</a></h1>
 <p>Welcome in this rust stuff section.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-cursor-how-it-works"><a class="header" href="#rust-cursor-how-it-works">Rust cursor, How it works</a></h1>
@@ -262,10 +260,59 @@ fn main() {
 <p>instead, we change <code>SeekFrom::Start(5)</code> with <code>SeekFrom::Start(10)</code>, the write will started at offset 10. this is the output</p>
 <pre><code class="language-txt">[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 0, 0, 0, 0, 0]
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="rust-bytes-has_remaining-method"><a class="header" href="#rust-bytes-has_remaining-method">Rust bytes has_remaining() method</a></h1>
+<p>this function return whatever any best left on buffer. example, let make simple tcp/ip</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl Connection {
+    pub fn new(stream: TcpStream) -&gt; Connection {
+        Connection {
+            stream: BufWriter::new(stream),
+            buffer: BytesMut::with_capacity(4096)
+        }
+
+    }
+
+    pub async fn read(&amp;mut self) 
+        -&gt; std::result::Result&lt;Option&lt;Frame&gt;, Box&lt;dyn std::error::Error + Send + Sync&gt;&gt; {
+        
+        let _ = self.stream.read_buf(&amp;mut self.buffer).await;
+        println!("hasremaining: {}", self.buffer.has_remaining());
+        
+        while self.buffer.has_remaining() {
+            let bytes = self.buffer.get_u8();
+            println!("{} -&gt; {}", bytes as char, self.buffer.has_remaining());
+        }
+
+        println!("{}", self.buffer.has_remaining());
+        // Frame::check(&amp;mut self.buffer);
+
+        Ok(Some(Frame::Null))
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<p>let's see the server result using <code>ncat</code></p>
+<p><img src="rust/../assets/tcp-ncat-snapshot.png" alt="ncat-result" /></p>
+<p>which the input is something look like this</p>
+<pre><code class="language-sh">[22:55:41] fadhil_riyanto@integral2 /home/fadhil_riyanto [SIGINT]
+&gt; ncat 127.0.0.1 6380
+abc
+
+</code></pre>
+<p>from this output, we know</p>
+<pre><code class="language-txt">hasremaining: true &lt;--- this is initial, didn't mean anything
+a -&gt; true &lt;--- a already read, but next char is b, why this is true
+b -&gt; true &lt;--- next is c, also true
+c -&gt; true &lt;--- next is \n char, also true
+
+ -&gt; false &lt;--- this is false because no next chars
+false &lt;--- confirm
+</code></pre>
+<p>Also, <code>get_u8</code> returns the first byte in the buffer. Each time it's called, it advances the position, so subsequent calls return the next bytes.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="math"><a class="header" href="#math">Math</a></h1>
 <p>Welcome in this section.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="set-operations-formula"><a class="header" href="#set-operations-formula">Set operations formula</a></h1>
-<h3 id="union-of-two-sets"><a class="header" href="#union-of-two-sets">Union of Two Sets</a></h3>
+<h3 id="union-of-two-sets-cardinality"><a class="header" href="#union-of-two-sets-cardinality">Union of Two Sets (cardinality)</a></h3>
 <p>\[
 |A \cup B| = |A| + |B| - |A \cap B|
 \]</p>
@@ -276,7 +323,8 @@ whole <code>A</code> and <code>B</code> add together, its make a data duplicatio
 \[ |A \cup B| = |A| + |B| - |A \cap B| \]
 \[ |A \cap B| = |A| + |B| - |A \cup B| \]</p>
 <h3 id="intersection-of-three-sets"><a class="header" href="#intersection-of-three-sets">Intersection of three sets</a></h3>
-<p>\[ |A \cup B \cup C| = |A| + |B| + |C| + |A \cap B| - |A \cap C| - |B \cap C| - |A \cap B \cap C| \]</p>
+<p>\[ |A \cup B \cup C| = |A| + |B| + |C| - |A \cap B| - |A \cap C| - |B \cap C| + |A \cap B \cap C| \]</p>
+<p>how it works, de remove data duplication two times on \( |A \cap B| \), \( |B \cap C| \), and \( |B \cap C| \), then fill the empty section on the center which \( |A \cap B \cap C| \)</p>
 <p>This is proof of concept by nice guy on internet: <a href="https://www.youtube.com/watch?v=vVZwe3TCJT8">https://www.youtube.com/watch?v=vVZwe3TCJT8</a>.</p>
 <h3 id="difference"><a class="header" href="#difference">Difference</a></h3>
 <p>\[ |A - B| = |A| - |A \cup B| \]</p>
@@ -294,20 +342,33 @@ Cardinals version:
 \]</p>
 <h4 id="2-symetric-difference-properties"><a class="header" href="#2-symetric-difference-properties">2. Symetric difference properties</a></h4>
 <ul>
-<li>\(
+<li>
+<p>\(
 A \space \triangle \space B  =  B \space \triangle \space A
-\)</li>
-<li>\(
+\)</p>
+</li>
+<li>
+<p>\(
 (A \space \triangle \space B) \space \triangle C  =  A \space \triangle \space (B \space \triangle C)
-\)</li>
-<li>\(
+\)</p>
+</li>
+<li>
+<p>\(
 (A \space \triangle \space \emptyset) =  A
-\) <a href="./gist/gist_1.html">why?</a></li>
-<li>\(
-(A \space \triangle \space A) =  \emptyset
-\)</li>
+\), why?</p>
+<ul>
+<li>\(A \space \triangle \space B = (A \cup B) - (B \cap A) \)</li>
+<li>\(A \space \triangle \space \emptyset = (A \cup \emptyset) - (\emptyset \cap A) \), but</li>
+<li>\( (A \cup \emptyset) = A \) and \( (\emptyset \cap A) = \emptyset \)</li>
+<li>\( (A - \emptyset) = A \)</li>
 </ul>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="random-gist"><a class="header" href="#random-gist">random gist</a></h1>
+</li>
+<li>
+<p>\(
+(A \space \triangle \space A) =  \emptyset
+\)</p>
+</li>
+</ul>
 
                     </main>
 
@@ -326,22 +387,6 @@ A \space \triangle \space B  =  B \space \triangle \space A
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 
