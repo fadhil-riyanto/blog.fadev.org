@@ -309,6 +309,77 @@ c -&gt; true &lt;--- next is \n char, also true
 false &lt;--- confirm
 </code></pre>
 <p>Also, <code>get_u8</code> returns the first byte in the buffer. Each time it's called, it advances the position, so subsequent calls return the next bytes.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="how-rust-into-box--error-analysis"><a class="header" href="#how-rust-into-box--error-analysis">How Rust into() Box + Error analysis</a></h1>
+<p>suppose, we have function return signature like this</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>std::result::Result&lt;Option&lt;Frame&gt;, Box&lt;dyn std::error::Error + Send + Sync&gt;&gt;
+<span class="boring">}</span></code></pre></pre>
+<p>and then, we return something like this from our function</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>return Err("connection reset".into())
+<span class="boring">}</span></code></pre></pre>
+<p>how the <code>into()</code> works?</p>
+<h1 id="analysis"><a class="header" href="#analysis">analysis</a></h1>
+<p>look at <a href="https://github.com/rust-lang/rust/blob/6e830462330a9e34d8176e86d4580dd0820c6fd5/library/alloc/src/boxed/convert.rs#L658">this</a> snippet</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[cfg(not(no_global_oom_handling))]
+#[stable(feature = "rust1", since = "1.0.0")]
+impl&lt;'a&gt; From&lt;&amp;str&gt; for Box&lt;dyn Error + Send + Sync + 'a&gt; {
+    /// Converts a [`str`] into a box of dyn [`Error`] + [`Send`] + [`Sync`].
+    ///
+    /// [`str`]: prim@str
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::error::Error;
+    /// use std::mem;
+    ///
+    /// let a_str_error = "a str error";
+    /// let a_boxed_error = Box::&lt;dyn Error + Send + Sync&gt;::from(a_str_error);
+    /// assert!(
+    ///     mem::size_of::&lt;Box&lt;dyn Error + Send + Sync&gt;&gt;() == mem::size_of_val(&amp;a_boxed_error))
+    /// ```
+    #[inline]
+    fn from(err: &amp;str) -&gt; Box&lt;dyn Error + Send + Sync + 'a&gt; {
+        From::from(String::from(err))
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<p>if we go deeper into <code>From::from</code>, we found <a href="https://github.com/rust-lang/rust/blob/6e830462330a9e34d8176e86d4580dd0820c6fd5/library/alloc/src/boxed/convert.rs#L608">this</a></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[inline]
+    fn from(err: String) -&gt; Box&lt;dyn Error + Send + Sync + 'a&gt; {
+        struct StringError(String);
+
+        impl Error for StringError {
+            #[allow(deprecated)]
+            fn description(&amp;self) -&gt; &amp;str {
+                &amp;self.0
+            }
+        }
+
+        impl fmt::Display for StringError {
+            fn fmt(&amp;self, f: &amp;mut fmt::Formatter&lt;'_&gt;) -&gt; fmt::Result {
+                fmt::Display::fmt(&amp;self.0, f)
+            }
+        }
+
+        // Purposefully skip printing "StringError(..)"
+        impl fmt::Debug for StringError {
+            fn fmt(&amp;self, f: &amp;mut fmt::Formatter&lt;'_&gt;) -&gt; fmt::Result {
+                fmt::Debug::fmt(&amp;self.0, f)
+            }
+        }
+
+        Box::new(StringError(err))
+    }
+<span class="boring">}</span></code></pre></pre>
+<p>nb: actually StringError is string aliases. then, we see in this section. we created a heap-allocated using <code>Box::new(StringError(err))</code>.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="math"><a class="header" href="#math">Math</a></h1>
 <p>Welcome in this section.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="set-operations-formula"><a class="header" href="#set-operations-formula">Set operations formula</a></h1>
