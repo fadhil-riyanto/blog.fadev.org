@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Rust bytes has_remaining() method - Fadhil Books &amp; Notes</title>
+        <title>Rust RESP get_line analysis - Fadhil Books &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -157,65 +157,70 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="rust-bytes-has_remaining-method"><a class="header" href="#rust-bytes-has_remaining-method">Rust bytes has_remaining() method</a></h1>
-<p>this function return whatever any best left on buffer. example, let make simple tcp/ip</p>
+                        <h1 id="rust-resp-get_line-analysis"><a class="header" href="#rust-resp-get_line-analysis">Rust RESP get_line analysis</a></h1>
+<p>if we look at simple tokio redis example (mini redis), we can see how the data is parsed. look at this</p>
+<p>the resp is generally read something like this `+abc\r\n'</p>
+<p>this is the code that actually crop down the buffer</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>impl Connection {
-    pub fn new(stream: TcpStream) -&gt; Connection {
-        Connection {
-            stream: BufWriter::new(stream),
-            buffer: BytesMut::with_capacity(4096)
-        }
+</span>fn get_line&lt;'a&gt;(src: &amp;mut Cursor&lt;&amp;'a [u8]&gt;) -&gt; Result&lt;&amp;'a [u8], Error&gt; {
+    // Scan the bytes directly
+    let start = src.position() as usize;
+    // Scan to the second to last byte
+    let end = src.get_ref().len() - 1;
 
+    for i in start..end {
+        if src.get_ref()[i] == b'\r' &amp;&amp; src.get_ref()[i + 1] == b'\n' {
+            // We found a line, update the position to be *after* the \n
+            src.set_position((i + 2) as u64);
+
+            // Return the line
+            return Ok(&amp;src.get_ref()[start..i]);
+        }
     }
 
-    pub async fn read(&amp;mut self) 
-        -&gt; std::result::Result&lt;Option&lt;Frame&gt;, Box&lt;dyn std::error::Error + Send + Sync&gt;&gt; {
-        
-        let _ = self.stream.read_buf(&amp;mut self.buffer).await;
-        println!("hasremaining: {}", self.buffer.has_remaining());
-        
-        while self.buffer.has_remaining() {
-            let bytes = self.buffer.get_u8();
-            println!("{} -&gt; {}", bytes as char, self.buffer.has_remaining());
-        }
-
-        println!("{}", self.buffer.has_remaining());
-        // Frame::check(&amp;mut self.buffer);
-
-        Ok(Some(Frame::Null))
-    }
+    Err(Error::Incomplete)
 }
 <span class="boring">}</span></code></pre></pre>
-<p>let's see the server result using <code>ncat</code></p>
-<p><img src="../assets/tcp-ncat-snapshot.png" alt="ncat-result" /></p>
-<p>which the input is something look like this</p>
-<pre><code class="language-sh">[22:55:41] fadhil_riyanto@integral2 /home/fadhil_riyanto [SIGINT]
-&gt; ncat 127.0.0.1 6380
-abc
-
+<p>and I will show you how they works (algorithm)</p>
+<h1 id="variables-setup"><a class="header" href="#variables-setup">variables setup</a></h1>
+<p>we have <code>start</code> and <code>end</code>, which consist of</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let start = src.position() as usize;
+let end = src.get_ref().len() - 1;
+<span class="boring">}</span></code></pre></pre>
+<p>the <code>src.position()</code> always return 0, also depending on the context. <code>src.get_ref().len()</code> return the length of the buffer, for example, <code>+rand\n\n</code> has length 7.</p>
+<p>because we wan't to read two chars at the end, which is \r and \n</p>
+<p>so we substract length with 1, <em>this is avoid buffer overflow</em></p>
+<p>suppose this situation:
+buf: <code>+rand\n\n</code></p>
+<p>when we add everything with 1, we got this
+idx: <code>012345 6 7</code>, it is idx[7]is found? no, so we need to sub with 1, the idx is something like this
+idx: <code>012345 6</code>, no overflow</p>
+<p>then we check the <code>i</code> and <code>i + 1</code>, make sure there is \r\n</p>
+<h1 id="set-position"><a class="header" href="#set-position">set position</a></h1>
+<p>now, we set the cursor to the next incoming buffer. which after \r\n</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>src.set_position((i + 2) as u64);
+<span class="boring">}</span></code></pre></pre>
+<p>suppose:</p>
+<pre><code>+rand\r\n+randomsomething\r\n
+012345 6 ^ 
+^^   ^   this is i + 2, indicates next buffer
+ii+1 orig i
 </code></pre>
-<p>from this output, we know</p>
-<pre><code class="language-txt">hasremaining: true &lt;--- this is initial, didn't mean anything
-a -&gt; true &lt;--- a already read, but next char is b, why this is true
-b -&gt; true &lt;--- next is c, also true
-c -&gt; true &lt;--- next is \n char, also true
-
- -&gt; false &lt;--- this is false because no next chars
-false &lt;--- confirm
-</code></pre>
-<p>Also, <code>get_u8</code> returns the first byte in the buffer. Each time it's called, it advances the position, so subsequent calls return the next bytes.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../rust/cursor_1.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../rust/buffer_bytes_advance.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../rust/into_box_error_analysis.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../math/readme-math.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -225,11 +230,11 @@ false &lt;--- confirm
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../rust/cursor_1.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../rust/buffer_bytes_advance.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../rust/into_box_error_analysis.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../math/readme-math.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

@@ -159,9 +159,145 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
-<p>Let me introduce my self, I'm Fadhil Riyanto (real-name), A self-taught programmer which live in Indonesian, This is some short &amp; dirty tutorial about computer science.</p>
+<p>Let me introduce my self, Who is Fadhil? Fadhil Riyanto (real-name), is a self-taught system programmer which live in Indonesian, This is some short &amp; dirty tutorial about computer science and litte about math.</p>
 <h1 id="contributing"><a class="header" href="#contributing">Contributing</a></h1>
 <p>Found a mistake? You can freely DM me on <a href="https://t.me/fadhil_riyanto">telegram</a> or just emailed me on <a href="mailto:me@fadev.org">me@fadev.org</a>.</p>
+<h1 id="language"><a class="header" href="#language">Language</a></h1>
+<p>Because I'm indonesian, some part of this website may written in indonesian. But I will try to translating it into english language.</p>
+<div class="warning">
+<p>Note</p>
+<p>[EN] If you found a mistake, let me know. BIG thanks!  <br>
+[ID] Jika kamu menemukan sesuatu yang sepertinya itu salah, bisa langsung kasih kabar ke saya. Terimakasih.</p>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="system-programming"><a class="header" href="#system-programming">System programming</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="how-data-movement-changes-a-destination-register"><a class="header" href="#how-data-movement-changes-a-destination-register">How data movement changes a destination register</a></h1>
+<p>This snippets is from "Computer Systems A Programmer’s Perspective, by Randal E. Bryant and David R. O’Hallaron"</p>
+<p>As described, there are two different conventions regarding whether and how data movement instruc-
+tions modify the upper bytes of a destination register. This distinction is illustrated by the following
+code sequence:</p>
+<pre><code class="language-txt">1 movabsq $0x0011223344556677, %rax %rax = 0011223344556677
+2 movb $-1, %al %rax = 00112233445566FF
+3 movw $-1, %ax %rax = 001122334455FFFF
+4 movl $-1, %eax %rax = 00000000FFFFFFFF
+5 movq $-1, %rax %rax = FFFFFFFFFFFFFFFF
+</code></pre>
+<p>In the following discussion, we use hexadecimal notation. In the example, the instruction on line 1
+initializes register %rax to the pattern 0011223344556677. The remaining instructions have immediate
+value −1 as their source values. Recall that the hexadecimal representation of −1 is of the form FF. . .F,
+where the number of F’s is twice the number of bytes in the representation. The movb instruction (line 2)
+therefore sets the low-order byte of %rax to FF, while the movw instruction (line 3) sets the low-order
+2 bytes to FFFF, with the remaining bytes unchanged. The movl instruction (line 4) sets the low-order
+4 bytes to FFFFFFFF, but it also sets the high-order 4 bytes to 00000000. Finally, the movq instruction
+(line 5) sets the complete register to FFFFFFFFFFFFFFFF.</p>
+<p>some useful links</p>
+<ul>
+<li><a href="https://stackoverflow.com/questions/52434073/whats-the-difference-between-the-x86-64-att-instructions-movq-and-movabsq">https://stackoverflow.com/questions/52434073/whats-the-difference-between-the-x86-64-att-instructions-movq-and-movabsq</a></li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="general-embedded-asm-linked-in-c"><a class="header" href="#general-embedded-asm-linked-in-c">General embedded ASM linked in C</a></h1>
+<p>this is program is succesfully compiled with <code>as</code>, but failed to run due to SIGSEGV.</p>
+<p>this is will fail</p>
+<pre><code class="language-asm">.data
+val:
+    .byte 0xF6
+    .byte 0xF6
+    .byte 0xF6
+    .byte 0xF6
+    
+
+.globl do_asm
+
+do_asm:
+    # movl 0x12345678, %eax
+    # movl 0xAABBCCDD, %edx 
+
+    # # move edx 8 bit high into al (eax)
+    # movb %dh, %al
+
+    
+    movq $9, %rax
+    ret
+
+</code></pre>
+<p>this is will compile</p>
+<pre><code class="language-asm">.data
+val:
+    .byte 0xF6
+    .byte 0xF6
+    .byte 0xF6
+    .byte 0xF6
+    
+
+.globl do_asm
+
+.text
+do_asm:
+    # movl 0x12345678, %eax
+    # movl 0xAABBCCDD, %edx 
+
+    # # move edx 8 bit high into al (eax)
+    # movb %dh, %al
+
+    
+    movq $9, %rax
+    ret
+
+</code></pre>
+<p>the difference only in <code>.text</code> section</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="move-sign--zero-extends-a-single-byte"><a class="header" href="#move-sign--zero-extends-a-single-byte">Move sign &amp; zero-extends a single byte</a></h1>
+<p>Disini saya akan membahas apa itu instruksi MOVSBL dan MOVZBL. pertama tama silahkan baca dulu disini</p>
+<ul>
+<li><a href="https://stackoverflow.com/questions/7861095/what-does-movsbl-instruction-do">https://stackoverflow.com/questions/7861095/what-does-movsbl-instruction-do</a></li>
+</ul>
+<pre><code class="language-txt">MOVSBL and MOVZBL
+* MOVSBL sign-extends a single byte, and copies it into a
+  double-word destination
+* MOVZBL expands a single byte to 32 bits with 24 leading
+  zeros, and copies it into a double-word destination
+</code></pre>
+<p>pertama tama, lihat kode asm ini.</p>
+<pre><code class="language-asm">
+.section .data
+val:
+    .byte 0xF6
+    .byte 0xF6
+    .byte 0xF6
+    .byte 0xF6
+    
+
+.globl do_asm
+
+.text
+do_asm:
+    movl $0x12345678, %eax
+    movl $0xAABBCCDD, %edx 
+
+    # move edx 8 bit high into al (eax)
+    movb %dh, %al
+
+    # reset
+    movl $0x12345678, %eax
+    movl $0xAABBCCDD, %edx 
+
+    MOVSBL %dh, %eax
+
+    # reset
+    movl $0x12345678, %eax
+    movl $0xAABBCCDD, %edx 
+
+    MOVZBL %dh, %eax
+
+    
+    movq $9, %rax
+    ret
+
+</code></pre>
+<p>dan ini hasilnya, movb biasa (tanpa hapus bagian atas data, bagian atas tetep utuh)
+<img src="sysprog//assets/movsbl-1.png" alt="gambar" /></p>
+<p>ini hasil signed bagian atas
+<img src="sysprog//assets/movsbl-2.png" alt="gambar" /></p>
+<p>ini hasil ketika bagian atas kita zerokan
+<img src="sysprog//assets/movzbl-3.png" alt="gambar" /></p>
+<p>catatan
+<code>movb %dh, %al</code> memindahkan rdx bagian high ke rax bagian bawah.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-stuff"><a class="header" href="#rust-stuff">Rust stuff</a></h1>
 <p>Welcome in this rust stuff section.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-cursor-how-it-works"><a class="header" href="#rust-cursor-how-it-works">Rust cursor, How it works</a></h1>
@@ -380,6 +516,79 @@ impl&lt;'a&gt; From&lt;&amp;str&gt; for Box&lt;dyn Error + Send + Sync + 'a&gt; 
     }
 <span class="boring">}</span></code></pre></pre>
 <p>nb: actually StringError is string aliases. then, we see in this section. we created a heap-allocated using <code>Box::new(StringError(err))</code>.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="rust-buffer-advance"><a class="header" href="#rust-buffer-advance">Rust buffer advance</a></h1>
+<p>this simple article show how buffer advance works</p>
+<pre><pre class="playground"><code class="language-rust">use bytes::Buf;
+
+fn main() {
+    let mut buf = &amp;b"hello world"[..];
+
+    println!("{}", String::from_utf8_lossy(buf.chunk()));
+
+    buf.advance(6);
+    println!("{}", String::from_utf8_lossy(buf.chunk()));
+}
+</code></pre></pre>
+<p>and the result</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>hello world
+world
+<span class="boring">}</span></code></pre></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="rust-resp-get_line-analysis"><a class="header" href="#rust-resp-get_line-analysis">Rust RESP get_line analysis</a></h1>
+<p>if we look at simple tokio redis example (mini redis), we can see how the data is parsed. look at this</p>
+<p>the resp is generally read something like this `+abc\r\n'</p>
+<p>this is the code that actually crop down the buffer</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn get_line&lt;'a&gt;(src: &amp;mut Cursor&lt;&amp;'a [u8]&gt;) -&gt; Result&lt;&amp;'a [u8], Error&gt; {
+    // Scan the bytes directly
+    let start = src.position() as usize;
+    // Scan to the second to last byte
+    let end = src.get_ref().len() - 1;
+
+    for i in start..end {
+        if src.get_ref()[i] == b'\r' &amp;&amp; src.get_ref()[i + 1] == b'\n' {
+            // We found a line, update the position to be *after* the \n
+            src.set_position((i + 2) as u64);
+
+            // Return the line
+            return Ok(&amp;src.get_ref()[start..i]);
+        }
+    }
+
+    Err(Error::Incomplete)
+}
+<span class="boring">}</span></code></pre></pre>
+<p>and I will show you how they works (algorithm)</p>
+<h1 id="variables-setup"><a class="header" href="#variables-setup">variables setup</a></h1>
+<p>we have <code>start</code> and <code>end</code>, which consist of</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let start = src.position() as usize;
+let end = src.get_ref().len() - 1;
+<span class="boring">}</span></code></pre></pre>
+<p>the <code>src.position()</code> always return 0, also depending on the context. <code>src.get_ref().len()</code> return the length of the buffer, for example, <code>+rand\n\n</code> has length 7.</p>
+<p>because we wan't to read two chars at the end, which is \r and \n</p>
+<p>so we substract length with 1, <em>this is avoid buffer overflow</em></p>
+<p>suppose this situation:
+buf: <code>+rand\n\n</code></p>
+<p>when we add everything with 1, we got this
+idx: <code>012345 6 7</code>, it is idx[7]is found? no, so we need to sub with 1, the idx is something like this
+idx: <code>012345 6</code>, no overflow</p>
+<p>then we check the <code>i</code> and <code>i + 1</code>, make sure there is \r\n</p>
+<h1 id="set-position"><a class="header" href="#set-position">set position</a></h1>
+<p>now, we set the cursor to the next incoming buffer. which after \r\n</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>src.set_position((i + 2) as u64);
+<span class="boring">}</span></code></pre></pre>
+<p>suppose:</p>
+<pre><code>+rand\r\n+randomsomething\r\n
+012345 6 ^ 
+^^   ^   this is i + 2, indicates next buffer
+ii+1 orig i
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="math"><a class="header" href="#math">Math</a></h1>
 <p>Welcome in this section.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="set-operations-formula"><a class="header" href="#set-operations-formula">Set operations formula</a></h1>
@@ -440,6 +649,617 @@ A \space \triangle \space B  =  B \space \triangle \space A
 \)</p>
 </li>
 </ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="set-stuff"><a class="header" href="#set-stuff">Set stuff</a></h1>
+<p>there is some intresting question about discrete math</p>
+<h2 id="why--mathcalpemptyset--lbrace-emptyset-rbrace-"><a class="header" href="#why--mathcalpemptyset--lbrace-emptyset-rbrace-">why \( \mathcal{P}(\emptyset) = \lbrace \emptyset \rbrace \)</a></h2>
+<p>consider \( \mathcal(S) \) where \( S \) is a set, for example</p>
+<ul>
+<li>if \( S = \lbrace a \rbrace \), then \( \mathcal{P}(S) = \lbrace \emptyset, \lbrace a \rbrace \rbrace \), same as \( \mathcal{P}(a) \)</li>
+<li>if \( S = \lbrace a, b \rbrace \), then \(
+\mathcal{P}(S) = \lbrace
+\emptyset,
+\lbrace a \rbrace,
+\lbrace b \rbrace,
+\lbrace a, b \rbrace
+\rbrace \), same as \( \mathcal{P}(a, b) \)</li>
+<li>if \( S = \lbrace \emptyset \rbrace \), then \( \mathcal{P}(S) = \lbrace \emptyset, \lbrace \emptyset \rbrace \rbrace \), same as \( \mathcal{P}(\emptyset) \)</li>
+</ul>
+<p>so, because \( \lbrace \rbrace \) usually hidden, \( \mathcal{P}(\emptyset) = \lbrace \emptyset \rbrace \)</p>
+<h2 id="let--a--emptyset-b--emptyset--how-to--a-times-b-"><a class="header" href="#let--a--emptyset-b--emptyset--how-to--a-times-b-">let \( A = \emptyset, B = \emptyset \), how to \( A \times B \)</a></h2>
+<p>Consider \( A \times B = \lbrace (a,b) | a \in A, b \in B \rbrace \)</p>
+<p>because</p>
+<ul>
+<li>A is empty, no elements can be paired</li>
+<li>B is also empty</li>
+</ul>
+<p>conlusion: no paired element = empty</p>
+<p>proof by cardinality
+\(
+|A| = 0, |B| = 0, \text{so, when } |A \times B| = |A| \times |B| = 0 \times 0 = 0
+\)</p>
+<h2 id="does--pemptyset--lbrace-lbrace-rbrace-rbrace--lbrace-emptyset-rbrace--"><a class="header" href="#does--pemptyset--lbrace-lbrace-rbrace-rbrace--lbrace-emptyset-rbrace--">does \( P(\emptyset) = \lbrace \lbrace \rbrace \rbrace = \lbrace \emptyset \rbrace \) ?</a></h2>
+<p>true, this is due \( \lbrace \emptyset \rbrace \) same as \( \lbrace \lbrace \rbrace \rbrace \), then consider example
+\( P(a) = \lbrace \lbrace \rbrace, \lbrace a \rbrace\rbrace \)</p>
+<h2 id="suppose-x-and-z-are-independent-of-each-other"><a class="header" href="#suppose-x-and-z-are-independent-of-each-other">Suppose X and Z are independent of each other</a></h2>
+<ul>
+<li>\( | \mathcal{P}(X \cap Z)| \)</li>
+<li>\( | X - Z | \)</li>
+<li>\( | X \oplus Z | \)</li>
+<li>\( | X \cap Z | \)</li>
+<li>\( | \mathcal{P}(X) \cup \mathcal{P}(Z)| \)</li>
+<li>\( | \overline{\mathcal{P}(X) \cup \mathcal{P}(Z)}| \)</li>
+</ul>
+<p>nb: bagian ini belum jadi</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="logika"><a class="header" href="#logika">Logika</a></h1>
+<p>Ringkasan ini dibuat sebagian sebagian dari Kuliah IF1220 Matematika Diskrit ITB oleh bapak Rinaldi Munir. dan berbagai sumber seperti Wikipedia, ChatGPT dsb</p>
+<h2 id="proposisi"><a class="header" href="#proposisi">Proposisi</a></h2>
+<p>adalah pernyataan bahwa suatu dua perbandingan adalah sama besar, contoh</p>
+<ul>
+<li>\( \frac{a}{b}=\frac{c}{d} \)</li>
+<li>\( 4 = 2 * 2 \)</li>
+<li>13 adalah bilangan ganjil</li>
+<li>Untuk sembarang bilangan bulat \( n &gt;= 0 \), maka \( 2n \) adalah genap</li>
+</ul>
+<p>contoh yang bukan</p>
+<ul>
+<li>Isilah gelas tersebut dengan air</li>
+<li>\( x + 3 = 8 \)</li>
+<li>\( x &gt; 3 \)</li>
+</ul>
+<p>dan, Proposisi dilambangkan dengan huruf kecil seperti \( p, q, r, ... \)</p>
+<h2 id="bentuk-bentuk-nya"><a class="header" href="#bentuk-bentuk-nya">Bentuk bentuk nya</a></h2>
+<ul>
+<li>Proposisi atomik
+bentuk proposisi tunggal, contoh
+<ul>
+<li>2n selalu genap untuk n=0, 1, 2, …</li>
+<li>Ibukota Maluku Utara adalah Ternate</li>
+</ul>
+</li>
+<li>proposisi majemuk
+diantaranya:
+<ul>
+<li>conjunction (and): \( \wedge \)</li>
+<li>disjunction (or): \( \vee \)</li>
+<li>negation (!n): \( ~ \)</li>
+<li>exclusive disjunction (xor): \( \oplus \)</li>
+</ul>
+</li>
+</ul>
+<h2 id="table"><a class="header" href="#table">Table</a></h2>
+<table border="1" cellspacing="0" cellpadding="5">
+  <tr>
+    <th>p</th>
+    <th>q</th>
+    <th>r</th>
+    <th>p ∧ q</th>
+    <th>¬q</th>
+    <th>¬q ∧ r</th>
+    <th>(p ∧ q) ∨ (¬q ∧ r)</th>
+  </tr>
+  <tr>
+    <td>T</td>
+    <td>T</td>
+    <td>T</td>
+    <td>T</td>
+    <td>F</td>
+    <td>F</td>
+    <td>T</td>
+  </tr>
+  <tr>
+    <td>T</td>
+    <td>T</td>
+    <td>F</td>
+    <td>T</td>
+    <td>F</td>
+    <td>F</td>
+    <td>T</td>
+  </tr>
+  <tr>
+    <td>T</td>
+    <td>F</td>
+    <td>T</td>
+    <td>F</td>
+    <td>T</td>
+    <td>T</td>
+    <td>T</td>
+  </tr>
+  <tr>
+    <td>T</td>
+    <td>F</td>
+    <td>F</td>
+    <td>F</td>
+    <td>T</td>
+    <td>F</td>
+    <td>F</td>
+  </tr>
+  <tr>
+    <td>F</td>
+    <td>T</td>
+    <td>T</td>
+    <td>F</td>
+    <td>F</td>
+    <td>F</td>
+    <td>F</td>
+  </tr>
+  <tr>
+    <td>F</td>
+    <td>T</td>
+    <td>F</td>
+    <td>F</td>
+    <td>F</td>
+    <td>F</td>
+    <td>F</td>
+  </tr>
+  <tr>
+    <td>F</td>
+    <td>F</td>
+    <td>T</td>
+    <td>F</td>
+    <td>T</td>
+    <td>T</td>
+    <td>T</td>
+  </tr>
+  <tr>
+    <td>F</td>
+    <td>F</td>
+    <td>F</td>
+    <td>F</td>
+    <td>T</td>
+    <td>F</td>
+    <td>F</td>
+  </tr>
+</table>
+<p>nb:</p>
+<ul>
+<li>Tautologi adalah pernyataan logika yang selalu benar, tidak peduli nilai kebenaran dari komponen-komponennya. contoh</li>
+</ul>
+<table border="1" cellspacing="0" cellpadding="5">
+  <tr>
+    <th>p</th>
+    <th>q</th>
+    <th>p ∧ q</th>
+    <th>¬(p ∧ q)</th>
+    <th>p ∨ ¬(p ∧ q)</th>
+  </tr>
+  <tr>
+    <td>T</td><td>T</td><td>T</td><td>F</td><td><span style="color:red;">T</span></td>
+  </tr>
+  <tr>
+    <td>T</td><td>F</td><td>F</td><td>T</td><td><span style="color:red;">T</span></td>
+  </tr>
+  <tr>
+    <td>F</td><td>T</td><td>F</td><td>T</td><td><span style="color:red;">T</span></td>
+  </tr>
+  <tr>
+    <td>F</td><td>F</td><td>F</td><td>T</td><td><span style="color:red;">T</span></td>
+  </tr>
+</table>
+<ul>
+<li>Kontradiksi adalah pernyataan logika yang selalu salah, tidak peduli nilai kebenaran dari komponen-komponennya. contoh</li>
+</ul>
+<table border="1" cellspacing="0" cellpadding="5">
+  <tr>
+    <th>p</th>
+    <th>q</th>
+    <th>p ∧ q</th>
+    <th>p ∨ q</th>
+    <th>¬(p ∨ q)</th>
+    <th>(p ∧ q) ∧ ¬(p ∨ q)</th>
+  </tr>
+  <tr>
+    <td>T</td><td>T</td><td>T</td><td>T</td><td>F</td><td><span style="color:red;">F</span></td>
+  </tr>
+  <tr>
+    <td>T</td><td>F</td><td>F</td><td>T</td><td>F</td><td><span style="color:red;">F</span></td>
+  </tr>
+  <tr>
+    <td>F</td><td>T</td><td>F</td><td>T</td><td>F</td><td><span style="color:red;">F</span></td>
+  </tr>
+  <tr>
+    <td>F</td><td>F</td><td>F</td><td>F</td><td>T</td><td><span style="color:red;">F</span></td>
+  </tr>
+</table>
+- ekivalen
+Intinya, jika dioperasikan, dia punya hasil tabel kebenaran yang identik, walau rumusnya beda.
+<p><img src="https://upload.wikimedia.org/wikipedia/commons/8/83/In_Quest_of_Univeral_Logic_Morgan.png" alt="gambar wikipedia hukum de morgan" /></p>
+<table border="1" cellspacing="0" cellpadding="5">
+  <tr>
+    <th>p</th>
+    <th>q</th>
+    <th>p ∧ q</th>
+    <th>¬(p ∧ q)</th>
+    <th>¬p</th>
+    <th>¬q</th>
+    <th>¬p ∨ ¬q</th>
+  </tr>
+  <tr>
+    <td>T</td><td>T</td><td>T</td><td><span style="color:red;">F</span></td><td>F</td><td>F</td><td><span style="color:red;">F</span></td>
+  </tr>
+  <tr>
+    <td>T</td><td>F</td><td>F</td><td><span style="color:red;">T</span></td><td>F</td><td>T</td><td><span style="color:red;">T</span></td>
+  </tr>
+  <tr>
+    <td>F</td><td>T</td><td>F</td><td><span style="color:red;">T</span></td><td>T</td><td>F</td><td><span style="color:red;">T</span></td>
+  </tr>
+  <tr>
+    <td>F</td><td>F</td><td>F</td><td><span style="color:red;">T</span></td><td>T</td><td>T</td><td><span style="color:red;">T</span></td>
+  </tr>
+</table>
+<h2 id="hukum-hukum-nya"><a class="header" href="#hukum-hukum-nya">Hukum hukum nya</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Bahasa Indonesia</th><th>Bahasa Inggris</th><th>Contoh</th></tr></thead><tbody>
+<tr><td>Hukum Identitas</td><td>Identity Law</td><td><code>p ∧ T ≡ p</code>, <code>p ∨ F ≡ p</code></td></tr>
+<tr><td>Hukum Dominasi</td><td>Domination Law</td><td><code>p ∨ T ≡ T</code>, <code>p ∧ F ≡ F</code></td></tr>
+<tr><td>Hukum Idempotensi</td><td>Idempotent Law</td><td><code>p ∨ p ≡ p</code>, <code>p ∧ p ≡ p</code></td></tr>
+<tr><td>Hukum Negasi</td><td>Negation Law</td><td><code>p ∨ ¬p ≡ T</code>, <code>p ∧ ¬p ≡ F</code></td></tr>
+<tr><td>Hukum Komutatif</td><td>Commutative Law</td><td><code>p ∨ q ≡ q ∨ p</code>, <code>p ∧ q ≡ q ∧ p</code></td></tr>
+<tr><td>Hukum Asosiatif</td><td>Associative Law</td><td><code>(p ∨ q) ∨ r ≡ p ∨ (q ∨ r)</code></td></tr>
+<tr><td>Hukum Distributif</td><td>Distributive Law</td><td><code>p ∨ (q ∧ r) ≡ (p ∨ q) ∧ (p ∨ r)</code></td></tr>
+<tr><td>Hukum De Morgan</td><td>De Morgan’s Laws</td><td><code>¬(p ∧ q) ≡ ¬p ∨ ¬q</code>, <code>¬(p ∨ q) ≡ ¬p ∧ ¬q</code></td></tr>
+<tr><td>Hukum Involusi</td><td>Double Negation / Involution</td><td><code>¬(¬p) ≡ p</code></td></tr>
+<tr><td>Hukum Implikasi</td><td>Implication Law</td><td><code>p → q ≡ ¬p ∨ q</code></td></tr>
+<tr><td>Hukum Biimplikasi</td><td>Biconditional Law</td><td><code>p ↔ q ≡ (p → q) ∧ (q → p)</code></td></tr>
+</tbody></table>
+</div>
+<h2 id="implikasi"><a class="header" href="#implikasi">Implikasi</a></h2>
+<p>Disebut juga proposisi bersyarat, seperti jika x maka y, notasinya \( p \rightarrow q\). \( p \) nya adalah condition, \( q \) nya adalah conlusion</p>
+<div class="table-wrapper"><table><thead><tr><th>p</th><th>q</th><th>p → q</th></tr></thead><tbody>
+<tr><td>T</td><td>T</td><td>T</td></tr>
+<tr><td>T</td><td>F</td><td>F</td></tr>
+<tr><td>F</td><td>T</td><td>T</td></tr>
+<tr><td>F</td><td>F</td><td>T</td></tr>
+</tbody></table>
+</div>
+<p>versi versinya jika dijadikan teks</p>
+<ul>
+<li>Jika p, maka q (if p, then q)</li>
+<li>Jika p, q (if p, q)</li>
+<li>p mengakibatkan q (p implies q)</li>
+<li>q jika p (q if p)</li>
+<li>p hanya jika q (p only if q)</li>
+<li>p syarat cukup untuk q (p is sufficient condition for q)</li>
+<li>q syarat perlu bagi p (q is necessary condition for q)</li>
+<li>q bilamana p (q whenever p)</li>
+<li>q mengikuti dari p (q follows from p)</li>
+</ul>
+<h3 id="penjelasan-kenapa--f-rightarrow-f--t-"><a class="header" href="#penjelasan-kenapa--f-rightarrow-f--t-">penjelasan kenapa \( F \rightarrow F = T \)</a></h3>
+<pre><code>“If I win the lottery, I’ll buy you a car.”
+I didn't win the lottery → (False)
+
+I didn't buy a car → (False)
+</code></pre>
+<p>dan juga \( P \rightarrow Q \) sebenarnya sama dengan \( \sim{P} \vee Q \)</p>
+<h3 id="penjelasan-kenapa--sim-p-rightarrow-q--itu-sama-dengan--p-space-wedge-simq-"><a class="header" href="#penjelasan-kenapa--sim-p-rightarrow-q--itu-sama-dengan--p-space-wedge-simq-">Penjelasan kenapa \( \sim (p \rightarrow q )\) itu sama dengan \( p \space \wedge \sim{q} \)</a></h3>
+<p>Kita tahu bahwa \( p \rightarrow q \) itu sebenarnya sama dengan \( \sim{p} \vee p \) , maka steps yang dibutuhkan hanya</p>
+<ul>
+<li>\( \sim(p \rightarrow q) \)</li>
+<li>\( \sim(\sim{p} \vee q) \)</li>
+<li>\( p \space \wedge \sim{q} \)</li>
+</ul>
+<h3 id="tabel-varian-implikasi-proporsi-bersyarat"><a class="header" href="#tabel-varian-implikasi-proporsi-bersyarat">tabel varian implikasi (Proporsi bersyarat)</a></h3>
+<ul>
+<li>Konvers (kebalikan): \( q \rightarrow p \)</li>
+<li>Invers : \( \sim p \rightarrow \sim q \)</li>
+<li>Kontraposisi : \( \sim q \rightarrow \sim p \)</li>
+</ul>
+<div class="table-wrapper"><table><thead><tr><th>p</th><th>q</th><th>¬p</th><th>¬q</th><th>p → q</th><th>q → p</th><th>¬p → ¬q</th><th>¬q → ¬p</th></tr></thead><tbody>
+<tr><td>T</td><td>T</td><td>F</td><td>F</td><td>T</td><td>T</td><td>T</td><td>T</td></tr>
+<tr><td>T</td><td>F</td><td>F</td><td>T</td><td>F</td><td>T</td><td>T</td><td>F</td></tr>
+<tr><td>F</td><td>T</td><td>T</td><td>F</td><td>T</td><td>F</td><td>F</td><td>T</td></tr>
+<tr><td>F</td><td>F</td><td>T</td><td>T</td><td>T</td><td>T</td><td>T</td><td>T</td></tr>
+</tbody></table>
+</div>
+<h2 id="bi-impication"><a class="header" href="#bi-impication">Bi-impication</a></h2>
+<p>Intinya, operand kanan kiri harus sama, entah sama sama true, atau sama sama false.
+notasinya: \( p \leftrightarrow q \)</p>
+<p>tabel kebenaran</p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: center">p</th><th style="text-align: center">q</th><th style="text-align: center">p ↔ q</th></tr></thead><tbody>
+<tr><td style="text-align: center">T</td><td style="text-align: center">T</td><td style="text-align: center">T</td></tr>
+<tr><td style="text-align: center">T</td><td style="text-align: center">F</td><td style="text-align: center">F</td></tr>
+<tr><td style="text-align: center">F</td><td style="text-align: center">T</td><td style="text-align: center">F</td></tr>
+<tr><td style="text-align: center">F</td><td style="text-align: center">F</td><td style="text-align: center">T</td></tr>
+</tbody></table>
+</div>
+<p>contoh</p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: center">p</th><th style="text-align: center">q</th><th style="text-align: center">p ↔ q</th><th style="text-align: center">p → q</th><th style="text-align: center">q → p</th><th style="text-align: center">(p → q) ∧ (q → p)</th></tr></thead><tbody>
+<tr><td style="text-align: center">T</td><td style="text-align: center">T</td><td style="text-align: center">T</td><td style="text-align: center">T</td><td style="text-align: center">T</td><td style="text-align: center">T</td></tr>
+<tr><td style="text-align: center">T</td><td style="text-align: center">F</td><td style="text-align: center">F</td><td style="text-align: center">F</td><td style="text-align: center">T</td><td style="text-align: center">F</td></tr>
+<tr><td style="text-align: center">F</td><td style="text-align: center">T</td><td style="text-align: center">F</td><td style="text-align: center">T</td><td style="text-align: center">F</td><td style="text-align: center">F</td></tr>
+<tr><td style="text-align: center">F</td><td style="text-align: center">F</td><td style="text-align: center">T</td><td style="text-align: center">T</td><td style="text-align: center">T</td><td style="text-align: center">T</td></tr>
+</tbody></table>
+</div>
+<p>analogi simple:</p>
+<ul>
+<li>
+<p><code>Jika suatu bilangan genap, maka habis dibagi 2</code>: \( \text{true} \leftrightarrow \text{true} = \text{true} \)</p>
+</li>
+<li>
+<p><code>Jika suatu bilangan bukan genap, maka tidak akan habis dibagi 2</code>: \( \text{false} \leftrightarrow \text{false} = \text{true} \)</p>
+</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="kumpulan-soal-matematika-diskrit"><a class="header" href="#kumpulan-soal-matematika-diskrit">kumpulan soal Matematika Diskrit</a></h1>
+<h2 id="no-1"><a class="header" href="#no-1">No. 1</a></h2>
+<p>Dalam sebuah survei terhadap 120 orang, diperoleh data sebagai berikut:</p>
+<ul>
+<li>65 orang suka kopi</li>
+<li>70 orang suka teh</li>
+<li>50 orang suka cokelat</li>
+<li>30 orang suka kopi dan teh</li>
+<li>28 orang suka kopi dan cokelat</li>
+<li>26 orang suka teh dan cokelat</li>
+<li>15 orang suka semua minuman</li>
+<li>Semua orang minimal menyukai satu jenis minuman</li>
+</ul>
+<p>Tentukan:</p>
+<ol>
+<li>Banyak orang yang hanya suka kopi</li>
+<li>Banyak orang yang suka teh dan cokelat, tapi tidak suka kopi</li>
+<li>Banyak orang yang suka tepat dua jenis minuman</li>
+<li>Banyak orang yang hanya suka satu jenis minuman</li>
+</ol>
+<h2 id="no-2"><a class="header" href="#no-2">No. 2</a></h2>
+<p>Jika diketahui</p>
+<ul>
+<li>S = {1,2,3 …, 15},</li>
+<li>A = { 2,3,5,7},</li>
+<li>B = { 1,3,5,7,9},</li>
+<li>C = {2,4,6,8}</li>
+</ul>
+<p>Tentukan :</p>
+<ol>
+<li>A ∪ B ∪ C</li>
+<li>A ∩ C</li>
+<li>B - A</li>
+<li>(A’ ∩ B) - C</li>
+<li>(B - C) ∩ A’</li>
+</ol>
+<h2 id="no-3"><a class="header" href="#no-3">No. 3</a></h2>
+<p>Dalam survei terhadap 80 mahasiswa, diperoleh data:</p>
+<ul>
+<li>45 mahasiswa suka Matematika</li>
+<li>38 mahasiswa suka Fisika</li>
+<li>40 mahasiswa suka Kimia</li>
+<li>20 mahasiswa suka Matematika dan Fisika</li>
+<li>25 mahasiswa suka Fisika dan Kimia</li>
+<li>18 mahasiswa suka Matematika dan Kimia</li>
+<li>10 mahasiswa suka ketiga mata kuliah</li>
+<li>8 mahasiswa tidak suka semua mata kuliah</li>
+</ul>
+<p>tentukan</p>
+<ol>
+<li>Banyak mahasiswa yang suka hanya Matematika</li>
+<li>Banyak mahasiswa yang suka tepat dua mata kuliah</li>
+<li>Banyak mahasiswa yang suka Matematika atau Kimia tapi tidak Fisika</li>
+<li>Banyak mahasiswa yang suka hanya satu mata kuliah</li>
+</ol>
+<div class='warning'>
+	Catatan
+<pre><code>format latex menyusul
+</code></pre>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="cryptography"><a class="header" href="#cryptography">Cryptography</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="alur-konek-ke-rpc-server-telegram"><a class="header" href="#alur-konek-ke-rpc-server-telegram">Alur konek ke RPC server telegram</a></h1>
+<p>step ini dibuat oleh seseorang dari masa lalu sekitar tahun 2020 yang akunnya telah terhapus, credit kepada Butthx</p>
+<p>`originals written in telegram chat, but because I want to preserve it. I write it here</p>
+<h2 id="step-1"><a class="header" href="#step-1">step 1:</a></h2>
+<p>Bikin koneksi ke server telegram pakai TCP yang tersedia (disini gwa pakai TCPIntermediate)</p>
+<h2 id="step-2"><a class="header" href="#step-2">step 2:</a></h2>
+<p>Bikin random nonce dengan value int128</p>
+<h2 id="step-3"><a class="header" href="#step-3">step 3:</a></h2>
+<p>Kirim bytes dari ReqPqMulti dengan value bytes dari nonce tadi.</p>
+<h2 id="step-4"><a class="header" href="#step-4">step 4:</a></h2>
+<p>pick salah satu dari beberapa publick fingerprints yang diberikan dari results step3.</p>
+<h2 id="step-5"><a class="header" href="#step-5">step 5:</a></h2>
+<p>Lakuin faktor bilangan pq yang diberikan dari results step3, dapetin lagi hasil pembagian dari pq tadi dengan hasil faktor, terus urutkan dari yang terkecil. untuk yang kecil di kasih nama p dan yang besar kasih nama g.</p>
+<h2 id="step-6"><a class="header" href="#step-6">step 6:</a></h2>
+<p>bikin nonce baru (jangan ubah nonce yang lama) dengan value random int256.</p>
+<h2 id="step-7"><a class="header" href="#step-7">step 7:</a></h2>
+<p>bikin hash (sha1) dari bytes PQInnerData ke telegram: bytes[pq,bytes p,bytes q,nonce,nonce baru,server nonce (dapet dari step3)]</p>
+<h2 id="step-8"><a class="header" href="#step-8">step 8:</a></h2>
+<p>bikin padding dengan random bytes dengan panjang -(length bytes PQInnerData + length sha1) mod 255</p>
+<h2 id="step-9"><a class="header" href="#step-9">step 9:</a></h2>
+<p>encrypt bytes[sha,bytes PQInnerData,padding] dengan RSA (pakai publik fingerprints tadi)</p>
+<h2 id="step-10"><a class="header" href="#step-10">step 10:</a></h2>
+<p>kirim bytes ReqDhParams: bytes[nonce,server nonce, bytes p, bytes q, encrypted data (step9) ,fingerprint]</p>
+<h2 id="step-11"><a class="header" href="#step-11">step 11:</a></h2>
+<p>bikin temporary aes key: bytes[sha1[bytes nonce baru, bytes server nonce],sha1[bytes server nonce, bytes nonce baru] slice 0 – 12]</p>
+<h2 id="step-12"><a class="header" href="#step-12">step 12:</a></h2>
+<p>bikin temporary aes initial vector (IV): bytes[sha1[bytes server nonce, bytes nonce baru] slice 12 – end, sha1[bytes nonce baru,bytes nonce baru], bytes[nonce baru] slice 0 – 4 ]</p>
+<h2 id="step-13"><a class="header" href="#step-13">step 13:</a></h2>
+<p>decrypt encryptedAnswer (dapet dari step 10) menggunakan AES-256-IGE pakai key sama iv tadi.</p>
+<h2 id="step-14"><a class="header" href="#step-14">step 14:</a></h2>
+<p>parse decrypted answer tadi ke TLSchema/TLObject</p>
+<h2 id="step-15"><a class="header" href="#step-15">step 15:</a></h2>
+<p>bikin random int(panjang 256 bytes, bukan int256 ygy) kita beri nama b</p>
+<h2 id="step-16"><a class="header" href="#step-16">step 16:</a></h2>
+<p>dapetin g_b dengan (g ** b) mod dh_prime</p>
+<ul>
+<li>g, dh_prime → dapet dari step 14</li>
+</ul>
+<h2 id="step-17"><a class="header" href="#step-17">step 17:</a></h2>
+<p>bikin hash sha1 dari bytes[ClientDhInnerData[nonce, server nonce, 0,unsigned big bytes g_b length 256]]</p>
+<h2 id="step-18"><a class="header" href="#step-18">step 18:</a></h2>
+<p>bikin padding dengan length -(length bytes ClientDhInnerData + length sha1) mod 16</p>
+<h2 id="step-19"><a class="header" href="#step-19">step 19:</a></h2>
+<p>encrypt bytes[bytes step 17,bytes ClientDhInnerData, padding ] dengan AES-256-IGE, key sama iv masih menggunakan yang step 11.</p>
+<h2 id="step-20"><a class="header" href="#step-20">step 20:</a></h2>
+<p>kirim bytes[SetClientDhParams[nonce, server nonce, bytes step 19]]</p>
+<h2 id="step-21"><a class="header" href="#step-21">step 21:</a></h2>
+<p>Bikin auth key dengan big-unsigned-bytes[big-u-int(g_a) ** b mod dhPrime] length 256</p>
+<h2 id="step-22"><a class="header" href="#step-22">step 22:</a></h2>
+<p>Lakuin security check..</p>
+<p>notes:
+Untuk format pengiriman bytes:</p>
+<pre><code class="language-txt">bytes[sessionId,messageId,length content,content]
+karena belum ada authkey, jadi sessionId  = Buffer.alloc(8)
+</code></pre>
+<p>untuk dapetin real data dari telegram, slice bytes yang di terima dari 20 – end</p>
+<p>pengiriman content selalu bentuk bytes, jadi semua parameter jadiin bytes :)</p>
+<pre><code class="language-ts">/**
+ * tgsnake - Telegram MTProto framework for nodejs.
+ * Copyright (C) 2022 butthx &lt;https://github.com/butthx&gt;
+ *
+ * THIS FILE IS PART OF TGSNAKE
+ *
+ * tgsnake is a free software : you can redistribute it and/or modify
+ * it under the terms of the MIT License as published.
+ */
+
+export const DCTest = {
+  1: '149.154.175.10',
+  2: '149.154.167.40',
+  3: '149.154.175.117',
+};
+export const DCProd = {
+  1: '149.154.175.53',
+  2: '149.154.167.51',
+  3: '149.154.175.100',
+  4: '149.154.167.91',
+  5: '91.108.56.130',
+};
+export const DCProdMedia = {
+  2: '149.154.167.151',
+  4: '149.154.164.250',
+};
+export const DCTestIPV6 = {
+  1: '2001:b28:f23d:f001::e',
+  2: '2001:67c:4e8:f002::e',
+  3: '2001:b28:f23d:f003::e',
+};
+export const DCProdIPV6 = {
+  1: '2001:b28:f23d:f001::a',
+  2: '2001:67c:4e8:f002::a',
+  3: '2001:b28:f23d:f003::a',
+  4: '2001:67c:4e8:f004::a',
+  5: '2001:b28:f23f:f005::a',
+};
+export const DCProdMediaIPV6 = {
+  2: '2001:067c:04e8:f002:0000:0000:0000:000b',
+  4: '2001:067c:04e8:f004:0000:0000:0000:000b',
+};
+export function DataCenter(
+  dcId: number,
+  testMode: boolean,
+  ipv6: boolean,
+  media: boolean
+): [ip: string, port: number] {
+  if (testMode) {
+    return [ipv6 ? DCTestIPV6[dcId] : DCTest[dcId], 80];
+  } else {
+    if (media) {
+      return [ipv6 ? DCProdMediaIPV6[dcId] : DCProdMedia[dcId], 443];
+    } else {
+      return [ipv6 ? DCProdIPV6[dcId] : DCProd[dcId], 443];
+    }
+  }
+}
+
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="other"><a class="header" href="#other">Other</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="resume-alpro"><a class="header" href="#resume-alpro">Resume alpro</a></h1>
+<h2 id="flowchart"><a class="header" href="#flowchart">flowchart</a></h2>
+<p>Apa itu flowchart? simplenya, flowchat itu semacam bentuk gambar atau visual dari suatu langkah langkah algoritma. dan tentunya karna ini algoritma, maka ada step step seperti jika x maka y, lalu panah panah dari atas ke bawah, lalu input, dll. contoh flowchart cara memperbiaki lampu</p>
+<p><img src="other//assets/LampFlowchart.svg" alt="gambar" /></p>
+<h2 id="class"><a class="header" href="#class">Class</a></h2>
+<p>Apa itu class? class adalah cara kita mengatur kode agar scope nya bisa dipecah, misal func a isinya ada 1000 line, nah agar mudah mendebugnya, kita bisa pecah ke method method yang sangat banyak, dan juga kita tidak perlu lagi pusing dengan banyak variabel, kita cukup memakai satu varlable, lalu gunakan di seluruh class yang dinamai "property"</p>
+<p>contoh simple, pakai property untuk nyimpan-tampilkan data,</p>
+<pre><code class="language-cpp">#include &lt;string&gt;
+#include &lt;iostream&gt;
+
+using namespace std;
+
+class abc {
+    string nama;
+public:
+    void set_nama(string nama) {
+        this-&gt;nama = nama;
+    }
+
+    void get_nama() {
+        cout &lt;&lt; this-&gt;nama &lt;&lt; endl;
+    }
+};
+
+int main() {
+    abc abc;
+    abc.set_nama("fadhil");
+    abc.get_nama();
+}
+</code></pre>
+<h2 id="enkapsulasi-encapsulation"><a class="header" href="#enkapsulasi-encapsulation">Enkapsulasi (encapsulation)</a></h2>
+<p>Trik atau cara agar kita bisa memberi aturan ke class/property apakah ia bisa terlihat (public)? atau tidak (private/protected) ke class.</p>
+<p>Intinya, bagaimana cara kita agar method atau property, tidak bisa secara sembarang diakses oleh kode lain. misal kita ada class trigonometri, dan method hitung sin, tetapi didalam hitung sin tersebut, ada method kecil kecil lagi yang banyak, tetapi fungsinya seperti hanya untuk ngebantu fungsi sin menjalankan tugasnya, nah fungsi2 yang kecil tadi itu nanti dibuat private, sedangkan fungsi sin yg dipakai dimana mana, dibuat public.</p>
+<p>contoh kecil</p>
+<pre><code class="language-cpp">#include &lt;string&gt;
+#include &lt;iostream&gt;
+
+using namespace std;
+
+class abc {
+    string nama;
+private:
+    void print_perkenalan() {
+        cout &lt;&lt; "perkenalkan nama saya ";
+    }
+
+public:
+    void set_nama(string nama) {
+        this-&gt;nama = nama;
+    }
+
+    void get_nama() {
+        this-&gt;print_perkenalan();
+        cout &lt;&lt; this-&gt;nama &lt;&lt; endl;
+    }
+};
+
+int main() {
+    abc abc;
+    abc.set_nama("fadhil");
+    abc.get_nama();
+}
+</code></pre>
+<p>terlihat public, private? nah itu adalah contoh encapsulation.</p>
+<p>nah, <code>print_perkenalan</code> (hanya contoh) bertindak seolah olah dia hanya internal function dari suatu class yg besar. dan yang dipanggil dimana mana adalah get nama, dimana dibaliknya dia manggil banyak func yang lain.</p>
+<p>dan <code>print_perkenalan</code> tidak boleh diakses langsung. termasuk property <code>nama</code> juga tidak boleh diakses langsung</p>
+<h2 id="sorting"><a class="header" href="#sorting">Sorting</a></h2>
+<h3 id="bubble-sort"><a class="header" href="#bubble-sort">Bubble Sort</a></h3>
+<p>Konsepnya, dengan cara melempar lempar data array, sampai dia urut, BigO nya <code>O(n^2)</code>. cara kerja nya yaitu dengan cara menukar-nukar posisi array sekarang dengan array didepannya, jika array saat ini &gt; dari array didepannya, maka tukar posisinya</p>
+<p>misal ada data simple seperti ini</p>
+<pre><code class="language-txt">2  3  1  (awal mulanya)
+2  1  3  (3 ditukar karna 3 &gt; 1)
+1  2  3 (2 ditukar karna 2 &gt; 1)
+1  2  3  (selesai)
+</code></pre>
+<h3 id="selection-sort"><a class="header" href="#selection-sort">Selection Sort</a></h3>
+<p>TL;DR, menemukan data yg lebih kecil dari nilai minimum saat ini, tunggu loopnya yang didalam selesai baru di swap.</p>
+<pre><code class="language-txt">contoh kita akan sorting
+
+2  9  4   1  (belum diapa-apakan)
+2  9  4   1  (minimum index ke 0, yaitu 2)
+2  9  4   1  (bandingkan 9 dgn index ke 0 yaitu 2, 9 &lt; 2 false)
+2  9  4   1  (bandingkan 4 dgn index ke 0, yaitu 2, 4 &lt; 2, false)
+2  9  4   1  (bandingkan 1 dgn index ke 0, yaitu 2, 1 &lt; 2, true, maka tukar)
+1  9  4   2  (set minimum di index  ke 1 sekarang, yaitu 9)
+1  9  4   2  (bandingkan 4 dgn index ke 1, 4 &lt; 9, true, maka kita biarkan karna loop belum selesai, tapi set minimum ke 4)
+1  9  4   2  (cek apakah 2 &lt; 4, ya, set minimum ke 2)
+1  2  4   9  (tukar)
+1  2  4   9  (set minimum ke index ke 3, yaitu 4, apakah 9 &lt; 4, tidak)
+--end---
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="rumus-sector-disk-linux"><a class="header" href="#rumus-sector-disk-linux">Rumus sector disk Linux</a></h1>
+<p>rumus sector linux</p>
+<p>\( x \times 512 = (n \times 1024 \times 1024 \times 1024) \)</p>
+<p>dan untuk \( n \) sesuaikan dengan kebutuhan.</p>
+<p>disk sector mulai dari 2048. maka misal, x adalah 3145728, command parted nya
+parted /dev/sda --script mkpart P1 ext4 2048s 3145728s
+misal ingin menambah sekitar 500 MB, maka offset terakhir ditambah 1, misal</p>
+<pre><code class="language-sh">parted /dev/sda --script mkpart P2 ext4 3145729s 4194304s
+</code></pre>
+<p>link referensi</p>
+<ul>
+<li><a href="https://wiki.archlinux.org/title/Parted#UEFI/GPT_examples">https://wiki.archlinux.org/title/Parted#UEFI/GPT_examples</a></li>
+<li><a href="https://ioflood.com/blog/parted-linux-command/">https://ioflood.com/blog/parted-linux-command/</a></li>
+</ul>
 
                     </main>
 
@@ -458,6 +1278,22 @@ A \space \triangle \space B  =  B \space \triangle \space A
 
         </div>
 
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
 
 
 

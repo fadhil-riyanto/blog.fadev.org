@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Rust bytes has_remaining() method - Fadhil Books &amp; Notes</title>
+        <title>Rust buffer advance - Fadhil Books &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -157,65 +157,35 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="rust-bytes-has_remaining-method"><a class="header" href="#rust-bytes-has_remaining-method">Rust bytes has_remaining() method</a></h1>
-<p>this function return whatever any best left on buffer. example, let make simple tcp/ip</p>
+                        <h1 id="rust-buffer-advance"><a class="header" href="#rust-buffer-advance">Rust buffer advance</a></h1>
+<p>this simple article show how buffer advance works</p>
+<pre><pre class="playground"><code class="language-rust">use bytes::Buf;
+
+fn main() {
+    let mut buf = &amp;b"hello world"[..];
+
+    println!("{}", String::from_utf8_lossy(buf.chunk()));
+
+    buf.advance(6);
+    println!("{}", String::from_utf8_lossy(buf.chunk()));
+}
+</code></pre></pre>
+<p>and the result</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>impl Connection {
-    pub fn new(stream: TcpStream) -&gt; Connection {
-        Connection {
-            stream: BufWriter::new(stream),
-            buffer: BytesMut::with_capacity(4096)
-        }
-
-    }
-
-    pub async fn read(&amp;mut self) 
-        -&gt; std::result::Result&lt;Option&lt;Frame&gt;, Box&lt;dyn std::error::Error + Send + Sync&gt;&gt; {
-        
-        let _ = self.stream.read_buf(&amp;mut self.buffer).await;
-        println!("hasremaining: {}", self.buffer.has_remaining());
-        
-        while self.buffer.has_remaining() {
-            let bytes = self.buffer.get_u8();
-            println!("{} -&gt; {}", bytes as char, self.buffer.has_remaining());
-        }
-
-        println!("{}", self.buffer.has_remaining());
-        // Frame::check(&amp;mut self.buffer);
-
-        Ok(Some(Frame::Null))
-    }
-}
+</span>hello world
+world
 <span class="boring">}</span></code></pre></pre>
-<p>let's see the server result using <code>ncat</code></p>
-<p><img src="../assets/tcp-ncat-snapshot.png" alt="ncat-result" /></p>
-<p>which the input is something look like this</p>
-<pre><code class="language-sh">[22:55:41] fadhil_riyanto@integral2 /home/fadhil_riyanto [SIGINT]
-&gt; ncat 127.0.0.1 6380
-abc
-
-</code></pre>
-<p>from this output, we know</p>
-<pre><code class="language-txt">hasremaining: true &lt;--- this is initial, didn't mean anything
-a -&gt; true &lt;--- a already read, but next char is b, why this is true
-b -&gt; true &lt;--- next is c, also true
-c -&gt; true &lt;--- next is \n char, also true
-
- -&gt; false &lt;--- this is false because no next chars
-false &lt;--- confirm
-</code></pre>
-<p>Also, <code>get_u8</code> returns the first byte in the buffer. Each time it's called, it advances the position, so subsequent calls return the next bytes.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../rust/cursor_1.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../rust/into_box_error_analysis.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../rust/into_box_error_analysis.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../rust/rust_RESP_get_line_analysis.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -225,11 +195,11 @@ false &lt;--- confirm
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../rust/cursor_1.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../rust/into_box_error_analysis.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../rust/into_box_error_analysis.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../rust/rust_RESP_get_line_analysis.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Rust bytes has_remaining() method - Fadhil Books &amp; Notes</title>
+        <title>Set stuff - Fadhil Books &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -157,65 +157,57 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="rust-bytes-has_remaining-method"><a class="header" href="#rust-bytes-has_remaining-method">Rust bytes has_remaining() method</a></h1>
-<p>this function return whatever any best left on buffer. example, let make simple tcp/ip</p>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>impl Connection {
-    pub fn new(stream: TcpStream) -&gt; Connection {
-        Connection {
-            stream: BufWriter::new(stream),
-            buffer: BytesMut::with_capacity(4096)
-        }
-
-    }
-
-    pub async fn read(&amp;mut self) 
-        -&gt; std::result::Result&lt;Option&lt;Frame&gt;, Box&lt;dyn std::error::Error + Send + Sync&gt;&gt; {
-        
-        let _ = self.stream.read_buf(&amp;mut self.buffer).await;
-        println!("hasremaining: {}", self.buffer.has_remaining());
-        
-        while self.buffer.has_remaining() {
-            let bytes = self.buffer.get_u8();
-            println!("{} -&gt; {}", bytes as char, self.buffer.has_remaining());
-        }
-
-        println!("{}", self.buffer.has_remaining());
-        // Frame::check(&amp;mut self.buffer);
-
-        Ok(Some(Frame::Null))
-    }
-}
-<span class="boring">}</span></code></pre></pre>
-<p>let's see the server result using <code>ncat</code></p>
-<p><img src="../assets/tcp-ncat-snapshot.png" alt="ncat-result" /></p>
-<p>which the input is something look like this</p>
-<pre><code class="language-sh">[22:55:41] fadhil_riyanto@integral2 /home/fadhil_riyanto [SIGINT]
-&gt; ncat 127.0.0.1 6380
-abc
-
-</code></pre>
-<p>from this output, we know</p>
-<pre><code class="language-txt">hasremaining: true &lt;--- this is initial, didn't mean anything
-a -&gt; true &lt;--- a already read, but next char is b, why this is true
-b -&gt; true &lt;--- next is c, also true
-c -&gt; true &lt;--- next is \n char, also true
-
- -&gt; false &lt;--- this is false because no next chars
-false &lt;--- confirm
-</code></pre>
-<p>Also, <code>get_u8</code> returns the first byte in the buffer. Each time it's called, it advances the position, so subsequent calls return the next bytes.</p>
+                        <h1 id="set-stuff"><a class="header" href="#set-stuff">Set stuff</a></h1>
+<p>there is some intresting question about discrete math</p>
+<h2 id="why--mathcalpemptyset--lbrace-emptyset-rbrace-"><a class="header" href="#why--mathcalpemptyset--lbrace-emptyset-rbrace-">why \( \mathcal{P}(\emptyset) = \lbrace \emptyset \rbrace \)</a></h2>
+<p>consider \( \mathcal(S) \) where \( S \) is a set, for example</p>
+<ul>
+<li>if \( S = \lbrace a \rbrace \), then \( \mathcal{P}(S) = \lbrace \emptyset, \lbrace a \rbrace \rbrace \), same as \( \mathcal{P}(a) \)</li>
+<li>if \( S = \lbrace a, b \rbrace \), then \(
+\mathcal{P}(S) = \lbrace
+\emptyset,
+\lbrace a \rbrace,
+\lbrace b \rbrace,
+\lbrace a, b \rbrace
+\rbrace \), same as \( \mathcal{P}(a, b) \)</li>
+<li>if \( S = \lbrace \emptyset \rbrace \), then \( \mathcal{P}(S) = \lbrace \emptyset, \lbrace \emptyset \rbrace \rbrace \), same as \( \mathcal{P}(\emptyset) \)</li>
+</ul>
+<p>so, because \( \lbrace \rbrace \) usually hidden, \( \mathcal{P}(\emptyset) = \lbrace \emptyset \rbrace \)</p>
+<h2 id="let--a--emptyset-b--emptyset--how-to--a-times-b-"><a class="header" href="#let--a--emptyset-b--emptyset--how-to--a-times-b-">let \( A = \emptyset, B = \emptyset \), how to \( A \times B \)</a></h2>
+<p>Consider \( A \times B = \lbrace (a,b) | a \in A, b \in B \rbrace \)</p>
+<p>because</p>
+<ul>
+<li>A is empty, no elements can be paired</li>
+<li>B is also empty</li>
+</ul>
+<p>conlusion: no paired element = empty</p>
+<p>proof by cardinality
+\(
+|A| = 0, |B| = 0, \text{so, when } |A \times B| = |A| \times |B| = 0 \times 0 = 0
+\)</p>
+<h2 id="does--pemptyset--lbrace-lbrace-rbrace-rbrace--lbrace-emptyset-rbrace--"><a class="header" href="#does--pemptyset--lbrace-lbrace-rbrace-rbrace--lbrace-emptyset-rbrace--">does \( P(\emptyset) = \lbrace \lbrace \rbrace \rbrace = \lbrace \emptyset \rbrace \) ?</a></h2>
+<p>true, this is due \( \lbrace \emptyset \rbrace \) same as \( \lbrace \lbrace \rbrace \rbrace \), then consider example
+\( P(a) = \lbrace \lbrace \rbrace, \lbrace a \rbrace\rbrace \)</p>
+<h2 id="suppose-x-and-z-are-independent-of-each-other"><a class="header" href="#suppose-x-and-z-are-independent-of-each-other">Suppose X and Z are independent of each other</a></h2>
+<ul>
+<li>\( | \mathcal{P}(X \cap Z)| \)</li>
+<li>\( | X - Z | \)</li>
+<li>\( | X \oplus Z | \)</li>
+<li>\( | X \cap Z | \)</li>
+<li>\( | \mathcal{P}(X) \cup \mathcal{P}(Z)| \)</li>
+<li>\( | \overline{\mathcal{P}(X) \cup \mathcal{P}(Z)}| \)</li>
+</ul>
+<p>nb: bagian ini belum jadi</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../rust/cursor_1.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../math/set_formula_1.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../rust/into_box_error_analysis.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../math/logika.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -225,11 +217,11 @@ false &lt;--- confirm
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../rust/cursor_1.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../math/set_formula_1.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../rust/into_box_error_analysis.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../math/logika.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Rust bytes has_remaining() method - Fadhil Books &amp; Notes</title>
+        <title>Move sign &amp; zero-extends a single byte - Fadhil Books &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -157,65 +157,72 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="rust-bytes-has_remaining-method"><a class="header" href="#rust-bytes-has_remaining-method">Rust bytes has_remaining() method</a></h1>
-<p>this function return whatever any best left on buffer. example, let make simple tcp/ip</p>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>impl Connection {
-    pub fn new(stream: TcpStream) -&gt; Connection {
-        Connection {
-            stream: BufWriter::new(stream),
-            buffer: BytesMut::with_capacity(4096)
-        }
+                        <h1 id="move-sign--zero-extends-a-single-byte"><a class="header" href="#move-sign--zero-extends-a-single-byte">Move sign &amp; zero-extends a single byte</a></h1>
+<p>Disini saya akan membahas apa itu instruksi MOVSBL dan MOVZBL. pertama tama silahkan baca dulu disini</p>
+<ul>
+<li><a href="https://stackoverflow.com/questions/7861095/what-does-movsbl-instruction-do">https://stackoverflow.com/questions/7861095/what-does-movsbl-instruction-do</a></li>
+</ul>
+<pre><code class="language-txt">MOVSBL and MOVZBL
+* MOVSBL sign-extends a single byte, and copies it into a
+  double-word destination
+* MOVZBL expands a single byte to 32 bits with 24 leading
+  zeros, and copies it into a double-word destination
+</code></pre>
+<p>pertama tama, lihat kode asm ini.</p>
+<pre><code class="language-asm">
+.section .data
+val:
+    .byte 0xF6
+    .byte 0xF6
+    .byte 0xF6
+    .byte 0xF6
+    
 
-    }
+.globl do_asm
 
-    pub async fn read(&amp;mut self) 
-        -&gt; std::result::Result&lt;Option&lt;Frame&gt;, Box&lt;dyn std::error::Error + Send + Sync&gt;&gt; {
-        
-        let _ = self.stream.read_buf(&amp;mut self.buffer).await;
-        println!("hasremaining: {}", self.buffer.has_remaining());
-        
-        while self.buffer.has_remaining() {
-            let bytes = self.buffer.get_u8();
-            println!("{} -&gt; {}", bytes as char, self.buffer.has_remaining());
-        }
+.text
+do_asm:
+    movl $0x12345678, %eax
+    movl $0xAABBCCDD, %edx 
 
-        println!("{}", self.buffer.has_remaining());
-        // Frame::check(&amp;mut self.buffer);
+    # move edx 8 bit high into al (eax)
+    movb %dh, %al
 
-        Ok(Some(Frame::Null))
-    }
-}
-<span class="boring">}</span></code></pre></pre>
-<p>let's see the server result using <code>ncat</code></p>
-<p><img src="../assets/tcp-ncat-snapshot.png" alt="ncat-result" /></p>
-<p>which the input is something look like this</p>
-<pre><code class="language-sh">[22:55:41] fadhil_riyanto@integral2 /home/fadhil_riyanto [SIGINT]
-&gt; ncat 127.0.0.1 6380
-abc
+    # reset
+    movl $0x12345678, %eax
+    movl $0xAABBCCDD, %edx 
+
+    MOVSBL %dh, %eax
+
+    # reset
+    movl $0x12345678, %eax
+    movl $0xAABBCCDD, %edx 
+
+    MOVZBL %dh, %eax
+
+    
+    movq $9, %rax
+    ret
 
 </code></pre>
-<p>from this output, we know</p>
-<pre><code class="language-txt">hasremaining: true &lt;--- this is initial, didn't mean anything
-a -&gt; true &lt;--- a already read, but next char is b, why this is true
-b -&gt; true &lt;--- next is c, also true
-c -&gt; true &lt;--- next is \n char, also true
-
- -&gt; false &lt;--- this is false because no next chars
-false &lt;--- confirm
-</code></pre>
-<p>Also, <code>get_u8</code> returns the first byte in the buffer. Each time it's called, it advances the position, so subsequent calls return the next bytes.</p>
+<p>dan ini hasilnya, movb biasa (tanpa hapus bagian atas data, bagian atas tetep utuh)
+<img src="/assets/movsbl-1.png" alt="gambar" /></p>
+<p>ini hasil signed bagian atas
+<img src="/assets/movsbl-2.png" alt="gambar" /></p>
+<p>ini hasil ketika bagian atas kita zerokan
+<img src="/assets/movzbl-3.png" alt="gambar" /></p>
+<p>catatan
+<code>movb %dh, %al</code> memindahkan rdx bagian high ke rax bagian bawah.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../rust/cursor_1.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../sysprog/embed_asm.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../rust/into_box_error_analysis.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../rust/readme-rust-stuff.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -225,11 +232,11 @@ false &lt;--- confirm
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../rust/cursor_1.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../sysprog/embed_asm.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../rust/into_box_error_analysis.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../rust/readme-rust-stuff.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

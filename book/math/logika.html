@@ -1,0 +1,514 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Logika - Fadhil Books &amp; Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Fadhil Books &amp; Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="logika"><a class="header" href="#logika">Logika</a></h1>
+<p>Ringkasan ini dibuat sebagian sebagian dari Kuliah IF1220 Matematika Diskrit ITB oleh bapak Rinaldi Munir. dan berbagai sumber seperti Wikipedia, ChatGPT dsb</p>
+<h2 id="proposisi"><a class="header" href="#proposisi">Proposisi</a></h2>
+<p>adalah pernyataan bahwa suatu dua perbandingan adalah sama besar, contoh</p>
+<ul>
+<li>\( \frac{a}{b}=\frac{c}{d} \)</li>
+<li>\( 4 = 2 * 2 \)</li>
+<li>13 adalah bilangan ganjil</li>
+<li>Untuk sembarang bilangan bulat \( n &gt;= 0 \), maka \( 2n \) adalah genap</li>
+</ul>
+<p>contoh yang bukan</p>
+<ul>
+<li>Isilah gelas tersebut dengan air</li>
+<li>\( x + 3 = 8 \)</li>
+<li>\( x &gt; 3 \)</li>
+</ul>
+<p>dan, Proposisi dilambangkan dengan huruf kecil seperti \( p, q, r, ... \)</p>
+<h2 id="bentuk-bentuk-nya"><a class="header" href="#bentuk-bentuk-nya">Bentuk bentuk nya</a></h2>
+<ul>
+<li>Proposisi atomik
+bentuk proposisi tunggal, contoh
+<ul>
+<li>2n selalu genap untuk n=0, 1, 2, …</li>
+<li>Ibukota Maluku Utara adalah Ternate</li>
+</ul>
+</li>
+<li>proposisi majemuk
+diantaranya:
+<ul>
+<li>conjunction (and): \( \wedge \)</li>
+<li>disjunction (or): \( \vee \)</li>
+<li>negation (!n): \( ~ \)</li>
+<li>exclusive disjunction (xor): \( \oplus \)</li>
+</ul>
+</li>
+</ul>
+<h2 id="table"><a class="header" href="#table">Table</a></h2>
+<table border="1" cellspacing="0" cellpadding="5">
+  <tr>
+    <th>p</th>
+    <th>q</th>
+    <th>r</th>
+    <th>p ∧ q</th>
+    <th>¬q</th>
+    <th>¬q ∧ r</th>
+    <th>(p ∧ q) ∨ (¬q ∧ r)</th>
+  </tr>
+  <tr>
+    <td>T</td>
+    <td>T</td>
+    <td>T</td>
+    <td>T</td>
+    <td>F</td>
+    <td>F</td>
+    <td>T</td>
+  </tr>
+  <tr>
+    <td>T</td>
+    <td>T</td>
+    <td>F</td>
+    <td>T</td>
+    <td>F</td>
+    <td>F</td>
+    <td>T</td>
+  </tr>
+  <tr>
+    <td>T</td>
+    <td>F</td>
+    <td>T</td>
+    <td>F</td>
+    <td>T</td>
+    <td>T</td>
+    <td>T</td>
+  </tr>
+  <tr>
+    <td>T</td>
+    <td>F</td>
+    <td>F</td>
+    <td>F</td>
+    <td>T</td>
+    <td>F</td>
+    <td>F</td>
+  </tr>
+  <tr>
+    <td>F</td>
+    <td>T</td>
+    <td>T</td>
+    <td>F</td>
+    <td>F</td>
+    <td>F</td>
+    <td>F</td>
+  </tr>
+  <tr>
+    <td>F</td>
+    <td>T</td>
+    <td>F</td>
+    <td>F</td>
+    <td>F</td>
+    <td>F</td>
+    <td>F</td>
+  </tr>
+  <tr>
+    <td>F</td>
+    <td>F</td>
+    <td>T</td>
+    <td>F</td>
+    <td>T</td>
+    <td>T</td>
+    <td>T</td>
+  </tr>
+  <tr>
+    <td>F</td>
+    <td>F</td>
+    <td>F</td>
+    <td>F</td>
+    <td>T</td>
+    <td>F</td>
+    <td>F</td>
+  </tr>
+</table>
+<p>nb:</p>
+<ul>
+<li>Tautologi adalah pernyataan logika yang selalu benar, tidak peduli nilai kebenaran dari komponen-komponennya. contoh</li>
+</ul>
+<table border="1" cellspacing="0" cellpadding="5">
+  <tr>
+    <th>p</th>
+    <th>q</th>
+    <th>p ∧ q</th>
+    <th>¬(p ∧ q)</th>
+    <th>p ∨ ¬(p ∧ q)</th>
+  </tr>
+  <tr>
+    <td>T</td><td>T</td><td>T</td><td>F</td><td><span style="color:red;">T</span></td>
+  </tr>
+  <tr>
+    <td>T</td><td>F</td><td>F</td><td>T</td><td><span style="color:red;">T</span></td>
+  </tr>
+  <tr>
+    <td>F</td><td>T</td><td>F</td><td>T</td><td><span style="color:red;">T</span></td>
+  </tr>
+  <tr>
+    <td>F</td><td>F</td><td>F</td><td>T</td><td><span style="color:red;">T</span></td>
+  </tr>
+</table>
+<ul>
+<li>Kontradiksi adalah pernyataan logika yang selalu salah, tidak peduli nilai kebenaran dari komponen-komponennya. contoh</li>
+</ul>
+<table border="1" cellspacing="0" cellpadding="5">
+  <tr>
+    <th>p</th>
+    <th>q</th>
+    <th>p ∧ q</th>
+    <th>p ∨ q</th>
+    <th>¬(p ∨ q)</th>
+    <th>(p ∧ q) ∧ ¬(p ∨ q)</th>
+  </tr>
+  <tr>
+    <td>T</td><td>T</td><td>T</td><td>T</td><td>F</td><td><span style="color:red;">F</span></td>
+  </tr>
+  <tr>
+    <td>T</td><td>F</td><td>F</td><td>T</td><td>F</td><td><span style="color:red;">F</span></td>
+  </tr>
+  <tr>
+    <td>F</td><td>T</td><td>F</td><td>T</td><td>F</td><td><span style="color:red;">F</span></td>
+  </tr>
+  <tr>
+    <td>F</td><td>F</td><td>F</td><td>F</td><td>T</td><td><span style="color:red;">F</span></td>
+  </tr>
+</table>
+- ekivalen
+Intinya, jika dioperasikan, dia punya hasil tabel kebenaran yang identik, walau rumusnya beda.
+<p><img src="https://upload.wikimedia.org/wikipedia/commons/8/83/In_Quest_of_Univeral_Logic_Morgan.png" alt="gambar wikipedia hukum de morgan" /></p>
+<table border="1" cellspacing="0" cellpadding="5">
+  <tr>
+    <th>p</th>
+    <th>q</th>
+    <th>p ∧ q</th>
+    <th>¬(p ∧ q)</th>
+    <th>¬p</th>
+    <th>¬q</th>
+    <th>¬p ∨ ¬q</th>
+  </tr>
+  <tr>
+    <td>T</td><td>T</td><td>T</td><td><span style="color:red;">F</span></td><td>F</td><td>F</td><td><span style="color:red;">F</span></td>
+  </tr>
+  <tr>
+    <td>T</td><td>F</td><td>F</td><td><span style="color:red;">T</span></td><td>F</td><td>T</td><td><span style="color:red;">T</span></td>
+  </tr>
+  <tr>
+    <td>F</td><td>T</td><td>F</td><td><span style="color:red;">T</span></td><td>T</td><td>F</td><td><span style="color:red;">T</span></td>
+  </tr>
+  <tr>
+    <td>F</td><td>F</td><td>F</td><td><span style="color:red;">T</span></td><td>T</td><td>T</td><td><span style="color:red;">T</span></td>
+  </tr>
+</table>
+<h2 id="hukum-hukum-nya"><a class="header" href="#hukum-hukum-nya">Hukum hukum nya</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Bahasa Indonesia</th><th>Bahasa Inggris</th><th>Contoh</th></tr></thead><tbody>
+<tr><td>Hukum Identitas</td><td>Identity Law</td><td><code>p ∧ T ≡ p</code>, <code>p ∨ F ≡ p</code></td></tr>
+<tr><td>Hukum Dominasi</td><td>Domination Law</td><td><code>p ∨ T ≡ T</code>, <code>p ∧ F ≡ F</code></td></tr>
+<tr><td>Hukum Idempotensi</td><td>Idempotent Law</td><td><code>p ∨ p ≡ p</code>, <code>p ∧ p ≡ p</code></td></tr>
+<tr><td>Hukum Negasi</td><td>Negation Law</td><td><code>p ∨ ¬p ≡ T</code>, <code>p ∧ ¬p ≡ F</code></td></tr>
+<tr><td>Hukum Komutatif</td><td>Commutative Law</td><td><code>p ∨ q ≡ q ∨ p</code>, <code>p ∧ q ≡ q ∧ p</code></td></tr>
+<tr><td>Hukum Asosiatif</td><td>Associative Law</td><td><code>(p ∨ q) ∨ r ≡ p ∨ (q ∨ r)</code></td></tr>
+<tr><td>Hukum Distributif</td><td>Distributive Law</td><td><code>p ∨ (q ∧ r) ≡ (p ∨ q) ∧ (p ∨ r)</code></td></tr>
+<tr><td>Hukum De Morgan</td><td>De Morgan’s Laws</td><td><code>¬(p ∧ q) ≡ ¬p ∨ ¬q</code>, <code>¬(p ∨ q) ≡ ¬p ∧ ¬q</code></td></tr>
+<tr><td>Hukum Involusi</td><td>Double Negation / Involution</td><td><code>¬(¬p) ≡ p</code></td></tr>
+<tr><td>Hukum Implikasi</td><td>Implication Law</td><td><code>p → q ≡ ¬p ∨ q</code></td></tr>
+<tr><td>Hukum Biimplikasi</td><td>Biconditional Law</td><td><code>p ↔ q ≡ (p → q) ∧ (q → p)</code></td></tr>
+</tbody></table>
+</div>
+<h2 id="implikasi"><a class="header" href="#implikasi">Implikasi</a></h2>
+<p>Disebut juga proposisi bersyarat, seperti jika x maka y, notasinya \( p \rightarrow q\). \( p \) nya adalah condition, \( q \) nya adalah conlusion</p>
+<div class="table-wrapper"><table><thead><tr><th>p</th><th>q</th><th>p → q</th></tr></thead><tbody>
+<tr><td>T</td><td>T</td><td>T</td></tr>
+<tr><td>T</td><td>F</td><td>F</td></tr>
+<tr><td>F</td><td>T</td><td>T</td></tr>
+<tr><td>F</td><td>F</td><td>T</td></tr>
+</tbody></table>
+</div>
+<p>versi versinya jika dijadikan teks</p>
+<ul>
+<li>Jika p, maka q (if p, then q)</li>
+<li>Jika p, q (if p, q)</li>
+<li>p mengakibatkan q (p implies q)</li>
+<li>q jika p (q if p)</li>
+<li>p hanya jika q (p only if q)</li>
+<li>p syarat cukup untuk q (p is sufficient condition for q)</li>
+<li>q syarat perlu bagi p (q is necessary condition for q)</li>
+<li>q bilamana p (q whenever p)</li>
+<li>q mengikuti dari p (q follows from p)</li>
+</ul>
+<h3 id="penjelasan-kenapa--f-rightarrow-f--t-"><a class="header" href="#penjelasan-kenapa--f-rightarrow-f--t-">penjelasan kenapa \( F \rightarrow F = T \)</a></h3>
+<pre><code>“If I win the lottery, I’ll buy you a car.”
+I didn't win the lottery → (False)
+
+I didn't buy a car → (False)
+</code></pre>
+<p>dan juga \( P \rightarrow Q \) sebenarnya sama dengan \( \sim{P} \vee Q \)</p>
+<h3 id="penjelasan-kenapa--sim-p-rightarrow-q--itu-sama-dengan--p-space-wedge-simq-"><a class="header" href="#penjelasan-kenapa--sim-p-rightarrow-q--itu-sama-dengan--p-space-wedge-simq-">Penjelasan kenapa \( \sim (p \rightarrow q )\) itu sama dengan \( p \space \wedge \sim{q} \)</a></h3>
+<p>Kita tahu bahwa \( p \rightarrow q \) itu sebenarnya sama dengan \( \sim{p} \vee p \) , maka steps yang dibutuhkan hanya</p>
+<ul>
+<li>\( \sim(p \rightarrow q) \)</li>
+<li>\( \sim(\sim{p} \vee q) \)</li>
+<li>\( p \space \wedge \sim{q} \)</li>
+</ul>
+<h3 id="tabel-varian-implikasi-proporsi-bersyarat"><a class="header" href="#tabel-varian-implikasi-proporsi-bersyarat">tabel varian implikasi (Proporsi bersyarat)</a></h3>
+<ul>
+<li>Konvers (kebalikan): \( q \rightarrow p \)</li>
+<li>Invers : \( \sim p \rightarrow \sim q \)</li>
+<li>Kontraposisi : \( \sim q \rightarrow \sim p \)</li>
+</ul>
+<div class="table-wrapper"><table><thead><tr><th>p</th><th>q</th><th>¬p</th><th>¬q</th><th>p → q</th><th>q → p</th><th>¬p → ¬q</th><th>¬q → ¬p</th></tr></thead><tbody>
+<tr><td>T</td><td>T</td><td>F</td><td>F</td><td>T</td><td>T</td><td>T</td><td>T</td></tr>
+<tr><td>T</td><td>F</td><td>F</td><td>T</td><td>F</td><td>T</td><td>T</td><td>F</td></tr>
+<tr><td>F</td><td>T</td><td>T</td><td>F</td><td>T</td><td>F</td><td>F</td><td>T</td></tr>
+<tr><td>F</td><td>F</td><td>T</td><td>T</td><td>T</td><td>T</td><td>T</td><td>T</td></tr>
+</tbody></table>
+</div>
+<h2 id="bi-impication"><a class="header" href="#bi-impication">Bi-impication</a></h2>
+<p>Intinya, operand kanan kiri harus sama, entah sama sama true, atau sama sama false.
+notasinya: \( p \leftrightarrow q \)</p>
+<p>tabel kebenaran</p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: center">p</th><th style="text-align: center">q</th><th style="text-align: center">p ↔ q</th></tr></thead><tbody>
+<tr><td style="text-align: center">T</td><td style="text-align: center">T</td><td style="text-align: center">T</td></tr>
+<tr><td style="text-align: center">T</td><td style="text-align: center">F</td><td style="text-align: center">F</td></tr>
+<tr><td style="text-align: center">F</td><td style="text-align: center">T</td><td style="text-align: center">F</td></tr>
+<tr><td style="text-align: center">F</td><td style="text-align: center">F</td><td style="text-align: center">T</td></tr>
+</tbody></table>
+</div>
+<p>contoh</p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: center">p</th><th style="text-align: center">q</th><th style="text-align: center">p ↔ q</th><th style="text-align: center">p → q</th><th style="text-align: center">q → p</th><th style="text-align: center">(p → q) ∧ (q → p)</th></tr></thead><tbody>
+<tr><td style="text-align: center">T</td><td style="text-align: center">T</td><td style="text-align: center">T</td><td style="text-align: center">T</td><td style="text-align: center">T</td><td style="text-align: center">T</td></tr>
+<tr><td style="text-align: center">T</td><td style="text-align: center">F</td><td style="text-align: center">F</td><td style="text-align: center">F</td><td style="text-align: center">T</td><td style="text-align: center">F</td></tr>
+<tr><td style="text-align: center">F</td><td style="text-align: center">T</td><td style="text-align: center">F</td><td style="text-align: center">T</td><td style="text-align: center">F</td><td style="text-align: center">F</td></tr>
+<tr><td style="text-align: center">F</td><td style="text-align: center">F</td><td style="text-align: center">T</td><td style="text-align: center">T</td><td style="text-align: center">T</td><td style="text-align: center">T</td></tr>
+</tbody></table>
+</div>
+<p>analogi simple:</p>
+<ul>
+<li>
+<p><code>Jika suatu bilangan genap, maka habis dibagi 2</code>: \( \text{true} \leftrightarrow \text{true} = \text{true} \)</p>
+</li>
+<li>
+<p><code>Jika suatu bilangan bukan genap, maka tidak akan habis dibagi 2</code>: \( \text{false} \leftrightarrow \text{false} = \text{true} \)</p>
+</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../math/set_stuff.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../math/kumpulan_soal_matematika_diskrit.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../math/set_stuff.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../math/kumpulan_soal_matematika_diskrit.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
