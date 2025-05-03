@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Move sign &amp; zero-extends a single byte - Fadhil Books &amp; Notes</title>
+        <title>Regex notes - Fadhil Books &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -157,74 +157,25 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="move-sign--zero-extends-a-single-byte"><a class="header" href="#move-sign--zero-extends-a-single-byte">Move sign &amp; zero-extends a single byte</a></h1>
-<p>Disini saya akan membahas apa itu instruksi MOVSBL dan MOVZBL. pertama tama silahkan baca dulu disini</p>
+                        <h1 id="regex-notes"><a class="header" href="#regex-notes">Regex notes</a></h1>
+<h2 id="letter--digits"><a class="header" href="#letter--digits">letter &amp; digits</a></h2>
 <ul>
-<li><a href="https://stackoverflow.com/questions/7861095/what-does-movsbl-instruction-do">https://stackoverflow.com/questions/7861095/what-does-movsbl-instruction-do</a></li>
+<li><code>\D+</code>: Matching all non digits, then  grouping</li>
 </ul>
-<pre><code class="language-txt">MOVSBL and MOVZBL
-* MOVSBL sign-extends a single byte, and copies it into a
-  double-word destination
-* MOVZBL expands a single byte to 32 bits with 24 leading
-  zeros, and copies it into a double-word destination
-</code></pre>
-<p>pertama tama, lihat kode asm ini.</p>
-<pre><code class="language-asm">
-.section .data
-val:
-    .byte 0xF6
-    .byte 0xF6
-    .byte 0xF6
-    .byte 0xF6
-    
-
-.globl do_asm
-
-.text
-do_asm:
-    movl $0x12345678, %eax
-    movl $0xAABBCCDD, %edx 
-
-    # move edx 8 bit high into al (eax)
-    movb %dh, %al
-
-    # reset
-    movl $0x12345678, %eax
-    movl $0xAABBCCDD, %edx 
-
-    MOVSBL %dh, %eax
-
-    # reset
-    movl $0x12345678, %eax
-    movl $0xAABBCCDD, %edx 
-
-    MOVZBL %dh, %eax
-
-    
-    movq $9, %rax
-    ret
-
-</code></pre>
-<p>dan ini hasilnya, movb biasa (tanpa hapus bagian atas data, bagian atas tetep utuh)
-<img src="/assets/movsbl-1.png" alt="gambar" /></p>
-<p>ini hasil signed bagian atas
-<img src="/assets/movsbl-2.png" alt="gambar" /></p>
-<p>ini hasil ketika bagian atas kita zerokan
-<img src="/assets/movzbl-3.png" alt="gambar" /></p>
-<p>catatan
-<code>movb %dh, %al</code> memindahkan rdx bagian high ke rax bagian bawah.</p>
+<h1 id="match-any-using-"><a class="header" href="#match-any-using-">match any using <code>.</code></a></h1>
+<h2 id="the--match-all-chars-except-r-or-n"><a class="header" href="#the--match-all-chars-except-r-or-n">the <code>.</code> match all chars, except \r or \n</a></h2>
+<p>example:
+regexp: <code>r".+"</code></p>
+<p>It will match anything as long as there is at least one character present. no empty string such ""</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../sysprog/embed_asm.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../other/rumus-sector-disk-linux.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../rust/readme-rust-stuff.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
 
                         <div style="clear: both"></div>
                     </nav>
@@ -232,13 +183,10 @@ do_asm:
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../sysprog/embed_asm.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../other/rumus-sector-disk-linux.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../rust/readme-rust-stuff.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

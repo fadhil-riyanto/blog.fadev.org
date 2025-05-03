@@ -26,3 +26,4 @@
 - [Other](./other/other-readme.md)
 	- [Resume alpro](./other/resume-alpro.md)
 	- [Rumus sector disk Linux](./other/rumus-sector-disk-linux.md)
+	- [Regex notes](./other/regex-notes.md)

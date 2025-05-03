@@ -6,9 +6,9 @@ Apa itu flowchart? simplenya, flowchat itu semacam bentuk gambar atau visual dar
 ![gambar](/assets/LampFlowchart.svg)
 
 ## Class
-Apa itu class? class adalah cara kita mengatur kode agar scope nya bisa dipecah, misal func a isinya ada 1000 line, nah agar mudah mendebugnya, kita bisa pecah ke method method yang sangat banyak, dan juga kita tidak perlu lagi pusing dengan banyak variabel, kita cukup memakai satu varlable, lalu gunakan di seluruh class yang dinamai "property"
+    Apa itu class? class adalah cara kita mengatur kode agar scope nya bisa dipecah, misal func a isinya ada 1000 line, nah agar mudah mendebugnya, kita bisa pecah ke method method yang sangat banyak, dan juga kita tidak perlu lagi pusing dengan banyak variabel, kita cukup memakai satu varlable, lalu gunakan di seluruh class yang dinamai "property"
 
-contoh simple, pakai property untuk nyimpan-tampilkan data,
+    contoh simple, pakai property untuk nyimpan-tampilkan data,
 
 ```cpp
 #include <string>
@@ -110,3 +110,45 @@ contoh kita akan sorting
 1  2  4   9  (set minimum ke index ke 3, yaitu 4, apakah 9 < 4, tidak)
 --end---
 ```
+
+### insertion sort
+Konsepnya, misal lagi menyusun kartu dari satu per satu. Jadi kamu ambil satu kartu, terus kamu bandingin ke kiri, kalau dia lebih kecil dari yang di kiri-nya, tukar posisinya. Terus begitu sampai semua kartu (data) urut
+
+contoh
+```txt
+5 3 4 1 (unchanged)
+3 5 4 1 (3 dimasukkan ke kiri 5 karena 3 < 5)
+3 4 5 1 (4 dimasukkan, dia lebih kecil dari 5, jadi tukar)
+1 3 4 5 (1 dimasukkan paling kiri, karena dia lebih kecil dari semuanya)
+```
+
+
+### merge sort
+misal ada data, terus di bagi-bagi tumpukan data jadi kecil-kecil dulu sampai tinggal satuan, baru nanti disusun lagi sambil dibandingin dan digabungin pelan-pelan sampai jadi urut.
+Cara kerjanya pakai prinsip divide and conquer
+Jadi data dibelah-belah jadi dua terus, sampai tinggal 1-an, lalu disatukan lagi sambil diurutin.
+
+contoh gifnya (google)
+![gambar](https://www.lavivienpost.net/wp-content/uploads/2022/02/merge-sort-400.gif)
+
+### sequential search
+nah, ini search paling gampang wkwkwk, intinya loop terus array nya, jika ketemu idx nya pakai if else, maka break loopnya & end
+
+### binary searching
+cara mencarinya data dibagi 2 ditengah tengah, lalu setelah dibagi 2, akan ada low (pojok kiri), mid (tengah tengah), high (pojok kanan). lalu cek saja pastikan data yg dicari == mid
+
+jika tidak, maka cek statusnya dia kurang dari mid atau lebih, jika lebih, cari bagian kanan, jika kurang, cari bagian kiri. proses ini diulang terus dan tiap2 menemukan low dan high baru, maka mid pasti berubah.
+
+### single linked list
+misal, ini pseudocode
+
+```txt
+struct node {
+    data_asli,
+    pointer_ke_struct_node_lain
+}
+```
+
+misal, kita define struct node sebagai a, maka kita ambil addr nya, lalu define lagi b, dimana b berisi data dan juga pointer ke a, lalu misal define lagi c, isinya pointer ke b.
+
+maka secara harfiah, c -> b -> a 

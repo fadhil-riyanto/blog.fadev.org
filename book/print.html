@@ -1160,8 +1160,10 @@ export function DataCenter(
 <p>Apa itu flowchart? simplenya, flowchat itu semacam bentuk gambar atau visual dari suatu langkah langkah algoritma. dan tentunya karna ini algoritma, maka ada step step seperti jika x maka y, lalu panah panah dari atas ke bawah, lalu input, dll. contoh flowchart cara memperbiaki lampu</p>
 <p><img src="other//assets/LampFlowchart.svg" alt="gambar" /></p>
 <h2 id="class"><a class="header" href="#class">Class</a></h2>
-<p>Apa itu class? class adalah cara kita mengatur kode agar scope nya bisa dipecah, misal func a isinya ada 1000 line, nah agar mudah mendebugnya, kita bisa pecah ke method method yang sangat banyak, dan juga kita tidak perlu lagi pusing dengan banyak variabel, kita cukup memakai satu varlable, lalu gunakan di seluruh class yang dinamai "property"</p>
-<p>contoh simple, pakai property untuk nyimpan-tampilkan data,</p>
+<pre><code>Apa itu class? class adalah cara kita mengatur kode agar scope nya bisa dipecah, misal func a isinya ada 1000 line, nah agar mudah mendebugnya, kita bisa pecah ke method method yang sangat banyak, dan juga kita tidak perlu lagi pusing dengan banyak variabel, kita cukup memakai satu varlable, lalu gunakan di seluruh class yang dinamai "property"
+
+contoh simple, pakai property untuk nyimpan-tampilkan data,
+</code></pre>
 <pre><code class="language-cpp">#include &lt;string&gt;
 #include &lt;iostream&gt;
 
@@ -1246,6 +1248,34 @@ int main() {
 1  2  4   9  (set minimum ke index ke 3, yaitu 4, apakah 9 &lt; 4, tidak)
 --end---
 </code></pre>
+<h3 id="insertion-sort"><a class="header" href="#insertion-sort">insertion sort</a></h3>
+<p>Konsepnya, misal lagi menyusun kartu dari satu per satu. Jadi kamu ambil satu kartu, terus kamu bandingin ke kiri, kalau dia lebih kecil dari yang di kiri-nya, tukar posisinya. Terus begitu sampai semua kartu (data) urut</p>
+<p>contoh</p>
+<pre><code class="language-txt">5 3 4 1 (unchanged)
+3 5 4 1 (3 dimasukkan ke kiri 5 karena 3 &lt; 5)
+3 4 5 1 (4 dimasukkan, dia lebih kecil dari 5, jadi tukar)
+1 3 4 5 (1 dimasukkan paling kiri, karena dia lebih kecil dari semuanya)
+</code></pre>
+<h3 id="merge-sort"><a class="header" href="#merge-sort">merge sort</a></h3>
+<p>misal ada data, terus di bagi-bagi tumpukan data jadi kecil-kecil dulu sampai tinggal satuan, baru nanti disusun lagi sambil dibandingin dan digabungin pelan-pelan sampai jadi urut.
+Cara kerjanya pakai prinsip divide and conquer
+Jadi data dibelah-belah jadi dua terus, sampai tinggal 1-an, lalu disatukan lagi sambil diurutin.</p>
+<p>contoh gifnya (google)
+<img src="https://www.lavivienpost.net/wp-content/uploads/2022/02/merge-sort-400.gif" alt="gambar" /></p>
+<h3 id="sequential-search"><a class="header" href="#sequential-search">sequential search</a></h3>
+<p>nah, ini search paling gampang wkwkwk, intinya loop terus array nya, jika ketemu idx nya pakai if else, maka break loopnya &amp; end</p>
+<h3 id="binary-searching"><a class="header" href="#binary-searching">binary searching</a></h3>
+<p>cara mencarinya data dibagi 2 ditengah tengah, lalu setelah dibagi 2, akan ada low (pojok kiri), mid (tengah tengah), high (pojok kanan). lalu cek saja pastikan data yg dicari == mid</p>
+<p>jika tidak, maka cek statusnya dia kurang dari mid atau lebih, jika lebih, cari bagian kanan, jika kurang, cari bagian kiri. proses ini diulang terus dan tiap2 menemukan low dan high baru, maka mid pasti berubah.</p>
+<h3 id="single-linked-list"><a class="header" href="#single-linked-list">single linked list</a></h3>
+<p>misal, ini pseudocode</p>
+<pre><code class="language-txt">struct node {
+    data_asli,
+    pointer_ke_struct_node_lain
+}
+</code></pre>
+<p>misal, kita define struct node sebagai a, maka kita ambil addr nya, lalu define lagi b, dimana b berisi data dan juga pointer ke a, lalu misal define lagi c, isinya pointer ke b.</p>
+<p>maka secara harfiah, c -&gt; b -&gt; a</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rumus-sector-disk-linux"><a class="header" href="#rumus-sector-disk-linux">Rumus sector disk Linux</a></h1>
 <p>rumus sector linux</p>
 <p>\( x \times 512 = (n \times 1024 \times 1024 \times 1024) \)</p>
@@ -1260,6 +1290,16 @@ misal ingin menambah sekitar 500 MB, maka offset terakhir ditambah 1, misal</p>
 <li><a href="https://wiki.archlinux.org/title/Parted#UEFI/GPT_examples">https://wiki.archlinux.org/title/Parted#UEFI/GPT_examples</a></li>
 <li><a href="https://ioflood.com/blog/parted-linux-command/">https://ioflood.com/blog/parted-linux-command/</a></li>
 </ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="regex-notes"><a class="header" href="#regex-notes">Regex notes</a></h1>
+<h2 id="letter--digits"><a class="header" href="#letter--digits">letter &amp; digits</a></h2>
+<ul>
+<li><code>\D+</code>: Matching all non digits, then  grouping</li>
+</ul>
+<h1 id="match-any-using-"><a class="header" href="#match-any-using-">match any using <code>.</code></a></h1>
+<h2 id="the--match-all-chars-except-r-or-n"><a class="header" href="#the--match-all-chars-except-r-or-n">the <code>.</code> match all chars, except \r or \n</a></h2>
+<p>example:
+regexp: <code>r".+"</code></p>
+<p>It will match anything as long as there is at least one character present. no empty string such ""</p>
 
                     </main>
 
@@ -1278,22 +1318,6 @@ misal ingin menambah sekitar 500 MB, maka offset terakhir ditambah 1, misal</p>
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 
