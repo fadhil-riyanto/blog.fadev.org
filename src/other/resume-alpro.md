@@ -129,7 +129,7 @@ Cara kerjanya pakai prinsip divide and conquer
 Jadi data dibelah-belah jadi dua terus, sampai tinggal 1-an, lalu disatukan lagi sambil diurutin.
 
 contoh gifnya (google)
-![gambar](https://www.lavivienpost.net/wp-content/uploads/2022/02/merge-sort-400.gif)
+<img src="/assets/merge-sort-400.gif">
 
 ### sequential search
 nah, ini search paling gampang wkwkwk, intinya loop terus array nya, jika ketemu idx nya pakai if else, maka break loopnya & end
@@ -140,15 +140,21 @@ cara mencarinya data dibagi 2 ditengah tengah, lalu setelah dibagi 2, akan ada l
 jika tidak, maka cek statusnya dia kurang dari mid atau lebih, jika lebih, cari bagian kanan, jika kurang, cari bagian kiri. proses ini diulang terus dan tiap2 menemukan low dan high baru, maka mid pasti berubah.
 
 ### single linked list
-misal, ini pseudocode
+misal, ini PSEUDOCODE
 
 ```txt
 struct node {
     data_asli,
-    pointer_ke_struct_node_lain
+    pointer_ke_struct_node_lain_sebut_saja_n
 }
 ```
 
 misal, kita define struct node sebagai a, maka kita ambil addr nya, lalu define lagi b, dimana b berisi data dan juga pointer ke a, lalu misal define lagi c, isinya pointer ke b.
 
 maka secara harfiah, c -> b -> a 
+nah, untuk pengecekan, loop lalu deference terus saja untuk pointernya, jadi yg awalnya di c, setelah deference pointer milik b, posisi sekarang di b, lalu deference pointer next nya, alhasil kita dapat a, dan agar bisa stop. maka bagian palig akhir harus dikasih tanda, contoh disini tandanya bisa pakai nullptr.
+
+intinya jika pas di deference isinya nullptr, maka sudah selesai
+
+## sinle linked list circular
+sama saja seperti single linked list, hanya aja dibagian akhir daripada diisi nullptr, kita isi pointer balik ke awal. alhasil dia seperti memutar.

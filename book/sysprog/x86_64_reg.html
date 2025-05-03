@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Resume alpro - Fadhil Books &amp; Notes</title>
+        <title>x86_64 register (fiks technical grade) - Fadhil Books &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -157,141 +157,18 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="resume-alpro"><a class="header" href="#resume-alpro">Resume alpro</a></h1>
-<h2 id="flowchart"><a class="header" href="#flowchart">flowchart</a></h2>
-<p>Apa itu flowchart? simplenya, flowchat itu semacam bentuk gambar atau visual dari suatu langkah langkah algoritma. dan tentunya karna ini algoritma, maka ada step step seperti jika x maka y, lalu panah panah dari atas ke bawah, lalu input, dll. contoh flowchart cara memperbiaki lampu</p>
-<p><img src="/assets/LampFlowchart.svg" alt="gambar" /></p>
-<h2 id="class"><a class="header" href="#class">Class</a></h2>
-<pre><code>Apa itu class? class adalah cara kita mengatur kode agar scope nya bisa dipecah, misal func a isinya ada 1000 line, nah agar mudah mendebugnya, kita bisa pecah ke method method yang sangat banyak, dan juga kita tidak perlu lagi pusing dengan banyak variabel, kita cukup memakai satu varlable, lalu gunakan di seluruh class yang dinamai "property"
-
-contoh simple, pakai property untuk nyimpan-tampilkan data,
-</code></pre>
-<pre><code class="language-cpp">#include &lt;string&gt;
-#include &lt;iostream&gt;
-
-using namespace std;
-
-class abc {
-    string nama;
-public:
-    void set_nama(string nama) {
-        this-&gt;nama = nama;
-    }
-
-    void get_nama() {
-        cout &lt;&lt; this-&gt;nama &lt;&lt; endl;
-    }
-};
-
-int main() {
-    abc abc;
-    abc.set_nama("fadhil");
-    abc.get_nama();
-}
-</code></pre>
-<h2 id="enkapsulasi-encapsulation"><a class="header" href="#enkapsulasi-encapsulation">Enkapsulasi (encapsulation)</a></h2>
-<p>Trik atau cara agar kita bisa memberi aturan ke class/property apakah ia bisa terlihat (public)? atau tidak (private/protected) ke class.</p>
-<p>Intinya, bagaimana cara kita agar method atau property, tidak bisa secara sembarang diakses oleh kode lain. misal kita ada class trigonometri, dan method hitung sin, tetapi didalam hitung sin tersebut, ada method kecil kecil lagi yang banyak, tetapi fungsinya seperti hanya untuk ngebantu fungsi sin menjalankan tugasnya, nah fungsi2 yang kecil tadi itu nanti dibuat private, sedangkan fungsi sin yg dipakai dimana mana, dibuat public.</p>
-<p>contoh kecil</p>
-<pre><code class="language-cpp">#include &lt;string&gt;
-#include &lt;iostream&gt;
-
-using namespace std;
-
-class abc {
-    string nama;
-private:
-    void print_perkenalan() {
-        cout &lt;&lt; "perkenalkan nama saya ";
-    }
-
-public:
-    void set_nama(string nama) {
-        this-&gt;nama = nama;
-    }
-
-    void get_nama() {
-        this-&gt;print_perkenalan();
-        cout &lt;&lt; this-&gt;nama &lt;&lt; endl;
-    }
-};
-
-int main() {
-    abc abc;
-    abc.set_nama("fadhil");
-    abc.get_nama();
-}
-</code></pre>
-<p>terlihat public, private? nah itu adalah contoh encapsulation.</p>
-<p>nah, <code>print_perkenalan</code> (hanya contoh) bertindak seolah olah dia hanya internal function dari suatu class yg besar. dan yang dipanggil dimana mana adalah get nama, dimana dibaliknya dia manggil banyak func yang lain.</p>
-<p>dan <code>print_perkenalan</code> tidak boleh diakses langsung. termasuk property <code>nama</code> juga tidak boleh diakses langsung</p>
-<h2 id="sorting"><a class="header" href="#sorting">Sorting</a></h2>
-<h3 id="bubble-sort"><a class="header" href="#bubble-sort">Bubble Sort</a></h3>
-<p>Konsepnya, dengan cara melempar lempar data array, sampai dia urut, BigO nya <code>O(n^2)</code>. cara kerja nya yaitu dengan cara menukar-nukar posisi array sekarang dengan array didepannya, jika array saat ini &gt; dari array didepannya, maka tukar posisinya</p>
-<p>misal ada data simple seperti ini</p>
-<pre><code class="language-txt">2  3  1  (awal mulanya)
-2  1  3  (3 ditukar karna 3 &gt; 1)
-1  2  3 (2 ditukar karna 2 &gt; 1)
-1  2  3  (selesai)
-</code></pre>
-<h3 id="selection-sort"><a class="header" href="#selection-sort">Selection Sort</a></h3>
-<p>TL;DR, menemukan data yg lebih kecil dari nilai minimum saat ini, tunggu loopnya yang didalam selesai baru di swap.</p>
-<pre><code class="language-txt">contoh kita akan sorting
-
-2  9  4   1  (belum diapa-apakan)
-2  9  4   1  (minimum index ke 0, yaitu 2)
-2  9  4   1  (bandingkan 9 dgn index ke 0 yaitu 2, 9 &lt; 2 false)
-2  9  4   1  (bandingkan 4 dgn index ke 0, yaitu 2, 4 &lt; 2, false)
-2  9  4   1  (bandingkan 1 dgn index ke 0, yaitu 2, 1 &lt; 2, true, maka tukar)
-1  9  4   2  (set minimum di index  ke 1 sekarang, yaitu 9)
-1  9  4   2  (bandingkan 4 dgn index ke 1, 4 &lt; 9, true, maka kita biarkan karna loop belum selesai, tapi set minimum ke 4)
-1  9  4   2  (cek apakah 2 &lt; 4, ya, set minimum ke 2)
-1  2  4   9  (tukar)
-1  2  4   9  (set minimum ke index ke 3, yaitu 4, apakah 9 &lt; 4, tidak)
---end---
-</code></pre>
-<h3 id="insertion-sort"><a class="header" href="#insertion-sort">insertion sort</a></h3>
-<p>Konsepnya, misal lagi menyusun kartu dari satu per satu. Jadi kamu ambil satu kartu, terus kamu bandingin ke kiri, kalau dia lebih kecil dari yang di kiri-nya, tukar posisinya. Terus begitu sampai semua kartu (data) urut</p>
-<p>contoh</p>
-<pre><code class="language-txt">5 3 4 1 (unchanged)
-3 5 4 1 (3 dimasukkan ke kiri 5 karena 3 &lt; 5)
-3 4 5 1 (4 dimasukkan, dia lebih kecil dari 5, jadi tukar)
-1 3 4 5 (1 dimasukkan paling kiri, karena dia lebih kecil dari semuanya)
-</code></pre>
-<h3 id="merge-sort"><a class="header" href="#merge-sort">merge sort</a></h3>
-<p>misal ada data, terus di bagi-bagi tumpukan data jadi kecil-kecil dulu sampai tinggal satuan, baru nanti disusun lagi sambil dibandingin dan digabungin pelan-pelan sampai jadi urut.
-Cara kerjanya pakai prinsip divide and conquer
-Jadi data dibelah-belah jadi dua terus, sampai tinggal 1-an, lalu disatukan lagi sambil diurutin.</p>
-<p>contoh gifnya (google)
-<img src="/assets/merge-sort-400.gif"></p>
-<h3 id="sequential-search"><a class="header" href="#sequential-search">sequential search</a></h3>
-<p>nah, ini search paling gampang wkwkwk, intinya loop terus array nya, jika ketemu idx nya pakai if else, maka break loopnya &amp; end</p>
-<h3 id="binary-searching"><a class="header" href="#binary-searching">binary searching</a></h3>
-<p>cara mencarinya data dibagi 2 ditengah tengah, lalu setelah dibagi 2, akan ada low (pojok kiri), mid (tengah tengah), high (pojok kanan). lalu cek saja pastikan data yg dicari == mid</p>
-<p>jika tidak, maka cek statusnya dia kurang dari mid atau lebih, jika lebih, cari bagian kanan, jika kurang, cari bagian kiri. proses ini diulang terus dan tiap2 menemukan low dan high baru, maka mid pasti berubah.</p>
-<h3 id="single-linked-list"><a class="header" href="#single-linked-list">single linked list</a></h3>
-<p>misal, ini PSEUDOCODE</p>
-<pre><code class="language-txt">struct node {
-    data_asli,
-    pointer_ke_struct_node_lain_sebut_saja_n
-}
-</code></pre>
-<p>misal, kita define struct node sebagai a, maka kita ambil addr nya, lalu define lagi b, dimana b berisi data dan juga pointer ke a, lalu misal define lagi c, isinya pointer ke b.</p>
-<p>maka secara harfiah, c -&gt; b -&gt; a
-nah, untuk pengecekan, loop lalu deference terus saja untuk pointernya, jadi yg awalnya di c, setelah deference pointer milik b, posisi sekarang di b, lalu deference pointer next nya, alhasil kita dapat a, dan agar bisa stop. maka bagian palig akhir harus dikasih tanda, contoh disini tandanya bisa pakai nullptr.</p>
-<p>intinya jika pas di deference isinya nullptr, maka sudah selesai</p>
-<h2 id="sinle-linked-list-circular"><a class="header" href="#sinle-linked-list-circular">sinle linked list circular</a></h2>
-<p>sama saja seperti single linked list, hanya aja dibagian akhir daripada diisi nullptr, kita isi pointer balik ke awal. alhasil dia seperti memutar.</p>
+                        <h1 id="x86_64-register-fiks-technical-grade"><a class="header" href="#x86_64-register-fiks-technical-grade">x86_64 register (fiks technical grade)</a></h1>
+<p><img src="/assets/calling_convention_page-0001.jpg" alt="gambar" /></p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../other/other-readme.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../sysprog/movabsq.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../other/rumus-sector-disk-linux.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../rust/readme-rust-stuff.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -301,11 +178,11 @@ nah, untuk pengecekan, loop lalu deference terus saja untuk pointernya, jadi yg 
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../other/other-readme.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../sysprog/movabsq.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../other/rumus-sector-disk-linux.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../rust/readme-rust-stuff.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

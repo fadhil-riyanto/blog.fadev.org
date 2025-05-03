@@ -6,6 +6,8 @@
 	- [How data movement changes a destination register](./sysprog/data_movement_changes_a_destination_register.md)
 	- [General embedded ASM linked in C](./sysprog/embed_asm.md)
 	- [Move sign & zero-extends a single byte](./sysprog/MOVSBL_MOVZBL.md)
+	- [movabsq](./sysprog/movabsq.md)
+	- [x86_64 register (fiks technical grade)](./sysprog/x86_64_reg.md)
 
 - [Rust stuff](./rust/readme-rust-stuff.md)
 	- [Rust Cursor & fseek concept](./rust/cursor_1.md)

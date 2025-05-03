@@ -298,6 +298,10 @@ do_asm:
 <img src="sysprog//assets/movzbl-3.png" alt="gambar" /></p>
 <p>catatan
 <code>movb %dh, %al</code> memindahkan rdx bagian high ke rax bagian bawah.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="movabsq"><a class="header" href="#movabsq">movabsq</a></h1>
+<p>simplenya, ini kepanjangan dari move absolute quad word (64 bit)</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="x86_64-register-fiks-technical-grade"><a class="header" href="#x86_64-register-fiks-technical-grade">x86_64 register (fiks technical grade)</a></h1>
+<p><img src="sysprog//assets/calling_convention_page-0001.jpg" alt="gambar" /></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-stuff"><a class="header" href="#rust-stuff">Rust stuff</a></h1>
 <p>Welcome in this rust stuff section.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-cursor-how-it-works"><a class="header" href="#rust-cursor-how-it-works">Rust cursor, How it works</a></h1>
@@ -1261,21 +1265,25 @@ int main() {
 Cara kerjanya pakai prinsip divide and conquer
 Jadi data dibelah-belah jadi dua terus, sampai tinggal 1-an, lalu disatukan lagi sambil diurutin.</p>
 <p>contoh gifnya (google)
-<img src="https://www.lavivienpost.net/wp-content/uploads/2022/02/merge-sort-400.gif" alt="gambar" /></p>
+<img src="other//assets/merge-sort-400.gif"></p>
 <h3 id="sequential-search"><a class="header" href="#sequential-search">sequential search</a></h3>
 <p>nah, ini search paling gampang wkwkwk, intinya loop terus array nya, jika ketemu idx nya pakai if else, maka break loopnya &amp; end</p>
 <h3 id="binary-searching"><a class="header" href="#binary-searching">binary searching</a></h3>
 <p>cara mencarinya data dibagi 2 ditengah tengah, lalu setelah dibagi 2, akan ada low (pojok kiri), mid (tengah tengah), high (pojok kanan). lalu cek saja pastikan data yg dicari == mid</p>
 <p>jika tidak, maka cek statusnya dia kurang dari mid atau lebih, jika lebih, cari bagian kanan, jika kurang, cari bagian kiri. proses ini diulang terus dan tiap2 menemukan low dan high baru, maka mid pasti berubah.</p>
 <h3 id="single-linked-list"><a class="header" href="#single-linked-list">single linked list</a></h3>
-<p>misal, ini pseudocode</p>
+<p>misal, ini PSEUDOCODE</p>
 <pre><code class="language-txt">struct node {
     data_asli,
-    pointer_ke_struct_node_lain
+    pointer_ke_struct_node_lain_sebut_saja_n
 }
 </code></pre>
 <p>misal, kita define struct node sebagai a, maka kita ambil addr nya, lalu define lagi b, dimana b berisi data dan juga pointer ke a, lalu misal define lagi c, isinya pointer ke b.</p>
-<p>maka secara harfiah, c -&gt; b -&gt; a</p>
+<p>maka secara harfiah, c -&gt; b -&gt; a
+nah, untuk pengecekan, loop lalu deference terus saja untuk pointernya, jadi yg awalnya di c, setelah deference pointer milik b, posisi sekarang di b, lalu deference pointer next nya, alhasil kita dapat a, dan agar bisa stop. maka bagian palig akhir harus dikasih tanda, contoh disini tandanya bisa pakai nullptr.</p>
+<p>intinya jika pas di deference isinya nullptr, maka sudah selesai</p>
+<h2 id="sinle-linked-list-circular"><a class="header" href="#sinle-linked-list-circular">sinle linked list circular</a></h2>
+<p>sama saja seperti single linked list, hanya aja dibagian akhir daripada diisi nullptr, kita isi pointer balik ke awal. alhasil dia seperti memutar.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rumus-sector-disk-linux"><a class="header" href="#rumus-sector-disk-linux">Rumus sector disk Linux</a></h1>
 <p>rumus sector linux</p>
 <p>\( x \times 512 = (n \times 1024 \times 1024 \times 1024) \)</p>
