@@ -243,65 +243,22 @@ do_asm:
 </code></pre>
 <p>the difference only in <code>.text</code> section</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="move-sign--zero-extends-a-single-byte"><a class="header" href="#move-sign--zero-extends-a-single-byte">Move sign &amp; zero-extends a single byte</a></h1>
-<p>Disini saya akan membahas apa itu instruksi MOVSBL dan MOVZBL. pertama tama silahkan baca dulu disini</p>
-<ul>
-<li><a href="https://stackoverflow.com/questions/7861095/what-does-movsbl-instruction-do">https://stackoverflow.com/questions/7861095/what-does-movsbl-instruction-do</a></li>
-</ul>
-<pre><code class="language-txt">MOVSBL and MOVZBL
-* MOVSBL sign-extends a single byte, and copies it into a
-  double-word destination
-* MOVZBL expands a single byte to 32 bits with 24 leading
-  zeros, and copies it into a double-word destination
-</code></pre>
-<p>pertama tama, lihat kode asm ini.</p>
-<pre><code class="language-asm">
-.section .data
-val:
-    .byte 0xF6
-    .byte 0xF6
-    .byte 0xF6
-    .byte 0xF6
-    
-
-.globl do_asm
-
-.text
-do_asm:
-    movl $0x12345678, %eax
-    movl $0xAABBCCDD, %edx 
-
-    # move edx 8 bit high into al (eax)
-    movb %dh, %al
-
-    # reset
-    movl $0x12345678, %eax
-    movl $0xAABBCCDD, %edx 
-
-    MOVSBL %dh, %eax
-
-    # reset
-    movl $0x12345678, %eax
-    movl $0xAABBCCDD, %edx 
-
-    MOVZBL %dh, %eax
-
-    
-    movq $9, %rax
-    ret
-
-</code></pre>
-<p>dan ini hasilnya, movb biasa (tanpa hapus bagian atas data, bagian atas tetep utuh)
-<img src="sysprog//assets/movsbl-1.png" alt="gambar" /></p>
-<p>ini hasil signed bagian atas
-<img src="sysprog//assets/movsbl-2.png" alt="gambar" /></p>
-<p>ini hasil ketika bagian atas kita zerokan
-<img src="sysprog//assets/movzbl-3.png" alt="gambar" /></p>
-<p>catatan
-<code>movb %dh, %al</code> memindahkan rdx bagian high ke rax bagian bawah.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="movabsq"><a class="header" href="#movabsq">movabsq</a></h1>
-<p>simplenya, ini kepanjangan dari move absolute quad word (64 bit)</p>
+<p>simplenya, ini kepanjangan dari move absolute quad word (64 bit)
+contoh kecil</p>
+<p><img src="sysprog//assets/eb8833cdb401abff39e22474d9ff5b2eb3f2540eba9687d889d6f9a4e435b8fabe993f5b8213122bd7fd7dac70efd0f5c9f62c1d9cb8f3995c340d26.png" alt="image" /></p>
+<p>itu contoh initial moveabsq int 64 bit, lalu</p>
+<p><img src="sysprog//assets/ee8e49f3fcdca5ab81c260f0de3a64d672c609ab252dcab094e5840a7d7bfefcaf2a8be83085daf33dbb8e45fb4626e2a25f0ddfa68a9fecc12ef848.png" alt="image" />
+contoh move 1 bytes</p>
+<p><img src="sysprog//assets/d05c2e568339a6f4c057091bb8578450d38dd00b154b141d530e2c0694852fb3c07829028af8ee233f33996ebfcc2ea29ca7a11d3b0eabe9c1ca8880.png" alt="image" />
+move 16 bit, 2 bytes word</p>
+<p><img src="sysprog//assets/6c223330945fca3f1f45e07fa66de88bbd9281187602069790b89fe9e7be6f94f1d2545734445512951ae4a3e674e498163b742ddc877572e7b21741.png" alt="image" />
+move 32 bit, 4 bytes, tapi disini keformat sebagai int32 wkwk</p>
+<p><img src="sysprog//assets/7dfc4195b63c65217c9b7e4162ee957287f352e5cc2070e73bc081e9b453aa2ee24cea30fe9af644e15f49a3c17eaaa2382a5daf28d98528e508c3f2.png" alt="image" />
+full 64 bit move</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="x86_64-register-fiks-technical-grade"><a class="header" href="#x86_64-register-fiks-technical-grade">x86_64 register (fiks technical grade)</a></h1>
 <p><img src="sysprog//assets/calling_convention_page-0001.jpg" alt="gambar" /></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="analisis-kenapa-pakai-movabsq-daripada-movq"><a class="header" href="#analisis-kenapa-pakai-movabsq-daripada-movq">analisis kenapa pakai movabsq, daripada movq</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-stuff"><a class="header" href="#rust-stuff">Rust stuff</a></h1>
 <p>Welcome in this rust stuff section.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-cursor-how-it-works"><a class="header" href="#rust-cursor-how-it-works">Rust cursor, How it works</a></h1>
@@ -1040,7 +997,16 @@ notasinya: \( p \leftrightarrow q \)</p>
 	Catatan
 <pre><code>format latex menyusul
 </code></pre>
-</div><div style="break-before: page; page-break-before: always;"></div><h1 id="cryptography"><a class="header" href="#cryptography">Cryptography</a></h1>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="asal-usul-rumus-sudut-vektor"><a class="header" href="#asal-usul-rumus-sudut-vektor">asal usul rumus sudut vektor</a></h1>
+<p>awal mula dari rumus entah berantah ini. link untuk oprek rumus: <a href="https://proofwiki.org/wiki/Cosine_Formula_for_Dot_Product">https://proofwiki.org/wiki/Cosine_Formula_for_Dot_Product</a></p>
+<p>\[ \vec{A} \cdot \vec{B} =  |\vec{A}| |\vec{B}| cos(\theta) \]</p>
+<p>lalu
+\[ \frac{\vec{A} \cdot \vec{B}}{|\vec{A}| |\vec{B}|} =   cos(\theta) \]</p>
+<p>lalu kita bisa balik, menjadi
+\[ cos(\theta) = \frac{\vec{A} \cdot \vec{B}}{|\vec{A}| |\vec{B}|} \]</p>
+<p>\[ arccos(\frac{\vec{A} \cdot \vec{B}}{|\vec{A}| |\vec{B}|}) = \theta \]</p>
+<p>solved!</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="cryptography"><a class="header" href="#cryptography">Cryptography</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="alur-konek-ke-rpc-server-telegram"><a class="header" href="#alur-konek-ke-rpc-server-telegram">Alur konek ke RPC server telegram</a></h1>
 <p>step ini dibuat oleh seseorang dari masa lalu sekitar tahun 2020 yang akunnya telah terhapus, credit kepada Butthx</p>
 <p>`originals written in telegram chat, but because I want to preserve it. I write it here</p>
