@@ -9,6 +9,7 @@
 	- [movabsq](./sysprog/movabsq.md)
 	- [x86_64 register (fiks technical grade)](./sysprog/x86_64_reg.md)
 	- [analisis kenapa pakai movabsq, daripada movq](./sysprog/movabsq_movq_vs.md)
+	- [analisis patch movq pakai 0xffffffff](./sysprog/0xffffffff_analysis_movq.md)
 
 - [Rust stuff](./rust/readme-rust-stuff.md)
 	- [Rust Cursor & fseek concept](./rust/cursor_1.md)
