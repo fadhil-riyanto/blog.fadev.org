@@ -24,6 +24,7 @@
 	- [Logika](./math/logika.md)
 	- [kumpulan soal Matematika Diskrit](./math/kumpulan_soal_matematika_diskrit.md)
 	- [asal usul rumus sudut vektor](./math/degree_vector_formula_origin.md)
+	- [transformasi elementer](./math/transformasi_elementer.md)
 
 - [Cryptography](./crypto/readme-crypto.md)
 	- [Alur koneksi ke RPC server telegram](./crypto/alur_koneksi_RPC_telegram.md)
