@@ -563,6 +563,32 @@ idx: <code>012345 6</code>, no overflow</p>
 ^^   ^   this is i + 2, indicates next buffer
 ii+1 orig i
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="postgresql---get-generic-function-signature"><a class="header" href="#postgresql---get-generic-function-signature">postgresql - get() generic function signature</a></h1>
+<p>In someday, i found</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[track_caller]
+    pub fn get&lt;'a, I, T&gt;(&amp;'a self, idx: I) -&gt; T
+    where
+        I: RowIndex + fmt::Display,
+        T: FromSql&lt;'a&gt;,
+    {
+        match self.get_inner(&amp;idx) {
+            Ok(ok) =&gt; ok,
+            Err(err) =&gt; panic!("error retrieving column {}: {}", idx, err),
+        }
+    }
+<span class="boring">}</span></code></pre></pre>
+<p>some sort of notes:</p>
+<ul>
+<li>https://doc.rust-lang.org/rust-by-example/generics.html</li>
+<li>https://serokell.io/blog/rust-generics</li>
+</ul>
+<p>how to call it</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let data2 = data_actual[0].get::&lt;_, i32&gt;(0);
+<span class="boring">}</span></code></pre></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="math"><a class="header" href="#math">Math</a></h1>
 <p>Welcome in this section.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="set-operations-formula"><a class="header" href="#set-operations-formula">Set operations formula</a></h1>
@@ -1025,7 +1051,7 @@ notasinya: \( p \leftrightarrow q \)</p>
 <li>\( H_{ij}A \): Swap baris i dengan baris j</li>
 <li>\( H_i^{(k)} \): mengalikan baris i dengan konstanta k</li>
 <li>\( H_{ij}^{(k)} \): hitung dulu konstanta k dikali baris j, lalu hasilnya ditambah baris i, simpan jg hasilnya ke baris i</li>
-<li>\( H_{i \space \space \space \space \space \space \space j}^{\space \space (k) \space \space \space (z)}(A)_i \): intinya, baris ke i dikalikan dgn k, kalau udah lanjut hitung baris j dikalikan z. hasilnya tentusaja simpan ke i</li>
+<li>\( H_{i \space \space \space \space \space \space \space j}^{\space \space (k) \space \space \space (z)}(A)_i \): intinya, baris ke i dikalikan dgn k, kalau udah lanjut hitung baris j dikalikan z. setelah itu hasilnya tentusaja simpan ke i hasil itung2 an tadi.</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="cryptography"><a class="header" href="#cryptography">Cryptography</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="alur-konek-ke-rpc-server-telegram"><a class="header" href="#alur-konek-ke-rpc-server-telegram">Alur konek ke RPC server telegram</a></h1>

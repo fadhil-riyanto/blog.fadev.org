@@ -17,6 +17,7 @@
 	- [How Rust into() Box + Error analysis](./rust/into_box_error_analysis.md)
 	- [Rust buffer advance](./rust/buffer_bytes_advance.md)
 	- [Rust RESP get_line analysis](./rust/rust_RESP_get_line_analysis.md)
+	- [postgresql - get() generic function signature](./rust/postgresql_get_generic_function_signature.md)
 
 - [Math](./math/readme-math.md)
 	- [Set formula](./math/set_formula_1.md)
