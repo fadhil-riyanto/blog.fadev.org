@@ -1171,6 +1171,33 @@ export function DataCenter(
 }
 
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="server"><a class="header" href="#server">Server</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="postgresql-database-creation-flow"><a class="header" href="#postgresql-database-creation-flow">PostgreSQL database creation flow</a></h1>
+<p>in order to create database (for safety, I use postgres account). I use this step.</p>
+<p>first, we need to login as <code>postgres</code> user, use this <code>sudo -u postgres psql</code>, then do</p>
+<pre><code class="language-sql">CREATE DATABASE EXAMPLE_DB;
+</code></pre>
+<p>this is optional</p>
+<pre><code class="language-sql">CREATE USER EXAMPLE_USER WITH ENCRYPTED PASSWORD 'Sup3rS3cret';
+</code></pre>
+<p>grant</p>
+<pre><code class="language-sql">GRANT ALL PRIVILEGES ON DATABASE EXAMPLE_DB TO EXAMPLE_USER;
+</code></pre>
+<p>now, change the state using <code>\c EXAMPLE_DB postgres</code>, execute this command</p>
+<pre><code class="language-sql">GRANT ALL ON SCHEMA public TO EXAMPLE_USER;
+</code></pre>
+<p>then, change ownership</p>
+<pre><code class="language-sql">ALTER DATABASE my_database OWNER TO my_database_user;
+</code></pre>
+<p>notes: <a href="https://stackoverflow.com/questions/67276391/why-am-i-getting-a-permission-denied-error-for-schema-public-on-pgadmin-4">https://stackoverflow.com/questions/67276391/why-am-i-getting-a-permission-denied-error-for-schema-public-on-pgadmin-4</a></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="how-to-use-sqlx-cli-tools-for-db-migration-such-laravel-migrations"><a class="header" href="#how-to-use-sqlx-cli-tools-for-db-migration-such-laravel-migrations">how to use SQLX cli tools for db migration such laravel migrations</a></h1>
+<p>let's meet with this crate, <a href="https://crates.io/crates/sqlx-cli">https://crates.io/crates/sqlx-cli</a>, this tools allow you to use db migration such as laravel migration tools;</p>
+<p>first, let's create env variable</p>
+<pre><code>export DATABASE_URL=postgres://fadhil_riyanto:&lt;your_pass&gt;@localhost/&lt;target_db&gt;
+</code></pre>
+<p>then, the things that we do next is only</p>
+<pre><code>sqlx migrate add -r &lt;name&gt;
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="other"><a class="header" href="#other">Other</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="resume-alpro"><a class="header" href="#resume-alpro">Resume alpro</a></h1>
 <h2 id="flowchart"><a class="header" href="#flowchart">flowchart</a></h2>
@@ -1297,6 +1324,123 @@ nah, untuk pengecekan, loop lalu deference terus saja untuk pointernya, jadi yg 
 <p>intinya jika pas di deference isinya nullptr, maka sudah selesai</p>
 <h2 id="sinle-linked-list-circular"><a class="header" href="#sinle-linked-list-circular">sinle linked list circular</a></h2>
 <p>sama saja seperti single linked list, hanya aja dibagian akhir daripada diisi nullptr, kita isi pointer balik ke awal. alhasil dia seperti memutar.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="resume-alpro-double-linkedlists"><a class="header" href="#resume-alpro-double-linkedlists">Resume alpro double linkedlists</a></h1>
+<p>langsung saja ini kodenya, 3 kode bebas, disini saya wrap di func saja karna agar tidak perlu buat banyak file.</p>
+<p>penjelasan kode ADA DIBAGIAN BAWAH SNIPPET KODE ini.</p>
+<pre><code class="language-cpp">#include &lt;cstddef&gt;
+#include &lt;iostream&gt;
+
+using namespace std;
+
+struct Node {
+  int data;
+  Node *prev;
+  Node *next;
+};
+
+Node *create_node(int data) {
+  Node *newly_created_node = new Node;
+
+  newly_created_node-&gt;data = data;
+  newly_created_node-&gt;next = nullptr;
+  newly_created_node-&gt;prev = nullptr;
+
+  return newly_created_node;
+}
+
+void print(Node *head) {
+  Node *current = head;
+  cout &lt;&lt; "Informasi tentang setiap node:" &lt;&lt; endl;
+  while (current != nullptr) {
+    cout &lt;&lt; "Alamat: " &lt;&lt; current &lt;&lt; endl;
+    cout &lt;&lt; "Nilai: " &lt;&lt; current-&gt;data &lt;&lt; endl;
+    cout &lt;&lt; "Alamat prev: " &lt;&lt; current-&gt;prev &lt;&lt; endl;
+    cout &lt;&lt; "Alamat next: " &lt;&lt; current-&gt;next &lt;&lt; endl &lt;&lt; endl;
+    current = current-&gt;next;
+  }
+  cout &lt;&lt; "---------------------------------------" &lt;&lt; endl;
+}
+
+void insert_last(Node *&amp;head, int data) {
+  Node *newly_created_node = create_node(data);
+  if (head == nullptr) {
+    head = newly_created_node;
+  } else {
+    Node *current = head;
+
+    while (current-&gt;next != nullptr) {
+      current = current-&gt;next;
+    }
+
+    current-&gt;next = newly_created_node;
+    newly_created_node-&gt;prev = current;
+  }
+}
+
+void insertFirst(Node *&amp;head, int data) {
+  Node *newNode = create_node(data);
+  if (head == nullptr) {
+    head = newNode;
+  } else {
+    newNode-&gt;next = head;
+    head-&gt;prev = newNode; 
+    head = newNode;
+  }
+}
+
+void delete_first(Node *&amp;head) {
+
+  if (head == nullptr) {
+    printf("node kosong\n");
+  }
+
+  Node *temp = head;
+  head = head-&gt;next;
+
+  if (head != nullptr) {
+    head-&gt;prev = nullptr;
+  }
+
+  delete temp;
+}
+
+int main() {
+  Node *head = nullptr;
+
+  head = create_node(7);
+  insert_last(head, 1);
+  insert_last(head, 10);
+  delete_first(head);
+  insertFirst(head, 99);
+
+  print(head);
+}
+</code></pre>
+<h3 id="func-create_node"><a class="header" href="#func-create_node">func <code>create_node</code></a></h3>
+<p>Walau bukan bagian dari tugas, saya sekalian jelaskan saja. intinya func ini membuat node baru, yang isinya prev dan next, diisi nullptr (alias nullpointer), dan datanya.</p>
+<p>jadi maksud func ini, kita bikin node yang bener2 kosong tanpa terhubung ke siapapun. lalu return value nya.</p>
+<h3 id="func-insert_last"><a class="header" href="#func-insert_last">func <code>insert_last</code></a></h3>
+<p>Cara kerjanya spt ini.</p>
+<ul>
+<li>kita buat dulu node nya (node yg tidak terhubung dgn siapapun pakai create_node)</li>
+<li>lalu cek, misalkan head yg dari func <code>main</code> itu masih nullptr (karna emang defaultnya nullptr), maka pertanda linked listsnya masih kosong, maka kita bisa timpa saja.</li>
+<li>jika tidak? kita simpan dulu node saat ini, anggap saja namanya current</li>
+<li>sudah kesimpan kan? current kita arahkan ke <code>current-&gt;next</code>, alhasil dia ngakses pointer selanjutnya, lalu cek apakah dia nullptr atau bukan (sbg penanda)</li>
+<li>misal iya, maka saatnya berhenti, lalu sambung, intinya karna dibelakang nullptr, maka untuk nyambungnya, nullptr kita ganti saja pakai address node yang barusan dibuat.</li>
+<li>agar bisa nyambung kebelaknng, maka prev (previus miliknya new node) kita timpa pakai current, kenapa? node yg terbaru itu prev nya masih nullptr, agar nyambung, maka kita harus isi dengan node sebelumnya yg sudah disimpan.</li>
+</ul>
+<p>nb: <code>Node *&amp;head</code> artinya nge-deferensi pointer, sekaligus kalau ada perubahan data, sekalian di update, jadi misal ubah data di func delete_last, maka kalau dibaca oleh insert_first, data yg kita share tetep singkron</p>
+<h3 id="func-insertfirst"><a class="header" href="#func-insertfirst">func <code>insertFirst</code></a></h3>
+<p>nah, ini func paling easy wkwk, karna head guarantee akan selalu point ke depan, maka untuk nyispin data didepan sangatlah easy.</p>
+<p>buat node baru, lalu node baru (next nya) diisi head.
+untuk prev (milik nya node lama) kita addr node baru.</p>
+<h3 id="func-delete_first"><a class="header" href="#func-delete_first">func <code>delete_first</code></a></h3>
+<p>konsepnya mirip dengan insert first, hanya saja</p>
+<ul>
+<li>karna head selalu point ke depan, maka kita perlu simpan head (yang sekarang), lalu saatnya pindah state ke node sebelahnya (kekanan)</li>
+<li>lalu lanjut mark bahwa head-&gt;prev itu nullptr, artinya headnya pindah.</li>
+<li>ok sudah, nah, head yang tadi disimpan, bisa di hapus pakai <code>delete</code></li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rumus-sector-disk-linux"><a class="header" href="#rumus-sector-disk-linux">Rumus sector disk Linux</a></h1>
 <p>rumus sector linux</p>
 <p>\( x \times 512 = (n \times 1024 \times 1024 \times 1024) \)</p>

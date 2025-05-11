@@ -30,7 +30,12 @@
 - [Cryptography](./crypto/readme-crypto.md)
 	- [Alur koneksi ke RPC server telegram](./crypto/alur_koneksi_RPC_telegram.md)
 
+- [Server](./server/readme-server.md)
+	- [PostgreSQL database creation flow](./server/postgresql_db_creation.md)
+	- [how to use SQLX cli tools for db migration such laravel migrations](./server/sqlx-migration-tools.md)
+
 - [Other](./other/other-readme.md)
 	- [Resume alpro](./other/resume-alpro.md)
+	- [Resume alpro double linkedlists](./other/resume-alpro-dll.md)
 	- [Rumus sector disk Linux](./other/rumus-sector-disk-linux.md)
 	- [Regex notes](./other/regex-notes.md)
