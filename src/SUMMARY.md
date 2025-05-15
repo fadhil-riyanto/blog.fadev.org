@@ -18,6 +18,8 @@
 	- [Rust buffer advance](./rust/buffer_bytes_advance.md)
 	- [Rust RESP get_line analysis](./rust/rust_RESP_get_line_analysis.md)
 	- [postgresql - get() generic function signature](./rust/postgresql_get_generic_function_signature.md)
+	- [Rust build logging](./rust/rust-build-logging.md)
+	- [Rust tonic gRPC server](./rust/rust-tonic-grpc-build.md)
 
 - [Math](./math/readme-math.md)
 	- [Set formula](./math/set_formula_1.md)
@@ -31,11 +33,18 @@
 	- [Alur koneksi ke RPC server telegram](./crypto/alur_koneksi_RPC_telegram.md)
 
 - [Server](./server/readme-server.md)
-	- [PostgreSQL database creation flow](./server/postgresql_db_creation.md)
-	- [how to use SQLX cli tools for db migration such laravel migrations](./server/sqlx-migration-tools.md)
+	- [Cgit setup](./server/cgit-setup.md)
+
+- [Database](./database/readme-database.md)
+	- [psql command](./database/psql_command.md)
+	- [psql snippet](./database/psql_snippet.md)
+	- [PostgreSQL database creation flow](./database/postgresql_db_creation.md)
+	- [how to use SQLX cli tools for db migration such laravel migrations](./database/sqlx-migration-tools.md)
 
 - [Other](./other/other-readme.md)
 	- [Resume alpro](./other/resume-alpro.md)
 	- [Resume alpro double linkedlists](./other/resume-alpro-dll.md)
 	- [Rumus sector disk Linux](./other/rumus-sector-disk-linux.md)
 	- [Regex notes](./other/regex-notes.md)
+	- [template workspace json vscode](./other/workspace-template.md)
+	- [Protobuf](./other/the-protobuf.md)

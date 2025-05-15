@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>how to use SQLX cli tools for db migration such laravel migrations - Fadhil Books &amp; Notes</title>
+        <title>Rust tonic gRPC server - Fadhil Books &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -157,24 +157,67 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="how-to-use-sqlx-cli-tools-for-db-migration-such-laravel-migrations"><a class="header" href="#how-to-use-sqlx-cli-tools-for-db-migration-such-laravel-migrations">how to use SQLX cli tools for db migration such laravel migrations</a></h1>
-<p>let's meet with this crate, <a href="https://crates.io/crates/sqlx-cli">https://crates.io/crates/sqlx-cli</a>, this tools allow you to use db migration such as laravel migration tools;</p>
-<p>first, let's create env variable</p>
-<pre><code>export DATABASE_URL=postgres://fadhil_riyanto:&lt;your_pass&gt;@localhost/&lt;target_db&gt;
-</code></pre>
-<p>then, the things that we do next is only</p>
-<pre><code>sqlx migrate add -r &lt;name&gt;
-</code></pre>
+                        <h1 id="rust-tonic-grpc-server-build-process"><a class="header" href="#rust-tonic-grpc-server-build-process">Rust tonic gRPC server build process</a></h1>
+<p>topik ini khusus membahas gRPC di rust,</p>
+<h2 id="build"><a class="header" href="#build">build</a></h2>
+<p>contoh template build rs:</p>
+<pre><pre class="playground"><code class="language-rust">use std::{env, path::PathBuf};
+
+fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+    // let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
+    let out_dir = PathBuf::from(
+        "/home/fadhil_riyanto/BALI64/fadev-service-rs/rpc/src/pb".to_string()
+    );
+
+    println!("cargo:warning=start build!");
+    
+    tonic_build::configure()
+        .build_server(true)
+        .build_client(false)
+        .file_descriptor_set_path(out_dir.join("random_service.bin"))
+        .compile_protos(
+            &amp;["proto/random_service.proto"], 
+            &amp;["proto"]
+        )?;
+
+
+    Ok(())
+}
+</code></pre></pre>
+<p>nb:</p>
+<ul>
+<li><code>file_descriptor_set_path</code>: dipakai sebagai reflection, bakal ketemu kalau pakai grpcurl.</li>
+<li><code>build_server</code> dan <code>build_client</code>: disini ada 2 mode build, untuk server atau untuk client. maka kita set server true, client false</li>
+<li><code>compile_protos</code>: masing2 berisi 2 param yg menerima slice, param pertama berisi lokasi protobuf, param kedua berisi root foldernya.</li>
+</ul>
+<p>anda bisa lihat-lihat contoh lain disini: <a href="https://github.com/hyperium/tonic/tree/master/examples">https://github.com/hyperium/tonic/tree/master/examples</a></p>
+<p>optional:</p>
+<ul>
+<li>use <code>.out_dir()</code> ketimbang harus nurut dengan apa yang OUT_DIR katakan</li>
+</ul>
+<h2 id="out_dir"><a class="header" href="#out_dir">OUT_DIR</a></h2>
+<p>what it is, simplenya <code>OUT_DIR</code> ini akan diset jika protobuf sudah di compile, dalam artian, file <code>*.proto</code> diubah jadi kumpulan file <code>*.rs</code> yang bakal di include sama macro, kemudian di compile</p>
+<p>urutan compile adalah, macro dievaluasi dulu, baru compile, sampai sini masuk akal. ini macro signature nya</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[macro_export]
+macro_rules! include_proto {
+    ($package: tt) =&gt; {
+        include!(concat!(env!("OUT_DIR"), concat!("/", $package, ".rs")));
+    };
+}
+<span class="boring">}</span></code></pre></pre>
+<p>tambahan info bisa baca2 sendiri disini: <a href="https://doc.rust-lang.org/cargo/reference/environment-variables.html#environment-variables-cargo-sets-for-build-scripts">https://doc.rust-lang.org/cargo/reference/environment-variables.html#environment-variables-cargo-sets-for-build-scripts</a>, dan jg biasanya ini akan diinclude ke sebuah file handler. kira kira seperti itu</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../server/postgresql_db_creation.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../rust/rust-build-logging.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../other/other-readme.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../math/readme-math.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -184,11 +227,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../server/postgresql_db_creation.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../rust/rust-build-logging.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../other/other-readme.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../math/readme-math.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

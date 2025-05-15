@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Server - Fadhil Books &amp; Notes</title>
+        <title>how to use SQLX cli tools for db migration such laravel migrations - Fadhil Books &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -157,17 +157,27 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="server"><a class="header" href="#server">Server</a></h1>
+                        <h1 id="how-to-use-sqlx-cli-tools-for-db-migration-such-laravel-migrations"><a class="header" href="#how-to-use-sqlx-cli-tools-for-db-migration-such-laravel-migrations">how to use SQLX cli tools for db migration such laravel migrations</a></h1>
+<p>let's meet with this crate, <a href="https://crates.io/crates/sqlx-cli">https://crates.io/crates/sqlx-cli</a>, this tools allow you to use db migration such as laravel migration tools;</p>
+<p>first, let's create env variable</p>
+<pre><code>export DATABASE_URL=postgres://fadhil_riyanto:&lt;your_pass&gt;@localhost/&lt;target_db&gt;
+</code></pre>
+<p>then, the things that we do next is only</p>
+<pre><code>sqlx migrate add -r &lt;name&gt;
+</code></pre>
+<p>running</p>
+<pre><code>sqlx migrate run
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../crypto/alur_koneksi_RPC_telegram.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../database/postgresql_db_creation.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../server/cgit-setup.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../other/other-readme.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -177,11 +187,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../crypto/alur_koneksi_RPC_telegram.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../database/postgresql_db_creation.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../server/cgit-setup.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../other/other-readme.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

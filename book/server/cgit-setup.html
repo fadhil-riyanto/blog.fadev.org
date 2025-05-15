@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Server - Fadhil Books &amp; Notes</title>
+        <title>Cgit setup - Fadhil Books &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -157,17 +157,38 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="server"><a class="header" href="#server">Server</a></h1>
+                        <h1 id="cgit-setup"><a class="header" href="#cgit-setup">Cgit setup</a></h1>
+<p>Ku mau share pengalaman bikin self hosting git server, pakai cgit, biar engga kalah aja sama git.kernel.org dan kernel.dk wkwk</p>
+<p>step satu, include dir nya sites-available spt biasa, contoh config nya
+https://gist.github.com/fadhil-riyanto/328f2cc0607eb58b713cdeaa473d08ee, lalu config untuk sites-available nya
+https://gist.github.com/fadhil-riyanto/c2e26de30c97600e4ee9342aefbd6ece</p>
+<p>nb: install fcgiwrap dulu</p>
+<p>lalu edit /etc/cgitrc, contoh config: https://gist.github.com/fadhil-riyanto/4033e6ce59a35568c31dbd5e5a1d29bd</p>
+<p>harusnya sampai sini, cgit dah bisa diakses, cuman empty repository aja.</p>
+<p>ok, lalu kita ke permission2 nya, pertama2 pakai akun root, tldr</p>
+<pre><code class="language-sh">cd /root
+mkdir git
+cd git
+mkdir user1, misal aja mkdir fadhil_riyanto
+cd fadhil_riyanto
+</code></pre>
+<p>clone git apapun disini, misal
+<code>git clone https://github.com/fadhil-riyanto/reponame.git --bare</code> (harus pakai bare)</p>
+<p>posisi dir ini di <code>/root/git/fadhil-riyanto/reponame.git</code></p>
+<p>ok, balik ke parent dir, posisi di /root/git
+lakukan <code>chown -R fadhil_riyanto fadhil-riyanto</code>, jika engga nanti error "git submodule update" failed with 'fatal: detected dubious ownership in repository at...' etc...</p>
+<p>ok, saatnya push
+<code>git remote add cgit fadhil_riyanto@123.123.111.222:/root/git/fadhil-riyanto/reponame.git</code></p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../crypto/alur_koneksi_RPC_telegram.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../server/readme-server.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../server/cgit-setup.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../database/readme-database.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -177,11 +198,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../crypto/alur_koneksi_RPC_telegram.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../server/readme-server.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../server/cgit-setup.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../database/readme-database.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

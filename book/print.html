@@ -589,6 +589,67 @@ ii+1 orig i
 </span><span class="boring">fn main() {
 </span>let data2 = data_actual[0].get::&lt;_, i32&gt;(0);
 <span class="boring">}</span></code></pre></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="rust-build-logging"><a class="header" href="#rust-build-logging">Rust build logging</a></h1>
+<p>rust build usually don't show any output if you try to println!() in build.rs, in order to force this, use</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>println!("cargo:warning=start build!");
+<span class="boring">}</span></code></pre></pre>
+<p>result</p>
+<pre><code class="language-txt">warning: ourcrate-rs@0.1.0: Something went wrong!
+</code></pre>
+<p>all docs: <a href="https://doc.rust-lang.org/cargo/reference/build-scripts.html">https://doc.rust-lang.org/cargo/reference/build-scripts.html</a></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="rust-tonic-grpc-server-build-process"><a class="header" href="#rust-tonic-grpc-server-build-process">Rust tonic gRPC server build process</a></h1>
+<p>topik ini khusus membahas gRPC di rust,</p>
+<h2 id="build"><a class="header" href="#build">build</a></h2>
+<p>contoh template build rs:</p>
+<pre><pre class="playground"><code class="language-rust">use std::{env, path::PathBuf};
+
+fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+    // let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
+    let out_dir = PathBuf::from(
+        "/home/fadhil_riyanto/BALI64/fadev-service-rs/rpc/src/pb".to_string()
+    );
+
+    println!("cargo:warning=start build!");
+    
+    tonic_build::configure()
+        .build_server(true)
+        .build_client(false)
+        .file_descriptor_set_path(out_dir.join("random_service.bin"))
+        .compile_protos(
+            &amp;["proto/random_service.proto"], 
+            &amp;["proto"]
+        )?;
+
+
+    Ok(())
+}
+</code></pre></pre>
+<p>nb:</p>
+<ul>
+<li><code>file_descriptor_set_path</code>: dipakai sebagai reflection, bakal ketemu kalau pakai grpcurl.</li>
+<li><code>build_server</code> dan <code>build_client</code>: disini ada 2 mode build, untuk server atau untuk client. maka kita set server true, client false</li>
+<li><code>compile_protos</code>: masing2 berisi 2 param yg menerima slice, param pertama berisi lokasi protobuf, param kedua berisi root foldernya.</li>
+</ul>
+<p>anda bisa lihat-lihat contoh lain disini: <a href="https://github.com/hyperium/tonic/tree/master/examples">https://github.com/hyperium/tonic/tree/master/examples</a></p>
+<p>optional:</p>
+<ul>
+<li>use <code>.out_dir()</code> ketimbang harus nurut dengan apa yang OUT_DIR katakan</li>
+</ul>
+<h2 id="out_dir"><a class="header" href="#out_dir">OUT_DIR</a></h2>
+<p>what it is, simplenya <code>OUT_DIR</code> ini akan diset jika protobuf sudah di compile, dalam artian, file <code>*.proto</code> diubah jadi kumpulan file <code>*.rs</code> yang bakal di include sama macro, kemudian di compile</p>
+<p>urutan compile adalah, macro dievaluasi dulu, baru compile, sampai sini masuk akal. ini macro signature nya</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[macro_export]
+macro_rules! include_proto {
+    ($package: tt) =&gt; {
+        include!(concat!(env!("OUT_DIR"), concat!("/", $package, ".rs")));
+    };
+}
+<span class="boring">}</span></code></pre></pre>
+<p>tambahan info bisa baca2 sendiri disini: <a href="https://doc.rust-lang.org/cargo/reference/environment-variables.html#environment-variables-cargo-sets-for-build-scripts">https://doc.rust-lang.org/cargo/reference/environment-variables.html#environment-variables-cargo-sets-for-build-scripts</a>, dan jg biasanya ini akan diinclude ke sebuah file handler. kira kira seperti itu</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="math"><a class="header" href="#math">Math</a></h1>
 <p>Welcome in this section.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="set-operations-formula"><a class="header" href="#set-operations-formula">Set operations formula</a></h1>
@@ -1172,6 +1233,194 @@ export function DataCenter(
 
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="server"><a class="header" href="#server">Server</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="cgit-setup"><a class="header" href="#cgit-setup">Cgit setup</a></h1>
+<p>Ku mau share pengalaman bikin self hosting git server, pakai cgit, biar engga kalah aja sama git.kernel.org dan kernel.dk wkwk</p>
+<p>step satu, include dir nya sites-available spt biasa, contoh config nya
+https://gist.github.com/fadhil-riyanto/328f2cc0607eb58b713cdeaa473d08ee, lalu config untuk sites-available nya
+https://gist.github.com/fadhil-riyanto/c2e26de30c97600e4ee9342aefbd6ece</p>
+<p>nb: install fcgiwrap dulu</p>
+<p>lalu edit /etc/cgitrc, contoh config: https://gist.github.com/fadhil-riyanto/4033e6ce59a35568c31dbd5e5a1d29bd</p>
+<p>harusnya sampai sini, cgit dah bisa diakses, cuman empty repository aja.</p>
+<p>ok, lalu kita ke permission2 nya, pertama2 pakai akun root, tldr</p>
+<pre><code class="language-sh">cd /root
+mkdir git
+cd git
+mkdir user1, misal aja mkdir fadhil_riyanto
+cd fadhil_riyanto
+</code></pre>
+<p>clone git apapun disini, misal
+<code>git clone https://github.com/fadhil-riyanto/reponame.git --bare</code> (harus pakai bare)</p>
+<p>posisi dir ini di <code>/root/git/fadhil-riyanto/reponame.git</code></p>
+<p>ok, balik ke parent dir, posisi di /root/git
+lakukan <code>chown -R fadhil_riyanto fadhil-riyanto</code>, jika engga nanti error "git submodule update" failed with 'fatal: detected dubious ownership in repository at...' etc...</p>
+<p>ok, saatnya push
+<code>git remote add cgit fadhil_riyanto@123.123.111.222:/root/git/fadhil-riyanto/reponame.git</code></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="database"><a class="header" href="#database">Database</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="psql-command"><a class="header" href="#psql-command">psql command</a></h1>
+<h2 id="general"><a class="header" href="#general">General</a></h2>
+<ul>
+<li><code>\bind</code> [PARAM]...       set query parameters</li>
+<li><code>\copyright</code>             show PostgreSQL usage and distribution terms</li>
+<li><code>\crosstabview</code> [COLUMNS] execute query and display result in crosstab</li>
+<li><code>\errverbose</code>            show most recent error message at maximum verbosity</li>
+<li><code>\g</code> [(OPTIONS)] [FILE]  execute query (and send result to file or |pipe);
+<code>\g</code> with no arguments is equivalent to a semicolon</li>
+<li><code>\gdesc</code>                 describe result of query, without executing it</li>
+<li><code>\gexec</code>                 execute query, then execute each value in its result</li>
+<li><code>\gset</code> [PREFIX]         execute query and store result in psql variables</li>
+<li><code>\gx</code> [(OPTIONS)] [FILE] as <code>\g</code>, but forces expanded output mode</li>
+<li><code>\q</code>                     quit psql</li>
+<li><code>\watch</code> [[i=]SEC] [c=N] [m=MIN]
+execute query every SEC seconds, up to N times,
+stop if less than MIN rows are returned</li>
+</ul>
+<h2 id="help"><a class="header" href="#help">Help</a></h2>
+<ul>
+<li><code>\?</code> [commands]          show help on backslash commands</li>
+<li><code>\?</code> options             show help on psql command-line options</li>
+<li><code>\?</code> variables           show help on special variables</li>
+<li><code>\h</code> [NAME]              help on syntax of SQL commands, * for all commands</li>
+</ul>
+<h2 id="query-buffer"><a class="header" href="#query-buffer">Query Buffer</a></h2>
+<ul>
+<li><code>\e</code> [FILE] [LINE]       edit the query buffer (or file) with external editor</li>
+<li><code>\ef</code> [FUNCNAME [LINE]]  edit function definition with external editor</li>
+<li><code>\ev</code> [VIEWNAME [LINE]]  edit view definition with external editor</li>
+<li><code>\p</code>                     show the contents of the query buffer</li>
+<li><code>\r</code>                     reset (clear) the query buffer</li>
+<li><code>\s</code> [FILE]              display history or save it to file</li>
+<li><code>\w</code> FILE                write query buffer to file</li>
+</ul>
+<h2 id="inputoutput"><a class="header" href="#inputoutput">Input/Output</a></h2>
+<ul>
+<li><code>\copy</code> ...              perform SQL COPY with data stream to the client host</li>
+<li><code>\echo</code> [-n] [STRING]    write string to standard output (-n for no newline)</li>
+<li><code>\i</code> FILE                execute commands from file</li>
+<li><code>\ir</code> FILE               as \i, but relative to location of current script</li>
+<li><code>\o</code> [FILE]              send all query results to file or |pipe</li>
+<li><code>\qecho</code> [-n] [STRING]   write string to \o output stream (-n for no newline)</li>
+<li><code>\warn</code> [-n] [STRING]    write string to standard error (-n for no newline)</li>
+</ul>
+<h2 id="conditional"><a class="header" href="#conditional">Conditional</a></h2>
+<ul>
+<li><code>\if</code> EXPR               begin conditional block</li>
+<li><code>\elif</code> EXPR             alternative within current conditional block</li>
+<li><code>\else</code>                  final alternative within current conditional block</li>
+<li><code>\endif</code>                 end conditional block</li>
+</ul>
+<h2 id="informational"><a class="header" href="#informational">Informational</a></h2>
+<p>(options: S = show system objects, + = additional detail)</p>
+<ul>
+<li>\d[S+]                 list tables, views, and sequences</li>
+<li>\d[S+]  NAME           describe table, view, sequence, or index</li>
+<li>\da[S]  [PATTERN]      list aggregates</li>
+<li>\dA[+]  [PATTERN]      list access methods</li>
+<li>\dAc[+] [AMPTRN [TYPEPTRN]]  list operator classes</li>
+<li>\dAf[+] [AMPTRN [TYPEPTRN]]  list operator families</li>
+<li>\dAo[+] [AMPTRN [OPFPTRN]]   list operators of operator families</li>
+<li>\dAp[+] [AMPTRN [OPFPTRN]]   list support functions of operator families</li>
+<li>\db[+]  [PATTERN]      list tablespaces</li>
+<li>\dc[S+] [PATTERN]      list conversions</li>
+<li>\dconfig[+] [PATTERN]  list configuration parameters</li>
+<li>\dC[+]  [PATTERN]      list casts</li>
+<li>\dd[S]  [PATTERN]      show object descriptions not displayed elsewhere</li>
+<li>\dD[S+] [PATTERN]      list domains</li>
+<li>\ddp    [PATTERN]      list default privileges</li>
+<li>\dE[S+] [PATTERN]      list foreign tables</li>
+<li>\des[+] [PATTERN]      list foreign servers</li>
+<li>\det[+] [PATTERN]      list foreign tables</li>
+<li>\deu[+] [PATTERN]      list user mappings</li>
+<li>\dew[+] [PATTERN]      list foreign-data wrappers</li>
+<li>\df[anptw][S+] [FUNCPTRN [TYPEPTRN ...]]
+list [only agg/normal/procedure/trigger/window] functions</li>
+<li>\dF[+]  [PATTERN]      list text search configurations</li>
+<li>\dFd[+] [PATTERN]      list text search dictionaries</li>
+<li>\dFp[+] [PATTERN]      list text search parsers</li>
+<li>\dFt[+] [PATTERN]      list text search templates</li>
+<li>\dg[S+] [PATTERN]      list roles</li>
+<li>\di[S+] [PATTERN]      list indexes</li>
+<li>\dl[+]                 list large objects, same as \lo_list</li>
+<li>\dL[S+] [PATTERN]      list procedural languages</li>
+<li>\dm[S+] [PATTERN]      list materialized views</li>
+<li>\dn[S+] [PATTERN]      list schemas</li>
+<li>\do[S+] [OPPTRN [TYPEPTRN [TYPEPTRN]]]
+list operators</li>
+<li>\dO[S+] [PATTERN]      list collations</li>
+<li>\dp[S]  [PATTERN]      list table, view, and sequence access privileges</li>
+<li>\dP[itn+] [PATTERN]    list [only index/table] partitioned relations [n=nested]</li>
+<li>\drds [ROLEPTRN [DBPTRN]] list per-database role settings</li>
+<li>\drg[S] [PATTERN]      list role grants</li>
+<li>\dRp[+] [PATTERN]      list replication publications</li>
+<li>\dRs[+] [PATTERN]      list replication subscriptions</li>
+<li>\ds[S+] [PATTERN]      list sequences</li>
+<li>\dt[S+] [PATTERN]      list tables</li>
+<li>\dT[S+] [PATTERN]      list data types</li>
+<li>\du[S+] [PATTERN]      list roles</li>
+<li>\dv[S+] [PATTERN]      list views</li>
+<li>\dx[+]  [PATTERN]      list extensions</li>
+<li>\dX     [PATTERN]      list extended statistics</li>
+<li>\dy[+]  [PATTERN]      list event triggers</li>
+<li>\l[+]   [PATTERN]      list databases</li>
+<li>\sf[+]  FUNCNAME       show a function's definition</li>
+<li>\sv[+]  VIEWNAME       show a view's definition</li>
+<li>\z[S]   [PATTERN]      same as \dp</li>
+</ul>
+<h2 id="large-objects"><a class="header" href="#large-objects">Large Objects</a></h2>
+<ul>
+<li>\lo_export LOBOID FILE write large object to file</li>
+<li>\lo_import FILE [COMMENT]
+read large object from file</li>
+<li>\lo_list[+]            list large objects</li>
+<li>\lo_unlink LOBOID      delete a large object</li>
+</ul>
+<h2 id="formatting"><a class="header" href="#formatting">Formatting</a></h2>
+<ul>
+<li>\a                     toggle between unaligned and aligned output mode</li>
+<li>\C [STRING]            set table title, or unset if none</li>
+<li>\f [STRING]            show or set field separator for unaligned query output</li>
+<li>\H                     toggle HTML output mode (currently off)</li>
+<li>\pset [NAME [VALUE]]   set table output option
+(border|columns|csv_fieldsep|expanded|fieldsep|
+fieldsep_zero|footer|format|linestyle|null|
+numericlocale|pager|pager_min_lines|recordsep|
+recordsep_zero|tableattr|title|tuples_only|
+unicode_border_linestyle|unicode_column_linestyle|
+unicode_header_linestyle|xheader_width)</li>
+<li>\t [on|off]            show only rows (currently off)</li>
+<li>\T [STRING]            set HTML <table> tag attributes, or unset if none</li>
+<li>\x [on|off|auto]       toggle expanded output (currently off)</li>
+</ul>
+<h2 id="connection"><a class="header" href="#connection">Connection</a></h2>
+<ul>
+<li>\c[onnect] {[DBNAME|- USER|- HOST|- PORT|-] | conninfo}
+connect to new database (currently "fadev_infra")</li>
+<li>\conninfo              display information about current connection</li>
+<li>\encoding [ENCODING]   show or set client encoding</li>
+<li>\password [USERNAME]   securely change the password for a user</li>
+</ul>
+<h2 id="operating-system"><a class="header" href="#operating-system">Operating System</a></h2>
+<ul>
+<li>\cd [DIR]              change the current working directory</li>
+<li>\getenv PSQLVAR ENVVAR fetch environment variable</li>
+<li>\setenv NAME [VALUE]   set or unset environment variable</li>
+<li>\timing [on|off]       toggle timing of commands (currently off)</li>
+<li>! [COMMAND]           execute command in shell or start interactive shell</li>
+</ul>
+<h2 id="variables"><a class="header" href="#variables">Variables</a></h2>
+<ul>
+<li>\prompt [TEXT] NAME    prompt user to set internal variable</li>
+<li>\set [NAME [VALUE]]    set internal variable, or list all if no parameters</li>
+<li>\unset NAME            unset (delete) internal variable</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="psql-snippet"><a class="header" href="#psql-snippet">psql snippet</a></h1>
+<h2 id="psql"><a class="header" href="#psql">psql</a></h2>
+<ul>
+<li><code>\df *.*</code> Lists all relations</li>
+</ul>
+<h2 id="command"><a class="header" href="#command">command</a></h2>
+<ul>
+<li><code>DROP TABLE table_name CASCADE;</code> used when you want to remove all object depend on them.</li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="postgresql-database-creation-flow"><a class="header" href="#postgresql-database-creation-flow">PostgreSQL database creation flow</a></h1>
 <p>in order to create database (for safety, I use postgres account). I use this step.</p>
 <p>first, we need to login as <code>postgres</code> user, use this <code>sudo -u postgres psql</code>, then do</p>
@@ -1197,6 +1446,9 @@ export function DataCenter(
 </code></pre>
 <p>then, the things that we do next is only</p>
 <pre><code>sqlx migrate add -r &lt;name&gt;
+</code></pre>
+<p>running</p>
+<pre><code>sqlx migrate run
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="other"><a class="header" href="#other">Other</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="resume-alpro"><a class="header" href="#resume-alpro">Resume alpro</a></h1>
@@ -1465,6 +1717,43 @@ misal ingin menambah sekitar 500 MB, maka offset terakhir ditambah 1, misal</p>
 <p>example:
 regexp: <code>r".+"</code></p>
 <p>It will match anything as long as there is at least one character present. no empty string such ""</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="template-workspace-json-vscode"><a class="header" href="#template-workspace-json-vscode">template workspace json vscode</a></h1>
+<pre><code class="language-json">{
+  "folders": [
+    {
+      "path": "rpc"
+    },
+    {
+      "path": "scraperlib"
+    },
+    {
+      "path": "offlinelook"
+    }
+  ]
+}
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="protobuf"><a class="header" href="#protobuf">Protobuf</a></h1>
+<p>protobuf ini intinya format pertukaran data, mirip json, tapi dia pakai schema (mirip graphql), agak kaku, dan ada method2</p>
+<p>baca spec: <a href="https://protobuf.dev/programming-guides/proto3/">https://protobuf.dev/programming-guides/proto3/</a></p>
+<p>ini termasuk prelude nya</p>
+<pre><code class="language-protobuf">syntax = "proto3";
+
+// this is namefile 
+package grpc.fadhil;
+</code></pre>
+<p>lalu ini anggap saja seperti struct, jika di C biasanya sent data over file pakai struct.</p>
+<pre><code class="language-protobuf">message Message1 {}
+
+message Message2 {
+  Message1 foo = 1;
+}
+
+</code></pre>
+<p>baru kita define semacam namespace yang didalamnya hold func func yang akan dicall oleh grpc</p>
+<pre><code class="language-protobuf">service SearchService {
+  rpc Search(SearchRequest) returns (SearchResponse);
+}
+</code></pre>
 
                     </main>
 

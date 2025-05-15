@@ -1,0 +1,367 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>psql command - Fadhil Books &amp; Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Fadhil Books &amp; Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="psql-command"><a class="header" href="#psql-command">psql command</a></h1>
+<h2 id="general"><a class="header" href="#general">General</a></h2>
+<ul>
+<li><code>\bind</code> [PARAM]...       set query parameters</li>
+<li><code>\copyright</code>             show PostgreSQL usage and distribution terms</li>
+<li><code>\crosstabview</code> [COLUMNS] execute query and display result in crosstab</li>
+<li><code>\errverbose</code>            show most recent error message at maximum verbosity</li>
+<li><code>\g</code> [(OPTIONS)] [FILE]  execute query (and send result to file or |pipe);
+<code>\g</code> with no arguments is equivalent to a semicolon</li>
+<li><code>\gdesc</code>                 describe result of query, without executing it</li>
+<li><code>\gexec</code>                 execute query, then execute each value in its result</li>
+<li><code>\gset</code> [PREFIX]         execute query and store result in psql variables</li>
+<li><code>\gx</code> [(OPTIONS)] [FILE] as <code>\g</code>, but forces expanded output mode</li>
+<li><code>\q</code>                     quit psql</li>
+<li><code>\watch</code> [[i=]SEC] [c=N] [m=MIN]
+execute query every SEC seconds, up to N times,
+stop if less than MIN rows are returned</li>
+</ul>
+<h2 id="help"><a class="header" href="#help">Help</a></h2>
+<ul>
+<li><code>\?</code> [commands]          show help on backslash commands</li>
+<li><code>\?</code> options             show help on psql command-line options</li>
+<li><code>\?</code> variables           show help on special variables</li>
+<li><code>\h</code> [NAME]              help on syntax of SQL commands, * for all commands</li>
+</ul>
+<h2 id="query-buffer"><a class="header" href="#query-buffer">Query Buffer</a></h2>
+<ul>
+<li><code>\e</code> [FILE] [LINE]       edit the query buffer (or file) with external editor</li>
+<li><code>\ef</code> [FUNCNAME [LINE]]  edit function definition with external editor</li>
+<li><code>\ev</code> [VIEWNAME [LINE]]  edit view definition with external editor</li>
+<li><code>\p</code>                     show the contents of the query buffer</li>
+<li><code>\r</code>                     reset (clear) the query buffer</li>
+<li><code>\s</code> [FILE]              display history or save it to file</li>
+<li><code>\w</code> FILE                write query buffer to file</li>
+</ul>
+<h2 id="inputoutput"><a class="header" href="#inputoutput">Input/Output</a></h2>
+<ul>
+<li><code>\copy</code> ...              perform SQL COPY with data stream to the client host</li>
+<li><code>\echo</code> [-n] [STRING]    write string to standard output (-n for no newline)</li>
+<li><code>\i</code> FILE                execute commands from file</li>
+<li><code>\ir</code> FILE               as \i, but relative to location of current script</li>
+<li><code>\o</code> [FILE]              send all query results to file or |pipe</li>
+<li><code>\qecho</code> [-n] [STRING]   write string to \o output stream (-n for no newline)</li>
+<li><code>\warn</code> [-n] [STRING]    write string to standard error (-n for no newline)</li>
+</ul>
+<h2 id="conditional"><a class="header" href="#conditional">Conditional</a></h2>
+<ul>
+<li><code>\if</code> EXPR               begin conditional block</li>
+<li><code>\elif</code> EXPR             alternative within current conditional block</li>
+<li><code>\else</code>                  final alternative within current conditional block</li>
+<li><code>\endif</code>                 end conditional block</li>
+</ul>
+<h2 id="informational"><a class="header" href="#informational">Informational</a></h2>
+<p>(options: S = show system objects, + = additional detail)</p>
+<ul>
+<li>\d[S+]                 list tables, views, and sequences</li>
+<li>\d[S+]  NAME           describe table, view, sequence, or index</li>
+<li>\da[S]  [PATTERN]      list aggregates</li>
+<li>\dA[+]  [PATTERN]      list access methods</li>
+<li>\dAc[+] [AMPTRN [TYPEPTRN]]  list operator classes</li>
+<li>\dAf[+] [AMPTRN [TYPEPTRN]]  list operator families</li>
+<li>\dAo[+] [AMPTRN [OPFPTRN]]   list operators of operator families</li>
+<li>\dAp[+] [AMPTRN [OPFPTRN]]   list support functions of operator families</li>
+<li>\db[+]  [PATTERN]      list tablespaces</li>
+<li>\dc[S+] [PATTERN]      list conversions</li>
+<li>\dconfig[+] [PATTERN]  list configuration parameters</li>
+<li>\dC[+]  [PATTERN]      list casts</li>
+<li>\dd[S]  [PATTERN]      show object descriptions not displayed elsewhere</li>
+<li>\dD[S+] [PATTERN]      list domains</li>
+<li>\ddp    [PATTERN]      list default privileges</li>
+<li>\dE[S+] [PATTERN]      list foreign tables</li>
+<li>\des[+] [PATTERN]      list foreign servers</li>
+<li>\det[+] [PATTERN]      list foreign tables</li>
+<li>\deu[+] [PATTERN]      list user mappings</li>
+<li>\dew[+] [PATTERN]      list foreign-data wrappers</li>
+<li>\df[anptw][S+] [FUNCPTRN [TYPEPTRN ...]]
+list [only agg/normal/procedure/trigger/window] functions</li>
+<li>\dF[+]  [PATTERN]      list text search configurations</li>
+<li>\dFd[+] [PATTERN]      list text search dictionaries</li>
+<li>\dFp[+] [PATTERN]      list text search parsers</li>
+<li>\dFt[+] [PATTERN]      list text search templates</li>
+<li>\dg[S+] [PATTERN]      list roles</li>
+<li>\di[S+] [PATTERN]      list indexes</li>
+<li>\dl[+]                 list large objects, same as \lo_list</li>
+<li>\dL[S+] [PATTERN]      list procedural languages</li>
+<li>\dm[S+] [PATTERN]      list materialized views</li>
+<li>\dn[S+] [PATTERN]      list schemas</li>
+<li>\do[S+] [OPPTRN [TYPEPTRN [TYPEPTRN]]]
+list operators</li>
+<li>\dO[S+] [PATTERN]      list collations</li>
+<li>\dp[S]  [PATTERN]      list table, view, and sequence access privileges</li>
+<li>\dP[itn+] [PATTERN]    list [only index/table] partitioned relations [n=nested]</li>
+<li>\drds [ROLEPTRN [DBPTRN]] list per-database role settings</li>
+<li>\drg[S] [PATTERN]      list role grants</li>
+<li>\dRp[+] [PATTERN]      list replication publications</li>
+<li>\dRs[+] [PATTERN]      list replication subscriptions</li>
+<li>\ds[S+] [PATTERN]      list sequences</li>
+<li>\dt[S+] [PATTERN]      list tables</li>
+<li>\dT[S+] [PATTERN]      list data types</li>
+<li>\du[S+] [PATTERN]      list roles</li>
+<li>\dv[S+] [PATTERN]      list views</li>
+<li>\dx[+]  [PATTERN]      list extensions</li>
+<li>\dX     [PATTERN]      list extended statistics</li>
+<li>\dy[+]  [PATTERN]      list event triggers</li>
+<li>\l[+]   [PATTERN]      list databases</li>
+<li>\sf[+]  FUNCNAME       show a function's definition</li>
+<li>\sv[+]  VIEWNAME       show a view's definition</li>
+<li>\z[S]   [PATTERN]      same as \dp</li>
+</ul>
+<h2 id="large-objects"><a class="header" href="#large-objects">Large Objects</a></h2>
+<ul>
+<li>\lo_export LOBOID FILE write large object to file</li>
+<li>\lo_import FILE [COMMENT]
+read large object from file</li>
+<li>\lo_list[+]            list large objects</li>
+<li>\lo_unlink LOBOID      delete a large object</li>
+</ul>
+<h2 id="formatting"><a class="header" href="#formatting">Formatting</a></h2>
+<ul>
+<li>\a                     toggle between unaligned and aligned output mode</li>
+<li>\C [STRING]            set table title, or unset if none</li>
+<li>\f [STRING]            show or set field separator for unaligned query output</li>
+<li>\H                     toggle HTML output mode (currently off)</li>
+<li>\pset [NAME [VALUE]]   set table output option
+(border|columns|csv_fieldsep|expanded|fieldsep|
+fieldsep_zero|footer|format|linestyle|null|
+numericlocale|pager|pager_min_lines|recordsep|
+recordsep_zero|tableattr|title|tuples_only|
+unicode_border_linestyle|unicode_column_linestyle|
+unicode_header_linestyle|xheader_width)</li>
+<li>\t [on|off]            show only rows (currently off)</li>
+<li>\T [STRING]            set HTML <table> tag attributes, or unset if none</li>
+<li>\x [on|off|auto]       toggle expanded output (currently off)</li>
+</ul>
+<h2 id="connection"><a class="header" href="#connection">Connection</a></h2>
+<ul>
+<li>\c[onnect] {[DBNAME|- USER|- HOST|- PORT|-] | conninfo}
+connect to new database (currently "fadev_infra")</li>
+<li>\conninfo              display information about current connection</li>
+<li>\encoding [ENCODING]   show or set client encoding</li>
+<li>\password [USERNAME]   securely change the password for a user</li>
+</ul>
+<h2 id="operating-system"><a class="header" href="#operating-system">Operating System</a></h2>
+<ul>
+<li>\cd [DIR]              change the current working directory</li>
+<li>\getenv PSQLVAR ENVVAR fetch environment variable</li>
+<li>\setenv NAME [VALUE]   set or unset environment variable</li>
+<li>\timing [on|off]       toggle timing of commands (currently off)</li>
+<li>! [COMMAND]           execute command in shell or start interactive shell</li>
+</ul>
+<h2 id="variables"><a class="header" href="#variables">Variables</a></h2>
+<ul>
+<li>\prompt [TEXT] NAME    prompt user to set internal variable</li>
+<li>\set [NAME [VALUE]]    set internal variable, or list all if no parameters</li>
+<li>\unset NAME            unset (delete) internal variable</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../database/readme-database.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../database/psql_snippet.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../database/readme-database.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../database/psql_snippet.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
