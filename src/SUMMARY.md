@@ -48,3 +48,4 @@
 	- [Regex notes](./other/regex-notes.md)
 	- [template workspace json vscode](./other/workspace-template.md)
 	- [Protobuf](./other/the-protobuf.md)
+	- [Subnetting](./other/subnetting.md)
