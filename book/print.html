@@ -706,6 +706,26 @@ macro_rules! include_proto {
 }
 <span class="boring">}</span></code></pre></pre>
 <p>tambahan info bisa baca2 sendiri disini: <a href="https://doc.rust-lang.org/cargo/reference/environment-variables.html#environment-variables-cargo-sets-for-build-scripts">https://doc.rust-lang.org/cargo/reference/environment-variables.html#environment-variables-cargo-sets-for-build-scripts</a>, dan jg biasanya ini akan diinclude ke sebuah file handler. kira kira seperti itu</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="rust-tokio-postgres-connection-config-example"><a class="header" href="#rust-tokio-postgres-connection-config-example">Rust tokio-postgres connection config example</a></h1>
+<p>first, this is example from the documentation</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span> let (client, conn_ctx) = tokio_postgres::connect("host=localhost user=postgres", NoTls);
+<span class="boring">}</span></code></pre></pre>
+<p>then, we want to convert it into config like ctx. <a href="https://docs.rs/postgres/latest/postgres/config/struct.Config.html">see this</a></p>
+<pre><pre class="playground"><code class="language-rust">use tokio_postgres::{NoTls, Error};
+
+#[tokio::main]
+async fn main() {
+        let mut config = postgres::config::Config::new();
+        config.host("localhost");
+        config.user("fadhil_riyanto");
+        config.password("1921684338");
+
+        let client_ret = config.connect(NoTls);
+
+
+}</code></pre></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="math"><a class="header" href="#math">Math</a></h1>
 <p>Welcome in this section.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="set-operations-formula"><a class="header" href="#set-operations-formula">Set operations formula</a></h1>
@@ -1951,6 +1971,22 @@ max int int 24 bit: 16777216</p>
 <li>
 <p>/9 : 0b100000000000000000000000:</p>
 </li>
+</ul>
+<h1 id="kumpulan-rumus-rumus"><a class="header" href="#kumpulan-rumus-rumus">kumpulan rumus rumus</a></h1>
+<h2 id="subnet"><a class="header" href="#subnet">subnet</a></h2>
+<p>rumusnya: \( 2^{jumlah \space angka \space 1 \space di \space setiap \space padding \space subnet}\)</p>
+<h3 id="contoh"><a class="header" href="#contoh">contoh</a></h3>
+<ul>
+<li>prefix /19, pad terdekatnya /16, maka dari 16 ke 19 ada 3 angka 1 (<code>0b11100000</code>), maka jumlah subnet yang akan terbentuk adalah 2^3 = 8 subnet</li>
+<li>prefix /26, pad terdekatnya 24, maka dari 24 ke 26 ada 2 angka 1 (<code>0b11000000</code>), maka jumlah subnetnya 2^2 = 4</li>
+</ul>
+<h2 id="jumlah-hosts"><a class="header" href="#jumlah-hosts">jumlah hosts</a></h2>
+<p>rumusnya: \( 2^{jumlah \space angka \space 0 \space dari \space 32} \)</p>
+<h3 id="contoh-1"><a class="header" href="#contoh-1">contoh</a></h3>
+<ul>
+<li>prefix /19, 32 - 19 = 13 angka 0, maka \( 2^{13} = 8192 \space hosts \)</li>
+<li>prefix /26, 32 - 26 = 6 angka 0, maka \( 2^{6} = 64 \space hosts \)</li>
+<li>prefix /8, 32 - 8 = 24 angka 0, maka \( 2^{24} = 16777216 \space hosts \)</li>
 </ul>
 
                     </main>

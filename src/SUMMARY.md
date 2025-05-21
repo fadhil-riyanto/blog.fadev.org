@@ -20,6 +20,7 @@
 	- [postgresql - get() generic function signature](./rust/postgresql_get_generic_function_signature.md)
 	- [Rust build logging](./rust/rust-build-logging.md)
 	- [Rust tonic gRPC server](./rust/rust-tonic-grpc-build.md)
+	- [Rust tokio-postgres connection config example](./rust/rust-tokio-connection-config-example.md)
 
 - [Math](./math/readme-math.md)
 	- [Set formula](./math/set_formula_1.md)

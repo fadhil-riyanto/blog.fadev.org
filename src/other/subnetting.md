@@ -95,5 +95,17 @@ max int int 24 bit: 16777216
 
 - /9 : 0b100000000000000000000000: 
 
+# kumpulan rumus rumus
+## subnet
+rumusnya: \\( 2^{jumlah \space angka \space 1 \space di \space setiap \space padding \space subnet}\\)
+### contoh
+- prefix /19, pad terdekatnya /16, maka dari 16 ke 19 ada 3 angka 1 (`0b11100000`), maka jumlah subnet yang akan terbentuk adalah 2^3 = 8 subnet
+- prefix /26, pad terdekatnya 24, maka dari 24 ke 26 ada 2 angka 1 (`0b11000000`), maka jumlah subnetnya 2^2 = 4
 
+## jumlah hosts
+rumusnya: \\( 2^{jumlah \space angka \space 0 \space dari \space 32} \\)
+### contoh
+- prefix /19, 32 - 19 = 13 angka 0, maka \\( 2^{13} = 8192 \space hosts \\)
+- prefix /26, 32 - 26 = 6 angka 0, maka \\( 2^{6} = 64 \space hosts \\)
+- prefix /8, 32 - 8 = 24 angka 0, maka \\( 2^{24} = 16777216 \space hosts \\)
 

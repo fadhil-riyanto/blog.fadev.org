@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Subnetting - Fadhil Books &amp; Notes</title>
+        <title>Rust tokio-postgres connection config example - Fadhil Books &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -157,173 +157,38 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="subnetting"><a class="header" href="#subnetting">Subnetting</a></h1>
-<p>pertama tama, range ip dahulu</p>
-<ul>
-<li>
-<p>A: 1 - 127</p>
-</li>
-<li>
-<p>B: 128 - 191</p>
-</li>
-<li>
-<p>C: 192 - AKHIR</p>
-</li>
-<li>
-<p><code>0b00000000</code> -&gt; 0 (katakanlah octet ke 4, cidr 24)</p>
-</li>
-<li>
-<p><code>0b10000000</code> -&gt; 0 (cidr 25, 128 hosts)							// 2 network</p>
-</li>
-<li>
-<p><code>0b11000000</code> -&gt; 0 (cidr 26, 128 + 64)								// 4 network</p>
-</li>
-<li>
-<p><code>0b11100000</code> -&gt; 0 (cidr 27, 128 + 64 + 32)						// 8 network</p>
-</li>
-<li>
-<p><code>0b11110000</code> -&gt; 0 (cidr 28, 128 + 64 + 32 + 16)					// 16 network</p>
-</li>
-<li>
-<p><code>0b11111000</code> -&gt; 0 (cidr 29, 128 + 64 + 32 + 16 + 8)				// 32 network</p>
-</li>
-<li>
-<p><code>0b11111100</code> -&gt; 0 (cidr 30, 128 + 64 + 32 + 16 + 8 + 4)			// 64 network</p>
-</li>
-<li>
-<p><code>0b11111110</code> -&gt; 0 (cidr 31, 128 + 64 + 32 + 16 + 8 + 4 + 2)		// 128 network</p>
-</li>
-<li>
-<p><code>0b11111111</code> -&gt; 0 (cidr 32, 128 + 64 + 32 + 16 + 8 + 4 + 2 + 1)	// 256 network</p>
-</li>
-</ul>
-<p>seperti yg terlihat, bahwa <code>128 + 64 + 32 + 16 + 8 + 4 + 2 + 1</code> = <code>255</code></p>
-<h2 id="contoh-19216810024"><a class="header" href="#contoh-19216810024">contoh 192.168.10.0/24:</a></h2>
-<p>ada network 192.168.10.0/24, kita ingin bagi jadi 4 jaringan. maka 256 / 4 = 64 hosts, dan ini akan</p>
-<ul>
-<li>subnet nya: 255.255.255.192</li>
-<li>64 hosts: 64 hosts usable, 1 untuk broadcast, 1 untuk network</li>
-</ul>
-<p>pembagian nya</p>
-<ul>
-<li>network 1:  192.168.10.0, broadcast: 192.168.10.63, range ip yang usable: 192.168.10.1 - 192.168.10.62</li>
-<li>network 2:  192.168.10.64, broadcast: 192.168.10.127, range ip yang usable: 192.168.10.65 - 192.168.10.126</li>
-<li>network 3:  192.168.10.128, broadcast: 192.168.10.191, range ip yang usable: 192.168.10.129 - 192.168.10.190</li>
-<li>network 4:  192.168.10.192, broadcast: 192.168.10.255, range ip yang usable: 192.168.10.193 - 192.168.10.254</li>
-</ul>
-<h2 id="oprekan-hitung2-an"><a class="header" href="#oprekan-hitung2-an">oprekan hitung2 an:</a></h2>
-<p>origin: pakai acuan ip kelas c</p>
-<p>jumlah hosts, misal cidr 24, itu max nya 256 kalau 0b11111111, kenapa 0b10000000 itu 128, dan kenapa 0b11000000 itu 192</p>
-<p>ok, lalu kenapa jika cidr /26, itu 255.255.255.192, punya 64 hosts, 4 network. semua ini didapat dari
-(max int case ini 8 bit) / maxint - pad network</p>
-<p>ini start dari /24</p>
-<ul>
-<li><code>0b00000000</code> -&gt; 0 (katakanlah octet ke 4, cidr 24)				// 1 network</li>
-<li><code>0b10000000</code> -&gt; 0 (cidr 25, 128 hosts)							// 2 network</li>
-<li><code>0b11000000</code> -&gt; 0 (cidr 26, 128 + 64)								// 4 network</li>
-<li><code>0b11100000</code> -&gt; 0 (cidr 27, 128 + 64 + 32)						// 8 network</li>
-<li><code>0b11110000</code> -&gt; 0 (cidr 28, 128 + 64 + 32 + 16)					// 16 network</li>
-<li><code>0b11111000</code> -&gt; 0 (cidr 29, 128 + 64 + 32 + 16 + 8)				// 32 network</li>
-<li><code>0b11111100</code> -&gt; 0 (cidr 30, 128 + 64 + 32 + 16 + 8 + 4)			// 64 network</li>
-<li><code>0b11111110</code> -&gt; 0 (cidr 31, 128 + 64 + 32 + 16 + 8 + 4 + 2)		// 128 network</li>
-<li><code>0b11111111</code> -&gt; 0 (cidr 32, 128 + 64 + 32 + 16 + 8 + 4 + 2 + 1)	// 256 network</li>
-</ul>
-<p>start dari /16</p>
-<ul>
-<li><code>0b0000000000000000</code> -&gt; 0 (cidr 16, 65535)								// 1 net, 65535 hosts</li>
-<li><code>0b1000000000000000</code> -&gt; 0 (cidr 17, 65535 + )							// 2 net, 32767 hosts</li>
-<li><code>0b1100000000000000</code> -&gt; 0 (cidr 26, 128 + 64)								// 4 net</li>
-<li><code>0b1110000000000000</code> -&gt; 0 (cidr 27, 128 + 64 + 32)						// 8 net</li>
-<li><code>0b1111000000000000</code> -&gt; 0 (cidr 28, 128 + 64 + 32 + 16)					// 16 net</li>
-<li><code>0b1111100000000000</code> -&gt; 0 (cidr 29, 128 + 64 + 32 + 16 + 8)				// 32 net</li>
-<li><code>0b1111110000000000</code> -&gt; 0 (cidr 30, 128 + 64 + 32 + 16 + 8 + 4)			// 64 net</li>
-<li><code>0b1111111000000000</code> -&gt; 0 (cidr 31, 128 + 64 + 32 + 16 + 8 + 4 + 2)		// 128 net</li>
-<li><code>0b1111111100000000</code> -&gt; 0 (cidr 32, 128 + 64 + 32 + 16 + 8 + 4 + 2 + 1)	// 256 net</li>
-</ul>
-<p>-- stagging (perhitungan ip cidr 16 keatas)
-max int 16 bit: 65536</p>
-<ul>
-<li>/16 : <code>0b0000000000000000</code> = 0</li>
-<li>/17 : <code>0b1000000000000000</code> = 32768, maka 65536 / 32768 = 2, alias 2 network, 32768 hosts</li>
-<li>/18 : <code>0b1100000000000000</code> = 49152, maka 65536 / (65536 - 49152)  = 4 network, 16384 hosts,</li>
-<li>/19 : <code>0b1110000000000000</code> = 57344, maka 65536 / (65536 - 57344)  = 8 network, 8192 hosts,</li>
-<li>/20 : <code>0b1111000000000000</code> = 61440, maka 65536 / (65536 - 61440)  = 16 network, 4096 hosts,</li>
-<li>/21 : <code>0b1111100000000000</code> = 61440, maka 65536 / (65536 - 61440)  = 32 network, 2048 hosts,</li>
-<li>/22 : <code>0b1111110000000000</code> = 64512, maka 65536 / (65536 - 64512)  = 64 network, 1024 hosts,</li>
-<li>/23 : <code>0b1111111000000000</code> = 64512, maka 65536 / (65536 - 64512)  = 128 network, 512 hosts,</li>
-<li>/24 : <code>0b1111111100000000</code> = 64512, maka 65536 / (65536 - 64512)  = 256 network, 256 hosts,</li>
-</ul>
-<p>-- stagging cidr 8 keatas
-max int int 24 bit: 16777216</p>
-<ul>
-<li>
-<p>/9 : <code>0b100000000000000000000000</code> = 16777216 / (16777216 - 8388608) = 2 network, 8388608 hosts</p>
-</li>
-<li>
-<p>/10: <code>0b110000000000000000000000</code> = 16777216 / (16777216 - 12582912)= 4 network, 4194304 hosts</p>
-</li>
-<li>
-<p>/11: <code>0b111000000000000000000000</code> = 16777216 / (16777216 - 14680064)= 8 network, 2097152 hosts</p>
-</li>
-<li>
-<p>/12: <code>0b111100000000000000000000</code> = 16777216 / (16777216 - 15728640)= 16 network, 1048576 hosts</p>
-</li>
-<li>
-<p>/13: <code>0b111110000000000000000000</code> = 16777216 / (16777216 - 16252928)= 32 network, 524288 hosts</p>
-</li>
-<li>
-<p>/14: <code>0b111111000000000000000000</code> = 16777216 / (16777216 - 16515072) = 64 network, 262144 hosts</p>
-</li>
-<li>
-<p>/15: <code>0b111111100000000000000000</code> = 16777216 / (16777216 - 16646144) = 128 network, 131072 hosts</p>
-</li>
-<li>
-<p>/16: <code>0b111111110000000000000000</code> = 16777216 / (16777216 - 16711680) = 256 network, 65536 hosts</p>
-</li>
-<li>
-<p>/17: <code>0b111111111000000000000000</code> = 16777216 / (16777216 - 16744448) = 512 network, 32768 hosts</p>
-</li>
-<li>
-<p>/18: <code>0b111111111100000000000000</code> = 16777216 / (16777216 - 16760832) = 1024 network, 16384 hosts</p>
-</li>
-<li>
-<p>/19: <code>0b111111111110000000000000</code> = 16777216 / (16777216 - 16769024) = 2048 network, 8192 hosts</p>
-</li>
-<li>
-<p>/20: <code>0b111111111111000000000000</code> = 16777216 / (16777216 - 16773120) = 4096 network, 4096 hosts</p>
-</li>
-<li>
-<p>/21: <code>0b111111111111100000000000</code> = 16777216 / (16777216 - 16775168) = 8192 network, 2048 hosts</p>
-</li>
-<li>
-<p>/9 : 0b100000000000000000000000:</p>
-</li>
-</ul>
-<h1 id="kumpulan-rumus-rumus"><a class="header" href="#kumpulan-rumus-rumus">kumpulan rumus rumus</a></h1>
-<h2 id="subnet"><a class="header" href="#subnet">subnet</a></h2>
-<p>rumusnya: \( 2^{jumlah \space angka \space 1 \space di \space setiap \space padding \space subnet}\)</p>
-<h3 id="contoh"><a class="header" href="#contoh">contoh</a></h3>
-<ul>
-<li>prefix /19, pad terdekatnya /16, maka dari 16 ke 19 ada 3 angka 1 (<code>0b11100000</code>), maka jumlah subnet yang akan terbentuk adalah 2^3 = 8 subnet</li>
-<li>prefix /26, pad terdekatnya 24, maka dari 24 ke 26 ada 2 angka 1 (<code>0b11000000</code>), maka jumlah subnetnya 2^2 = 4</li>
-</ul>
-<h2 id="jumlah-hosts"><a class="header" href="#jumlah-hosts">jumlah hosts</a></h2>
-<p>rumusnya: \( 2^{jumlah \space angka \space 0 \space dari \space 32} \)</p>
-<h3 id="contoh-1"><a class="header" href="#contoh-1">contoh</a></h3>
-<ul>
-<li>prefix /19, 32 - 19 = 13 angka 0, maka \( 2^{13} = 8192 \space hosts \)</li>
-<li>prefix /26, 32 - 26 = 6 angka 0, maka \( 2^{6} = 64 \space hosts \)</li>
-<li>prefix /8, 32 - 8 = 24 angka 0, maka \( 2^{24} = 16777216 \space hosts \)</li>
-</ul>
+                        <h1 id="rust-tokio-postgres-connection-config-example"><a class="header" href="#rust-tokio-postgres-connection-config-example">Rust tokio-postgres connection config example</a></h1>
+<p>first, this is example from the documentation</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span> let (client, conn_ctx) = tokio_postgres::connect("host=localhost user=postgres", NoTls);
+<span class="boring">}</span></code></pre></pre>
+<p>then, we want to convert it into config like ctx. <a href="https://docs.rs/postgres/latest/postgres/config/struct.Config.html">see this</a></p>
+<pre><pre class="playground"><code class="language-rust">use tokio_postgres::{NoTls, Error};
+
+#[tokio::main]
+async fn main() {
+        let mut config = postgres::config::Config::new();
+        config.host("localhost");
+        config.user("fadhil_riyanto");
+        config.password("1921684338");
+
+        let client_ret = config.connect(NoTls);
+
+
+}</code></pre></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../other/the-protobuf.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../rust/rust-tonic-grpc-build.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
+                            <a rel="next prefetch" href="../math/readme-math.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
 
                         <div style="clear: both"></div>
                     </nav>
@@ -331,10 +196,13 @@ max int int 24 bit: 16777216</p>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../other/the-protobuf.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../rust/rust-tonic-grpc-build.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
+                    <a rel="next prefetch" href="../math/readme-math.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
             </nav>
 
         </div>
