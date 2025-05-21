@@ -1988,6 +1988,118 @@ max int int 24 bit: 16777216</p>
 <li>prefix /26, 32 - 26 = 6 angka 0, maka \( 2^{6} = 64 \space hosts \)</li>
 <li>prefix /8, 32 - 8 = 24 angka 0, maka \( 2^{24} = 16777216 \space hosts \)</li>
 </ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="inter-vlan-routing"><a class="header" href="#inter-vlan-routing">Inter-VLAN routing</a></h1>
+<p>how to config vlan inter-VLAN routing</p>
+<p>topology:</p>
+<ul>
+<li>VNET1:192.168.10.0/24 (vlan 10)</li>
+<li>PC1: 192.168.10.2</li>
+<li>PC2: 192.168.10.3</li>
+<li>VNET2:192.168.20.0/24 (vlan 20)</li>
+<li>PC3: 192.168.20.2</li>
+<li>PC4: 192.168.20.3</li>
+<li>ROUTER IP (fa0/0.10): 192.168.10.1</li>
+<li>ROUTER IP (fa0/0.20): 192.168.20.1</li>
+</ul>
+<h1 id="scripts"><a class="header" href="#scripts">SCRIPTS</a></h1>
+<h2 id="management"><a class="header" href="#management">management</a></h2>
+<h3 id="--show-vlan-brief-show-all-configured-vlan"><a class="header" href="#--show-vlan-brief-show-all-configured-vlan">- <code>show vlan brief</code>: show all configured vlan</a></h3>
+<h2 id="setup-vlan-tanpa-setup-ip-dulu"><a class="header" href="#setup-vlan-tanpa-setup-ip-dulu">setup vlan (tanpa setup ip dulu)</a></h2>
+<pre><code class="language-sh">Switch&gt;enable
+Switch#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+Switch(config)#vlan 10
+Switch(config-vlan)#name SALES
+Switch(config-vlan)#ex
+Switch(config)#vlan 20
+Switch(config-vlan)#name IT
+</code></pre>
+<h2 id="lalu-setup-mode"><a class="header" href="#lalu-setup-mode">lalu setup mode</a></h2>
+<ul>
+<li>trunk: untuk switch ke router</li>
+<li>access: untuk switch ke PC</li>
+</ul>
+<p>setup untuk vlan 10 dan 10, masing2 dengan network 192.168.10.0/24 dan 192.168.20.0/24</p>
+<p>script:</p>
+<pre><code class="language-sh">Switch#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+Switch(config)#int fa0/1
+Switch(config-if)#switchport mode access
+Switch(config-if)#switchport access vlan 10
+Switch(config-if)#ex
+Switch(config)#int fa0/2
+Switch(config-if)#switchport mode access
+Switch(config-if)#switchport access vlan 10
+Switch(config-if)#ex
+Switch(config)#int fa0/3
+Switch(config-if)#switchport mode access
+Switch(config-if)#switchport access vlan 20
+Switch(config-if)#ex
+Switch(config)#int fa0/4
+Switch(config-if)#switchport mode access
+Switch(config-if)#switchport access vlan 20
+Switch(config-if)#ex
+Switch(config)#
+</code></pre>
+<p>alternative script</p>
+<pre><code class="language-sh">Switch(config-if)#int range fa0/1-4
+Switch(config-if-range)#switchport mode access
+</code></pre>
+<h2 id="config-untuk-port-fa05-ke-router-pakai-mode-trunk"><a class="header" href="#config-untuk-port-fa05-ke-router-pakai-mode-trunk">config untuk port fa0/5 ke router (pakai mode trunk)</a></h2>
+<pre><code class="language-sh">Switch(config)#int fa0/5
+Switch(config-if)#switchport mode trunk
+Switch(config-if)#
+</code></pre>
+<h1 id="inter-vlan-routing-1"><a class="header" href="#inter-vlan-routing-1">inter-VLAN routing</a></h1>
+<h2 id="enable-port-fa00-tanpa-assign-ip-dahulu"><a class="header" href="#enable-port-fa00-tanpa-assign-ip-dahulu">enable port Fa0/0 (tanpa assign ip dahulu)</a></h2>
+<pre><code class="language-sh">Router(config)#int fa0/0
+Router(config-if)#no shut
+
+Router(config-if)#
+%LINK-5-CHANGED: Interface FastEthernet0/0, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/0, changed state to up
+</code></pre>
+<h2 id="assign-ip-untuk-masing2-vlan"><a class="header" href="#assign-ip-untuk-masing2-vlan">assign ip untuk masing2 vlan</a></h2>
+<pre><code class="language-sh">Router(config)#interface FastEthernet0/0
+Router(config-if)#int fa0/0.10
+Router(config-subif)#
+%LINK-5-CHANGED: Interface FastEthernet0/0.10, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/0.10, changed state to up
+
+Router(config-subif)#encapsulation dot1q 10 
+Router(config-subif)#ip add 192.168.10.1 255.255.255.0
+Router(config-subif)#ex
+Router(config)#int fa0/0.20
+Router(config-subif)#
+%LINK-5-CHANGED: Interface FastEthernet0/0.20, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/0.20, changed state to up
+
+Router(config-subif)#encapsulation dot1q 20
+Router(config-subif)#ip add 192.168.20.1 255.255.255.0
+Router(config-subif)#
+</code></pre>
+<h2 id="hasil-output-show-vlan-brief"><a class="header" href="#hasil-output-show-vlan-brief">hasil output <code>show vlan brief</code></a></h2>
+<pre><code class="language-sh">Switch&gt;show vlan brief
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Fa0/6, Fa0/7, Fa0/8, Fa0/9
+                                                Fa0/10, Fa0/11, Fa0/12, Fa0/13
+                                                Fa0/14, Fa0/15, Fa0/16, Fa0/17
+                                                Fa0/18, Fa0/19, Fa0/20, Fa0/21
+                                                Fa0/22, Fa0/23, Fa0/24, Gig0/1
+                                                Gig0/2
+10   SALES                            active    Fa0/1, Fa0/2
+20   IT                               active    Fa0/3, Fa0/4
+1002 fddi-default                     active    
+1003 token-ring-default               active    
+1004 fddinet-default                  active    
+1005 trnet-default                    active    
+Switch&gt;
+</code></pre>
 
                     </main>
 
