@@ -35,6 +35,8 @@
 
 - [Server](./server/readme-server.md)
 	- [Cgit setup](./server/cgit-setup.md)
+	- [Setup virtual network interface](./server/virtual-network-linux.md)
+	- [ip aliasing](./server/ip-aliasing.md)
 
 - [Database](./database/readme-database.md)
 	- [psql command](./database/psql_command.md)

@@ -1331,6 +1331,61 @@ cd fadhil_riyanto
 lakukan <code>chown -R fadhil_riyanto fadhil-riyanto</code>, jika engga nanti error "git submodule update" failed with 'fatal: detected dubious ownership in repository at...' etc...</p>
 <p>ok, saatnya push
 <code>git remote add cgit fadhil_riyanto@123.123.111.222:/root/git/fadhil-riyanto/reponame.git</code></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="setup-virtual-network-interface"><a class="header" href="#setup-virtual-network-interface">Setup virtual network interface</a></h1>
+<p>cara setup virtual ethernet + assign ip nya</p>
+<ul>
+<li><code>sudo ip link add veth0 type dummy</code></li>
+</ul>
+<p>bisa dicek pakai <code>ip addr</code></p>
+<pre><code class="language-txt">[11:11:35] fadhil_riyanto@integral2 /etc/systemd/network  
+&gt; ip addr
+1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host noprefixroute 
+       valid_lft forever preferred_lft forever
+2: enp2s0: &lt;NO-CARRIER,BROADCAST,MULTICAST,UP&gt; mtu 1500 qdisc fq_codel state DOWN group default qlen 1000
+    link/ether 2c:4d:54:c6:f2:0c brd ff:ff:ff:ff:ff:ff
+    altname enx2c4d54c6f20c
+3: wlan0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue state UP group default qlen 1000
+    link/ether f0:03:8c:66:9c:21 brd ff:ff:ff:ff:ff:ff
+    inet 192.168.5.44/24 brd 192.168.5.255 scope global dynamic noprefixroute wlan0
+       valid_lft 581sec preferred_lft 581sec
+    inet 192.168.5.197/24 metric 1024 brd 192.168.5.255 scope global secondary dynamic wlan0
+       valid_lft 582sec preferred_lft 582sec
+    inet6 fe80::5574:5771:be47:2f7b/64 scope link noprefixroute 
+       valid_lft forever preferred_lft forever
+    inet6 fe80::f203:8cff:fe66:9c21/64 scope link proto kernel_ll 
+       valid_lft forever preferred_lft forever
+4: veth0: &lt;BROADCAST,NOARP,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/ether 76:4d:3f:3d:11:7f brd ff:ff:ff:ff:ff:ff
+    inet6 fe80::744d:3fff:fe3d:117f/64 scope link proto kernel_ll 
+       valid_lft forever preferred_lft forever
+
+</code></pre>
+<p>lalu assign ip nya</p>
+<ul>
+<li><code>sudo ip addr add 192.168.100.10/24 dev veth0</code></li>
+<li><code>sudo ip link set veth0 up</code></li>
+</ul>
+<p>dan bisa diping juga
+<img src="server//assets/11bb1cc1160be5425a379843f6c2ccef31b6a80cf13b505d842404bd9e9922d4cda2d7e4f0693c4291743e74c3143e20021494aa95a5d380b1b8e3c8.png" alt="image" /></p>
+<p>untuk remove interface nya bisa pakai
+<code>sudo ip link delete vnet0</code></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="ip-aliasing"><a class="header" href="#ip-aliasing">ip aliasing</a></h1>
+<p>satu interface bisa punya lebih dari 1 IP dinamai sebagai IP aliasing. contoh</p>
+<p><code>eth0</code> bisa punya 2 ip dengan cara</p>
+<ul>
+<li><code>ip addr add 192.168.1.100/24 dev eth0</code></li>
+<li><code>ip addr add 192.168.1.101/24 dev eth0</code></li>
+</ul>
+<p>atau bisa juga ada 2 interface, katakanlah <code>eth0</code> dengan <code>eth1</code>, masing2 punya ip nya sendiri2 dengan cara</p>
+<pre><code class="language-sh">ip addr add 192.168.1.10/24 dev eth0
+ip addr add 10.0.0.5/24 dev eth1
+</code></pre>
+<h1 id="tambahan"><a class="header" href="#tambahan">tambahan</a></h1>
+<p>untuk ngeremove salah satu ip nya, bisa dengan <code>ip addr del &lt;IP NYA&gt;/&lt;CIDR&gt; dev &lt;IFACE&gt;</code></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="database"><a class="header" href="#database">Database</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="psql-command"><a class="header" href="#psql-command">psql command</a></h1>
 <h2 id="general"><a class="header" href="#general">General</a></h2>

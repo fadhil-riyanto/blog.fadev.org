@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Database - Fadhil Books &amp; Notes</title>
+        <title>ip aliasing - Fadhil Books &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -157,17 +157,29 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="database"><a class="header" href="#database">Database</a></h1>
+                        <h1 id="ip-aliasing"><a class="header" href="#ip-aliasing">ip aliasing</a></h1>
+<p>satu interface bisa punya lebih dari 1 IP dinamai sebagai IP aliasing. contoh</p>
+<p><code>eth0</code> bisa punya 2 ip dengan cara</p>
+<ul>
+<li><code>ip addr add 192.168.1.100/24 dev eth0</code></li>
+<li><code>ip addr add 192.168.1.101/24 dev eth0</code></li>
+</ul>
+<p>atau bisa juga ada 2 interface, katakanlah <code>eth0</code> dengan <code>eth1</code>, masing2 punya ip nya sendiri2 dengan cara</p>
+<pre><code class="language-sh">ip addr add 192.168.1.10/24 dev eth0
+ip addr add 10.0.0.5/24 dev eth1
+</code></pre>
+<h1 id="tambahan"><a class="header" href="#tambahan">tambahan</a></h1>
+<p>untuk ngeremove salah satu ip nya, bisa dengan <code>ip addr del &lt;IP NYA&gt;/&lt;CIDR&gt; dev &lt;IFACE&gt;</code></p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../server/ip-aliasing.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../server/virtual-network-linux.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../database/psql_command.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../database/readme-database.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -177,11 +189,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../server/ip-aliasing.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../server/virtual-network-linux.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../database/psql_command.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../database/readme-database.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
