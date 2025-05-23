@@ -37,6 +37,7 @@
 	- [Cgit setup](./server/cgit-setup.md)
 	- [Setup virtual network interface](./server/virtual-network-linux.md)
 	- [ip aliasing](./server/ip-aliasing.md)
+	- [setup bridge enp0s16u1](./server/setup-bridge-enp0s16u1.md)
 
 - [Database](./database/readme-database.md)
 	- [psql command](./database/psql_command.md)
