@@ -42,3 +42,12 @@ dan bisa diping juga
 
 untuk remove interface nya bisa pakai
 `sudo ip link delete vnet0`
+
+# some sorts of equalivalent command
+
+- Create bridge: `brctl addbr br0` `ip link add br0 type bridge`
+- Delete bridge: `brctl delbr br0`   ip link delete br0
+- Add interface to bridge: `brctl addif br0 eth0` ip link set eth0 master br0
+- Remove interface from bridge: `brctl delif br0 eth0` ip link set eth0 nomaster
+- Show bridge info: `brctl show` or `brctl show br0`  `bridge link show` or `ip link show master br0`
+- Enable/disable STP: `brctl stp br0 on/off` `bridge link set dev eth0 guard off/on` (note: STP enable/disable logic is reversed)

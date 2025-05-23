@@ -199,6 +199,15 @@
 <img src="/assets/11bb1cc1160be5425a379843f6c2ccef31b6a80cf13b505d842404bd9e9922d4cda2d7e4f0693c4291743e74c3143e20021494aa95a5d380b1b8e3c8.png" alt="image" /></p>
 <p>untuk remove interface nya bisa pakai
 <code>sudo ip link delete vnet0</code></p>
+<h1 id="some-sorts-of-equalivalent-command"><a class="header" href="#some-sorts-of-equalivalent-command">some sorts of equalivalent command</a></h1>
+<ul>
+<li>Create bridge: <code>brctl addbr br0</code> <code>ip link add br0 type bridge</code></li>
+<li>Delete bridge: <code>brctl delbr br0</code>   ip link delete br0</li>
+<li>Add interface to bridge: <code>brctl addif br0 eth0</code> ip link set eth0 master br0</li>
+<li>Remove interface from bridge: <code>brctl delif br0 eth0</code> ip link set eth0 nomaster</li>
+<li>Show bridge info: <code>brctl show</code> or <code>brctl show br0</code>  <code>bridge link show</code> or <code>ip link show master br0</code></li>
+<li>Enable/disable STP: <code>brctl stp br0 on/off</code> <code>bridge link set dev eth0 guard off/on</code> (note: STP enable/disable logic is reversed)</li>
+</ul>
 
                     </main>
 
