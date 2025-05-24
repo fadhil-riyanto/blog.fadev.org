@@ -3,7 +3,12 @@
 Let me introduce my self, Who is Fadhil? Fadhil Riyanto (real-name), is a self-taught system programmer which live in Indonesian, This is some short & dirty tutorial about computer science and litte about math.
 
 # Contributing
-Found a mistake? You can freely DM me on [telegram](https://t.me/fadhil_riyanto) or just emailed me on [me@fadev.org](mailto:me@fadev.org).
+Found a mistake? You can freely DM me on [telegram](https://t.me/fadhil_riyanto) or just email me on 
+
+- [me@fadev.org](mailto:me@fadev.org) (primary, fast respond)
+- [fadhilriyanto@duck.com](mailto:fadhilriyanto@duck.com) (gmail mirror)
+- [fadhil.riyanto@gnuweeb.org](mailto:fadhil.riyanto@gnuweeb.org) (alternative-1)
+- [xor@3xploit.dev](mailto:xor@3xploit.dev) (alternative-2)
 
 # Language
 Because I'm indonesian, some part of this website may written in indonesian. But I will try to translating it into english language.

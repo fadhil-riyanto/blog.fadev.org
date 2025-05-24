@@ -161,7 +161,13 @@
                         <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
 <p>Let me introduce my self, Who is Fadhil? Fadhil Riyanto (real-name), is a self-taught system programmer which live in Indonesian, This is some short &amp; dirty tutorial about computer science and litte about math.</p>
 <h1 id="contributing"><a class="header" href="#contributing">Contributing</a></h1>
-<p>Found a mistake? You can freely DM me on <a href="https://t.me/fadhil_riyanto">telegram</a> or just emailed me on <a href="mailto:me@fadev.org">me@fadev.org</a>.</p>
+<p>Found a mistake? You can freely DM me on <a href="https://t.me/fadhil_riyanto">telegram</a> or just email me on</p>
+<ul>
+<li><a href="mailto:me@fadev.org">me@fadev.org</a> (primary, fast respond)</li>
+<li><a href="mailto:fadhilriyanto@duck.com">fadhilriyanto@duck.com</a> (gmail mirror)</li>
+<li><a href="mailto:fadhil.riyanto@gnuweeb.org">fadhil.riyanto@gnuweeb.org</a> (alternative-1)</li>
+<li><a href="mailto:xor@3xploit.dev">xor@3xploit.dev</a> (alternative-2)</li>
+</ul>
 <h1 id="language"><a class="header" href="#language">Language</a></h1>
 <p>Because I'm indonesian, some part of this website may written in indonesian. But I will try to translating it into english language.</p>
 <div class="warning">
@@ -1535,6 +1541,27 @@ sudo ip link set tap0 master br0
 <li>test ping keluar
 <img src="server//assets/cb4039e3828cd86cc73a5d980b39aceb4799ce9b4bfe34dc364ac87cd3e3500b12c118cf861de575ed4f86c2e1a98b8d3392bf43575726771234517e.png" alt="image" /></li>
 </ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="setup-shadowsocks-proxy-server"><a class="header" href="#setup-shadowsocks-proxy-server">Setup shadowsocks proxy server</a></h1>
+<p>shadowsocks-libev is available in the official repository for Debian 9("Stretch"), unstable, Ubuntu 16.10 and later derivatives:</p>
+<pre><code class="language-sh">sudo apt update
+sudo apt install shadowsocks-libev
+</code></pre>
+<p>then, create a file config on <code>/etc/shadowsocks-libev/config.json</code> which has contents something like this</p>
+<pre><code class="language-json">{
+    "server":["::1", "10.1.1.4"],
+    "mode":"tcp_and_udp",
+    "server_port":8388,
+    "local_port":1080,
+    "password":"1u21wW3E0bwu",
+    "timeout":86400,
+    "method":"chacha20-ietf-poly1305"
+}
+
+</code></pre>
+<p>in this case, I use <code>10.1.1.4</code> as local ip, then forwarded through firewall to the public addr.</p>
+<p>then, <code>sudo systemctl start shadowsocks-libev</code></p>
+<p>ref: <a href="https://shadowsocks.org/doc/configs.html">https://shadowsocks.org/doc/configs.html</a></p>
+<h1 id="connect"><a class="header" href="#connect">connect</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="database"><a class="header" href="#database">Database</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="psql-command"><a class="header" href="#psql-command">psql command</a></h1>
 <h2 id="general"><a class="header" href="#general">General</a></h2>
@@ -2304,6 +2331,90 @@ VLAN Name                             Status    Ports
 1005 trnet-default                    active    
 Switch&gt;
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="tealinux-qemu-promp--testing"><a class="header" href="#tealinux-qemu-promp--testing">Tealinux qemu promp &amp; testing</a></h1>
+<h2 id="create-image"><a class="header" href="#create-image">create image</a></h2>
+<p><code>qemu-img create -f qcow2 &lt;NAME&gt;.img 45G</code></p>
+<ul>
+<li>Change 45G with your desired size</li>
+</ul>
+<h2 id="running-system-on-bios-mode"><a class="header" href="#running-system-on-bios-mode">running system on BIOS mode</a></h2>
+<p>this will open SSH connection on port 20022</p>
+<h2 id="live"><a class="header" href="#live">live</a></h2>
+<pre><code class="language-sh">qemu-system-x86_64 \
+                -enable-kvm \
+                -boot order=d \
+                -cdrom tealinux-2025.02.16-x86_64.iso \
+                -drive file=tealinux.img,format=qcow2 \
+                -m 4G \
+                -enable-kvm \
+                -smp 4 \
+                -net user,hostfwd=tcp::20022-:22 \
+                -net nic
+</code></pre>
+<h2 id="non-live"><a class="header" href="#non-live">non-live</a></h2>
+<pre><code class="language-sh">qemu-system-x86_64 \
+                -enable-kvm \
+                -boot order=d \
+                -drive file=tealinux.img,format=qcow2 \
+                -m 4G \
+                -enable-kvm \
+                -smp 4 \
+                -net user,hostfwd=tcp::20022-:22 \
+                -net nic
+</code></pre>
+<h2 id="running-on-uefi-mode"><a class="header" href="#running-on-uefi-mode">running on UEFI mode</a></h2>
+<p>in order to running qemu on UEFI mode, we need <a href="https://archlinux.org/packages/extra/any/edk2-ovmf/">edk2-ovmf</a></p>
+<p>get your ovmf vars by running <code>cp /usr/share/edk2/x64/OVMF_VARS.4m.fd .</code></p>
+<h2 id="live-1"><a class="header" href="#live-1">live</a></h2>
+<pre><code class="language-sh">qemu-system-x86_64 \
+                -enable-kvm \
+                -cdrom tealinux-2025.02.16-x86_64.iso \
+                -boot order=d \
+                -drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
+                -drive if=pflash,format=raw,file=OVMF_VARS.4m.fd \
+                -drive file=tealinux.img,format=qcow2 \
+                -m 4G \
+                -enable-kvm \
+                -smp 4 \
+                -net user,hostfwd=tcp::20022-:22 \
+                -net nic
+</code></pre>
+<h2 id="non-live-1"><a class="header" href="#non-live-1">non-live</a></h2>
+<pre><code class="language-sh">qemu-system-x86_64 \
+                -enable-kvm \
+                -boot order=d \
+                -drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
+                -drive if=pflash,format=raw,file=OVMF_VARS.4m.fd \
+                -drive file=tealinux.img,format=qcow2 \
+                -m 4G \
+                -enable-kvm \
+                -smp 4 \
+                -net user,hostfwd=tcp::20022-:22 \
+                -net nic
+</code></pre>
+<h2 id="windows"><a class="header" href="#windows">windows</a></h2>
+<pre><code class="language-sh">qemu-system-x86_64 \
+                -enable-kvm \
+                -boot order=d \
+                -cdrom Win10_22H2_English_x64v1.iso \
+                -drive file=tealinux.img,format=qcow2 \
+                -m 4G \
+                -enable-kvm \
+                -smp 4 \
+                -net user,hostfwd=tcp::20022-:22 \
+                -net nic
+</code></pre>
+<h2 id="misc"><a class="header" href="#misc">misc</a></h2>
+<h3 id="add-more-drive"><a class="header" href="#add-more-drive">add more drive</a></h3>
+<p>in order add more drive, use this param</p>
+<ul>
+<li><code>-drive file=img1.img,format=qcow2</code></li>
+<li><code>-drive file=img1.img,format=qcow2</code></li>
+</ul>
+<h2 id="forward-more-port"><a class="header" href="#forward-more-port">forward more port</a></h2>
+<p>imagine you need to forward another port, not only ssh, the correct command is
+<code>-net user,hostfwd=tcp::10022-:22,hostfwd=tcp::8080-:8080,hostfwd=tcp::5173-:5173</code></p>
+<p>5173 is our port.</p>
 
                     </main>
 

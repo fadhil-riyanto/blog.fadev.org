@@ -38,6 +38,7 @@
 	- [Setup virtual network interface](./server/virtual-network-linux.md)
 	- [ip aliasing](./server/ip-aliasing.md)
 	- [setup bridge enp0s16u1](./server/setup-bridge-enp0s16u1.md)
+	- [Setup shadowsocks proxy server](./server/setup-ss-server.md)
 
 - [Database](./database/readme-database.md)
 	- [psql command](./database/psql_command.md)
@@ -54,3 +55,4 @@
 	- [Protobuf](./other/the-protobuf.md)
 	- [Subnetting](./other/subnetting.md)
 	- [Inter-VLAN routing](./other/intervlan-routing.md)
+	- [Tealinux qemu promp & testing](./other/tealinux-promp-testing.md)
