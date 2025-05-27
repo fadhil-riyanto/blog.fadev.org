@@ -78,12 +78,43 @@ qemu-system-x86_64 \
                 -enable-kvm \
                 -boot order=d \
                 -cdrom Win10_22H2_English_x64v1.iso \
-                -drive file=tealinux.img,format=qcow2 \
+                -drive file=windows-tealinux-mbr.img,format=qcow2 \
                 -m 4G \
                 -enable-kvm \
                 -smp 4 \
                 -net user,hostfwd=tcp::20022-:22 \
                 -net nic
+```
+
+uefi version
+```sh
+qemu-system-x86_64 \
+                 -enable-kvm \
+                 -boot order=d \
+                 -cdrom Win10_22H2_English_x64v1.iso \
+                 -drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
+                 -drive if=pflash,format=raw,file=OVMF_VARS.4m.fd \
+                 -drive file=tealinux.img,format=qcow2 \
+                 -m 4G \
+                 -enable-kvm \
+                 -smp 4 \
+                 -net user,hostfwd=tcp::20022-:22
+```
+
+note: bug unwrap error
+```sh
+qemu-system-x86_64 \
+                      -enable-kvm \
+                      -boot order=d \
+                      -cdrom tealinux-2025.02.16-x86_64.iso \
+      -drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
+                      -drive if=pflash,format=raw,file=OVMF_VARS.4m.fd \
+                      -drive file=tealinux.img,format=qcow2 \
+                      -m 4G \
+                      -enable-kvm \
+                      -smp 4 \
+                      -net user,hostfwd=tcp::20022-:22 \
+      -net nic
 ```
 
 

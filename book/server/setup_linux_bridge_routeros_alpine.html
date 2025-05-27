@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Rust stuff - Fadhil Books &amp; Notes</title>
+        <title>setup linux bridge between RouterOS &amp; Alpine linux hosts - Fadhil Books &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -157,18 +157,110 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="rust-stuff"><a class="header" href="#rust-stuff">Rust stuff</a></h1>
-<p>Welcome in this rust stuff section.</p>
+                        <h1 id="setup-linux-bridge-between-routeros--alpine-linux-hosts"><a class="header" href="#setup-linux-bridge-between-routeros--alpine-linux-hosts">setup linux bridge between RouterOS &amp; Alpine linux hosts</a></h1>
+<p>this docs is second part of <a href="http://localhost:3000/server/alpine_install_on_live_cd_qemu.html">this</a></p>
+<p>first thing that we need to do is create a copy of qcow2 alpine, so we do not need to re-install again. do not forget to change the hostname &amp; password for easy identification</p>
+<h1 id="setup-bridge"><a class="header" href="#setup-bridge">setup bridge</a></h1>
+<ul>
+<li><code>sudo ip link add br0-lan type bridge</code></li>
+<li><code>sudo ip link add br1-lan type bridge</code></li>
+</ul>
+<h1 id="setup-tap"><a class="header" href="#setup-tap">setup TAP</a></h1>
+<p>tap0 &amp; tap1 connected to br0-lan
+tap2 &amp; tap3 connected to br1-lan</p>
+<ul>
+<li><code>sudo ip tuntap add dev tap0 mode tap</code></li>
+<li><code>sudo ip tuntap add dev tap1 mode tap</code></li>
+<li><code>sudo ip tuntap add dev tap2 mode tap</code></li>
+<li><code>sudo ip tuntap add dev tap3 mode tap</code></li>
+<li><code>sudo ip link set tap0 master br0-lan</code></li>
+<li><code>sudo ip link set tap1 master br0-lan</code></li>
+<li><code>sudo ip link set tap2 master br1-lan</code></li>
+<li><code>sudo ip link set tap3 master br1-lan</code></li>
+<li><code>sudo ip link set tap0 up</code></li>
+<li><code>sudo ip link set tap1 up</code></li>
+<li><code>sudo ip link set tap2 up</code></li>
+<li><code>sudo ip link set tap3 up</code></li>
+</ul>
+<h1 id="launch-mikrotik-iso"><a class="header" href="#launch-mikrotik-iso">launch mikrotik ISO</a></h1>
+<pre><code class="language-sh">qemu-system-x86_64 \
+      -enable-kvm \
+      -boot order=d \
+      -drive file=chr.qcow2,format=qcow2 \
+      -m 256M \
+      -smp 4 \
+      -netdev tap,id=net0,ifname=tap0,script=no,downscript=no \
+      -device virtio-net-pci,netdev=net0,mac=02:11:2a:3b:ff:c3  \
+      -netdev tap,id=net1,ifname=tap2,script=no,downscript=no \
+      -device virtio-net-pci,netdev=net1,mac=02:1a:f2:f1:21:b5  \
+      -nographic \
+      -net user,hostfwd=tcp::10022-:22,hostfwd=tcp::8291-:8291 \
+      -net nic
+</code></pre>
+<p><img src="/assets/74d589bde385dccca9047d3167ed42def74f535f82c92cbf66599c40b835c624eaf8de74ef1787a86df7886b00194fdaef8e290afbef0021128ef4a1.png" alt="image" /></p>
+<p>based on topology, we know that</p>
+<ul>
+<li><code>02:11:2a:3b:ff:c3</code> used by tap0 (in routerOS, bridge 0)</li>
+<li><code>02:1a:f2:f1:21:b5</code> used by tap2 (in routerOS, bridge 1)</li>
+<li><code>tap1</code> &amp; <code>tap3</code> used by alpine virtual machine</li>
+</ul>
+<p>now run alpine iso</p>
+<h1 id="alpine-as-pc-1"><a class="header" href="#alpine-as-pc-1">alpine (as pc-1)</a></h1>
+<pre><code class="language-sh">qemu-system-x86_64 \
+            -enable-kvm \
+            -m 256 \
+            -smp 4 \
+            -cpu host \
+            -drive file=pc-1.qcow2,format=qcow2 \
+            -cdrom alpine-virt-3.21.3-x86_64.iso \
+            -boot d \
+            -nographic \
+            -netdev tap,id=net0,ifname=tap1,script=no,downscript=no \
+            -device virtio-net-pci,netdev=net0
+</code></pre>
+<h1 id="alpine-as-pc-3"><a class="header" href="#alpine-as-pc-3">alpine (as pc-3)</a></h1>
+<pre><code class="language-sh">qemu-system-x86_64 \
+            -enable-kvm \
+            -m 256 \
+            -smp 4 \
+            -cpu host \
+            -drive file=pc-2.qcow2,format=qcow2 \
+            -cdrom alpine-virt-3.21.3-x86_64.iso \
+            -boot d \
+            -nographic \
+            -netdev tap,id=net0,ifname=tap3,script=no,downscript=no \
+            -device virtio-net-pci,netdev=net0
+</code></pre>
+<h1 id="winbox-config"><a class="header" href="#winbox-config">WinBox config</a></h1>
+<p>first, we need to see the configuration &amp; which etherX by looking to spesific mac-addr, we find out that</p>
+<pre><code class="language-txt">[admin@MikroTik] &gt; /interface print
+Flags: D - dynamic, X - disabled, R - running, S - slave 
+ #     NAME                                TYPE       ACTUAL-MTU L2MTU  MAX-L2MTU MAC-ADDRESS      
+ 0  R  ;;; wan
+       ether1                              ether            1500                  52:54:00:12:34:56
+ 1  R  ether4                              ether            1500                  02:11:2A:3B:FF:C3
+ 2  R  ether5                              ether            1500                  02:1A:F2:F1:21:B5
+[admin@MikroTik] &gt; 
+</code></pre>
+<p>next thing, lets configure our ip using winbox, this is ip configuration
+<img src="/assets/7dedfcaff5c700e6e724ad760e3b5fc2436b7c644d63310b24aaaf93490a6b8d5cf51677ce32e719a4e0237ec43dfd8ed5e624c58e890d7c37f81ce1.png" alt="image" /></p>
+<p>DHCP server section
+<img src="/assets/ca1cdfa9afe3e1d127ce07a5c1e57d47f87842aa0d4804d3b926fcf883b73ed90cc602012200326be8fdbcb021a7f40fa974427ce40f6ccb530c9322.png" alt="image" /></p>
+<p>now, try run <code>udhcpc -i eth0</code> on each vm</p>
+<h1 id="result-on-pc-1"><a class="header" href="#result-on-pc-1">result on pc-1</a></h1>
+<p><img src="/assets/4e13804d5d7b7ceb052ab19a79d8bf0720b28671348a035f0bfe9809eff022183489033a1c0c11482e99cb3c8dea4785747482724f5a37ab6ad8b61c.png" alt="image" /></p>
+<h1 id="result-on-pc-2"><a class="header" href="#result-on-pc-2">result on pc-2</a></h1>
+<p><img src="/assets/1458eceef396746ef428f3d19210c34e564131ad6f30a26d5f075ef170fa0ae20f403f5dbf1f44d924f85b7105a51568576bb16246475772d26d0c55.png" alt="image" /></p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../sysprog/ext4_unknown_RO_compact_features.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../server/run_router_os_on_qemu.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../rust/cursor_1.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../database/readme-database.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -178,11 +270,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../sysprog/ext4_unknown_RO_compact_features.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../server/run_router_os_on_qemu.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../rust/cursor_1.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../database/readme-database.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

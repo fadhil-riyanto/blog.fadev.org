@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Rust stuff - Fadhil Books &amp; Notes</title>
+        <title>Alpine install on live cd qemu - Fadhil Books &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -157,18 +157,109 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="rust-stuff"><a class="header" href="#rust-stuff">Rust stuff</a></h1>
-<p>Welcome in this rust stuff section.</p>
+                        <h1 id="alpine-htop-install-on-live-qemu"><a class="header" href="#alpine-htop-install-on-live-qemu">Alpine htop install on live QEMU</a></h1>
+<h1 id="create-disk-first"><a class="header" href="#create-disk-first">create disk first</a></h1>
+<pre><code class="language-sh">qemu-img create -f qcow2 alpine-1.qcow2 1G
+</code></pre>
+<h1 id="start-qemu"><a class="header" href="#start-qemu">start qemu</a></h1>
+<p>download iso here <a href="https://dl-cdn.alpinelinux.org/alpine/v3.21/releases/x86_64/alpine-virt-3.21.3-x86_64.iso">https://dl-cdn.alpinelinux.org/alpine/v3.21/releases/x86_64/alpine-virt-3.21.3-x86_64.iso</a></p>
+<pre><code class="language-sh">qemu-system-x86_64 \
+      -enable-kvm \
+      -m 256 \
+      -smp 4 \
+      -cpu host \
+      -drive file=alpine-1.qcow2,format=qcow2 \
+      -cdrom alpine-virt-3.21.3-x86_64.iso \
+      -boot d \
+      -net nic \
+      -net user -nographic
+</code></pre>
+<p>default username is <code>root</code>, password left blank, just enter</p>
+<h1 id="set-eth0-up--dhcp"><a class="header" href="#set-eth0-up--dhcp">set eth0 up &amp; DHCP</a></h1>
+<ul>
+<li><code>ip link set dev eth0 up</code></li>
+<li><code>udhcpc -i eth0</code></li>
+<li><code>ping 1.1.1.1</code> (testing)</li>
+</ul>
+<p>for <code>/etc/resolv.conf</code>, change to <code>nameserver 1.1.1.1</code></p>
+<h1 id="patch-apk-configuration"><a class="header" href="#patch-apk-configuration">patch apk configuration</a></h1>
+<p><code>cp /etc/apk/repositories /etc/apk/repositories-old</code></p>
+<pre><code class="language-patch">--- repositories-old
++++ repositories
+@@ -1 +1,2 @@
+-/media/cdrom/apks
++http://dl-cdn.alpinelinux.org/alpine/v3.21/main
++http://dl-cdn.alpinelinux.org/alpine/v3.21/community
+</code></pre>
+<h1 id="update"><a class="header" href="#update">update</a></h1>
+<ul>
+<li><code>apk update</code></li>
+<li><code>apk cache download</code></li>
+<li><code>apk cache -v sync</code></li>
+</ul>
+<h1 id="setup-partition"><a class="header" href="#setup-partition">setup partition</a></h1>
+<div class="warning">
+Note 
+<p>set it with your needs, I use entire disk in this docs</p>
+</div>
+<p>make sure first your ext4 kernel module is installed &amp; loaded by typing</p>
+<ul>
+<li><code>lsmod | grep ext4</code>: check</li>
+<li><code>modprobe ext4</code></li>
+<li><code>lsmod | grep ext4</code>: recheck again</li>
+</ul>
+<p>the output is should be something like this
+<img src="/assets/37fc640f3957aa8c9cc08ae77ed08afc3ad58b7b1187232994a259776acbdc94fe64e1a8b0cd1cbd834fc51e3f7d9d21cdd850a4fbfd35aa0092ffb9.png" alt="image" /></p>
+<p>then we can move forward to ext4 partition generation</p>
+<h1 id="partitioning"><a class="header" href="#partitioning">partitioning</a></h1>
+<p>install parted first using <code>apk add parted</code>, check your disk first using <code>fdisk -l</code>, for example there is <code>/dev/sda</code></p>
+<h2 id="parted-section"><a class="header" href="#parted-section">parted section</a></h2>
+<p>run <code>parted /dev/sda</code>, inside of parted is</p>
+<ul>
+<li><code>unit s</code></li>
+<li><code>mklabel [gpt/msdos]</code>: I use msdos anyway</li>
+<li><code>print</code>: identify disk size by see on section something like Disk /dev/sda: 2097152s, there has 2097152s sector, so I use 2097152 - (2948 * 2), which is 2093056s</li>
+<li><code>mkpart</code>
+<ul>
+<li><code>primary</code></li>
+<li><code>ext4</code></li>
+<li><code>2048s</code></li>
+<li><code>2093056s</code>
+<ul>
+<li><code>q</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>resulted partition:
+<img src="/assets/2e9d14e41182f8915e615acd0bedb1797c4a5b13411506a142ce9bf33b0874ce1abbc3963190e351a97b67876af6c7613735930d2e1c71140947c98d.png" alt="image" /></p>
+<h1 id="setup-diskless-install"><a class="header" href="#setup-diskless-install">setup diskless install</a></h1>
+<p>warn: you need to enable ext4 kernel module or you'll get <code>mount: mounting /dev/sda1 on /media/sda1 failed: Invalid argument</code> when mounting</p>
+<ul>
+<li><code>modprobe ext4</code></li>
+<li><code>apk add e2fsprogs</code> for <code>mkfs.ext4</code> command</li>
+<li><code>mkfs.ext4 /dev/sda1</code></li>
+<li><code>mount /dev/sda1 /media/sda1</code>: mount location should be located on <code>/media</code>, not <code>/mnt</code></li>
+</ul>
+<p>then, you can do normal <code>setup-alpine</code>, except for this thing</p>
+<ul>
+<li>Which disk(s) would you like to use? (or '?' for help or 'none') [none] none</li>
+<li>Enter where to store configs ('floppy', 'sda1', 'usb' or 'none') [sda1] sda1</li>
+<li>Enter apk cache directory (or '?' or 'none') [/media/sda1/cache] /media/sda1/cache</li>
+</ul>
+<h1 id="lbu"><a class="header" href="#lbu">LBU</a></h1>
+<p>run <code>lbu commit</code></p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../sysprog/ext4_unknown_RO_compact_features.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../server/setup-ss-server.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../rust/cursor_1.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../server/run_router_os_on_qemu.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -178,11 +269,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../sysprog/ext4_unknown_RO_compact_features.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../server/setup-ss-server.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../rust/cursor_1.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../server/run_router_os_on_qemu.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

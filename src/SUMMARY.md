@@ -10,6 +10,7 @@
 	- [x86_64 register (fiks technical grade)](./sysprog/x86_64_reg.md)
 	- [analisis kenapa pakai movabsq, daripada movq](./sysprog/movabsq_movq_vs.md)
 	- [analisis patch movq pakai 0xffffffff](./sysprog/0xffffffff_analysis_movq.md)
+	- [ext4 unknown RO compact features](./sysprog/ext4_unknown_RO_compact_features.md)
 
 - [Rust stuff](./rust/readme-rust-stuff.md)
 	- [Rust Cursor & fseek concept](./rust/cursor_1.md)
@@ -39,6 +40,9 @@
 	- [ip aliasing](./server/ip-aliasing.md)
 	- [setup bridge enp0s16u1](./server/setup-bridge-enp0s16u1.md)
 	- [Setup shadowsocks proxy server](./server/setup-ss-server.md)
+	- [Alpine install on live cd qemu](./server/alpine_install_on_live_cd_qemu.md)
+	- [Run router-OS on qemu](./server/run_router_os_on_qemu.md)
+	- [setup linux bridge between RouterOS & Alpine linux hosts](./server/setup_linux_bridge_routeros_alpine.md)
 
 - [Database](./database/readme-database.md)
 	- [psql command](./database/psql_command.md)

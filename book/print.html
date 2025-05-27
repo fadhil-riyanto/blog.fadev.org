@@ -334,6 +334,36 @@ full 64 bit move</p>
 <img src="sysprog//assets/183193f1ed20460acef3b46f25d34f4362c97d685aa27c440ecf464d0036cddab2a92fad306c6018a9911aa10b27b1ab130a443ca9c0edcbe6f61a68.png" alt="image" /></p>
 <p>saatnya kita lanjutkan, apakah error
 <img src="sysprog//assets/c160ad95471ba78693869c17396b2ce78d2dd142abfb1232dfd08532438a3823f5746823e3061b802421b731067d432ee3dc7df6dd1980159bfd4d10.png" alt="image" /></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="ext4-unknown-ro-compact-features"><a class="header" href="#ext4-unknown-ro-compact-features">ext4 unknown RO compact features</a></h1>
+<p>this error come from linux kernel</p>
+<pre><code class="language-c">	/* Check that feature set is OK for a read-write mount */
+	if (ext4_has_unknown_ext4_ro_compat_features(sb)) {
+		ext4_msg(sb, KERN_ERR, "couldn't mount RDWR because of "
+			 "unsupported optional features (%x)",
+			 (le32_to_cpu(EXT4_SB(sb)-&gt;s_es-&gt;s_feature_ro_compat) &amp;
+				~EXT4_FEATURE_RO_COMPAT_SUPP));
+		return 0;
+	}
+</code></pre>
+<p>which EXT4_FEATURE_RO_COMPAT_SUPP</p>
+<pre><code class="language-c">#define EXT4_FEATURE_RO_COMPAT_SUPP	(EXT4_FEATURE_RO_COMPAT_SPARSE_SUPER| \
+					 EXT4_FEATURE_RO_COMPAT_LARGE_FILE| \
+					 EXT4_FEATURE_RO_COMPAT_GDT_CSUM| \
+					 EXT4_FEATURE_RO_COMPAT_DIR_NLINK | \
+					 EXT4_FEATURE_RO_COMPAT_EXTRA_ISIZE | \
+					 EXT4_FEATURE_RO_COMPAT_BTREE_DIR |\
+					 EXT4_FEATURE_RO_COMPAT_HUGE_FILE |\
+					 EXT4_FEATURE_RO_COMPAT_BIGALLOC |\
+					 EXT4_FEATURE_RO_COMPAT_METADATA_CSUM|\
+					 EXT4_FEATURE_RO_COMPAT_QUOTA |\
+					 EXT4_FEATURE_RO_COMPAT_PROJECT |\
+					 EXT4_FEATURE_RO_COMPAT_VERITY |\
+					 EXT4_FEATURE_RO_COMPAT_ORPHAN_PRESENT)
+</code></pre>
+<pre><code class="language-c">#define EXT4_FEATURE_RO_COMPAT_GDT_CSUM		0x0010
+</code></pre>
+<p><a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/fs/ext4/ext4.h#n2188">https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/fs/ext4/ext4.h#n2188</a></p>
+<p><a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/fs/ext4/ext4.h#n2024">https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/fs/ext4/ext4.h#n2024</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-stuff"><a class="header" href="#rust-stuff">Rust stuff</a></h1>
 <p>Welcome in this rust stuff section.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-cursor-how-it-works"><a class="header" href="#rust-cursor-how-it-works">Rust cursor, How it works</a></h1>
@@ -1562,6 +1592,205 @@ sudo apt install shadowsocks-libev
 <p>then, <code>sudo systemctl start shadowsocks-libev</code></p>
 <p>ref: <a href="https://shadowsocks.org/doc/configs.html">https://shadowsocks.org/doc/configs.html</a></p>
 <h1 id="connect"><a class="header" href="#connect">connect</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="alpine-htop-install-on-live-qemu"><a class="header" href="#alpine-htop-install-on-live-qemu">Alpine htop install on live QEMU</a></h1>
+<h1 id="create-disk-first"><a class="header" href="#create-disk-first">create disk first</a></h1>
+<pre><code class="language-sh">qemu-img create -f qcow2 alpine-1.qcow2 1G
+</code></pre>
+<h1 id="start-qemu"><a class="header" href="#start-qemu">start qemu</a></h1>
+<p>download iso here <a href="https://dl-cdn.alpinelinux.org/alpine/v3.21/releases/x86_64/alpine-virt-3.21.3-x86_64.iso">https://dl-cdn.alpinelinux.org/alpine/v3.21/releases/x86_64/alpine-virt-3.21.3-x86_64.iso</a></p>
+<pre><code class="language-sh">qemu-system-x86_64 \
+      -enable-kvm \
+      -m 256 \
+      -smp 4 \
+      -cpu host \
+      -drive file=alpine-1.qcow2,format=qcow2 \
+      -cdrom alpine-virt-3.21.3-x86_64.iso \
+      -boot d \
+      -net nic \
+      -net user -nographic
+</code></pre>
+<p>default username is <code>root</code>, password left blank, just enter</p>
+<h1 id="set-eth0-up--dhcp"><a class="header" href="#set-eth0-up--dhcp">set eth0 up &amp; DHCP</a></h1>
+<ul>
+<li><code>ip link set dev eth0 up</code></li>
+<li><code>udhcpc -i eth0</code></li>
+<li><code>ping 1.1.1.1</code> (testing)</li>
+</ul>
+<p>for <code>/etc/resolv.conf</code>, change to <code>nameserver 1.1.1.1</code></p>
+<h1 id="patch-apk-configuration"><a class="header" href="#patch-apk-configuration">patch apk configuration</a></h1>
+<p><code>cp /etc/apk/repositories /etc/apk/repositories-old</code></p>
+<pre><code class="language-patch">--- repositories-old
++++ repositories
+@@ -1 +1,2 @@
+-/media/cdrom/apks
++http://dl-cdn.alpinelinux.org/alpine/v3.21/main
++http://dl-cdn.alpinelinux.org/alpine/v3.21/community
+</code></pre>
+<h1 id="update"><a class="header" href="#update">update</a></h1>
+<ul>
+<li><code>apk update</code></li>
+<li><code>apk cache download</code></li>
+<li><code>apk cache -v sync</code></li>
+</ul>
+<h1 id="setup-partition"><a class="header" href="#setup-partition">setup partition</a></h1>
+<div class="warning">
+Note 
+<p>set it with your needs, I use entire disk in this docs</p>
+</div>
+<p>make sure first your ext4 kernel module is installed &amp; loaded by typing</p>
+<ul>
+<li><code>lsmod | grep ext4</code>: check</li>
+<li><code>modprobe ext4</code></li>
+<li><code>lsmod | grep ext4</code>: recheck again</li>
+</ul>
+<p>the output is should be something like this
+<img src="server//assets/37fc640f3957aa8c9cc08ae77ed08afc3ad58b7b1187232994a259776acbdc94fe64e1a8b0cd1cbd834fc51e3f7d9d21cdd850a4fbfd35aa0092ffb9.png" alt="image" /></p>
+<p>then we can move forward to ext4 partition generation</p>
+<h1 id="partitioning"><a class="header" href="#partitioning">partitioning</a></h1>
+<p>install parted first using <code>apk add parted</code>, check your disk first using <code>fdisk -l</code>, for example there is <code>/dev/sda</code></p>
+<h2 id="parted-section"><a class="header" href="#parted-section">parted section</a></h2>
+<p>run <code>parted /dev/sda</code>, inside of parted is</p>
+<ul>
+<li><code>unit s</code></li>
+<li><code>mklabel [gpt/msdos]</code>: I use msdos anyway</li>
+<li><code>print</code>: identify disk size by see on section something like Disk /dev/sda: 2097152s, there has 2097152s sector, so I use 2097152 - (2948 * 2), which is 2093056s</li>
+<li><code>mkpart</code>
+<ul>
+<li><code>primary</code></li>
+<li><code>ext4</code></li>
+<li><code>2048s</code></li>
+<li><code>2093056s</code>
+<ul>
+<li><code>q</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>resulted partition:
+<img src="server//assets/2e9d14e41182f8915e615acd0bedb1797c4a5b13411506a142ce9bf33b0874ce1abbc3963190e351a97b67876af6c7613735930d2e1c71140947c98d.png" alt="image" /></p>
+<h1 id="setup-diskless-install"><a class="header" href="#setup-diskless-install">setup diskless install</a></h1>
+<p>warn: you need to enable ext4 kernel module or you'll get <code>mount: mounting /dev/sda1 on /media/sda1 failed: Invalid argument</code> when mounting</p>
+<ul>
+<li><code>modprobe ext4</code></li>
+<li><code>apk add e2fsprogs</code> for <code>mkfs.ext4</code> command</li>
+<li><code>mkfs.ext4 /dev/sda1</code></li>
+<li><code>mount /dev/sda1 /media/sda1</code>: mount location should be located on <code>/media</code>, not <code>/mnt</code></li>
+</ul>
+<p>then, you can do normal <code>setup-alpine</code>, except for this thing</p>
+<ul>
+<li>Which disk(s) would you like to use? (or '?' for help or 'none') [none] none</li>
+<li>Enter where to store configs ('floppy', 'sda1', 'usb' or 'none') [sda1] sda1</li>
+<li>Enter apk cache directory (or '?' or 'none') [/media/sda1/cache] /media/sda1/cache</li>
+</ul>
+<h1 id="lbu"><a class="header" href="#lbu">LBU</a></h1>
+<p>run <code>lbu commit</code></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="run-router-os-on-qemu"><a class="header" href="#run-router-os-on-qemu">Run router-OS on qemu</a></h1>
+<p>on normal interface</p>
+<pre><code class="language-sh">qemu-system-x86_64 \
+          -enable-kvm \
+          -boot order=d \
+          -cdrom chr-6.49.18.img \
+          -drive file=chr.qcow2,format=qcow2 \
+          -m 4G \
+          -smp 4 \
+          -net user,hostfwd=tcp::10022-:22,hostfwd=tcp::8291-:8291 \
+          -net nic
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="setup-linux-bridge-between-routeros--alpine-linux-hosts"><a class="header" href="#setup-linux-bridge-between-routeros--alpine-linux-hosts">setup linux bridge between RouterOS &amp; Alpine linux hosts</a></h1>
+<p>this docs is second part of <a href="http://localhost:3000/server/alpine_install_on_live_cd_qemu.html">this</a></p>
+<p>first thing that we need to do is create a copy of qcow2 alpine, so we do not need to re-install again. do not forget to change the hostname &amp; password for easy identification</p>
+<h1 id="setup-bridge"><a class="header" href="#setup-bridge">setup bridge</a></h1>
+<ul>
+<li><code>sudo ip link add br0-lan type bridge</code></li>
+<li><code>sudo ip link add br1-lan type bridge</code></li>
+</ul>
+<h1 id="setup-tap"><a class="header" href="#setup-tap">setup TAP</a></h1>
+<p>tap0 &amp; tap1 connected to br0-lan
+tap2 &amp; tap3 connected to br1-lan</p>
+<ul>
+<li><code>sudo ip tuntap add dev tap0 mode tap</code></li>
+<li><code>sudo ip tuntap add dev tap1 mode tap</code></li>
+<li><code>sudo ip tuntap add dev tap2 mode tap</code></li>
+<li><code>sudo ip tuntap add dev tap3 mode tap</code></li>
+<li><code>sudo ip link set tap0 master br0-lan</code></li>
+<li><code>sudo ip link set tap1 master br0-lan</code></li>
+<li><code>sudo ip link set tap2 master br1-lan</code></li>
+<li><code>sudo ip link set tap3 master br1-lan</code></li>
+<li><code>sudo ip link set tap0 up</code></li>
+<li><code>sudo ip link set tap1 up</code></li>
+<li><code>sudo ip link set tap2 up</code></li>
+<li><code>sudo ip link set tap3 up</code></li>
+</ul>
+<h1 id="launch-mikrotik-iso"><a class="header" href="#launch-mikrotik-iso">launch mikrotik ISO</a></h1>
+<pre><code class="language-sh">qemu-system-x86_64 \
+      -enable-kvm \
+      -boot order=d \
+      -drive file=chr.qcow2,format=qcow2 \
+      -m 256M \
+      -smp 4 \
+      -netdev tap,id=net0,ifname=tap0,script=no,downscript=no \
+      -device virtio-net-pci,netdev=net0,mac=02:11:2a:3b:ff:c3  \
+      -netdev tap,id=net1,ifname=tap2,script=no,downscript=no \
+      -device virtio-net-pci,netdev=net1,mac=02:1a:f2:f1:21:b5  \
+      -nographic \
+      -net user,hostfwd=tcp::10022-:22,hostfwd=tcp::8291-:8291 \
+      -net nic
+</code></pre>
+<p><img src="server//assets/74d589bde385dccca9047d3167ed42def74f535f82c92cbf66599c40b835c624eaf8de74ef1787a86df7886b00194fdaef8e290afbef0021128ef4a1.png" alt="image" /></p>
+<p>based on topology, we know that</p>
+<ul>
+<li><code>02:11:2a:3b:ff:c3</code> used by tap0 (in routerOS, bridge 0)</li>
+<li><code>02:1a:f2:f1:21:b5</code> used by tap2 (in routerOS, bridge 1)</li>
+<li><code>tap1</code> &amp; <code>tap3</code> used by alpine virtual machine</li>
+</ul>
+<p>now run alpine iso</p>
+<h1 id="alpine-as-pc-1"><a class="header" href="#alpine-as-pc-1">alpine (as pc-1)</a></h1>
+<pre><code class="language-sh">qemu-system-x86_64 \
+            -enable-kvm \
+            -m 256 \
+            -smp 4 \
+            -cpu host \
+            -drive file=pc-1.qcow2,format=qcow2 \
+            -cdrom alpine-virt-3.21.3-x86_64.iso \
+            -boot d \
+            -nographic \
+            -netdev tap,id=net0,ifname=tap1,script=no,downscript=no \
+            -device virtio-net-pci,netdev=net0
+</code></pre>
+<h1 id="alpine-as-pc-3"><a class="header" href="#alpine-as-pc-3">alpine (as pc-3)</a></h1>
+<pre><code class="language-sh">qemu-system-x86_64 \
+            -enable-kvm \
+            -m 256 \
+            -smp 4 \
+            -cpu host \
+            -drive file=pc-2.qcow2,format=qcow2 \
+            -cdrom alpine-virt-3.21.3-x86_64.iso \
+            -boot d \
+            -nographic \
+            -netdev tap,id=net0,ifname=tap3,script=no,downscript=no \
+            -device virtio-net-pci,netdev=net0
+</code></pre>
+<h1 id="winbox-config"><a class="header" href="#winbox-config">WinBox config</a></h1>
+<p>first, we need to see the configuration &amp; which etherX by looking to spesific mac-addr, we find out that</p>
+<pre><code class="language-txt">[admin@MikroTik] &gt; /interface print
+Flags: D - dynamic, X - disabled, R - running, S - slave 
+ #     NAME                                TYPE       ACTUAL-MTU L2MTU  MAX-L2MTU MAC-ADDRESS      
+ 0  R  ;;; wan
+       ether1                              ether            1500                  52:54:00:12:34:56
+ 1  R  ether4                              ether            1500                  02:11:2A:3B:FF:C3
+ 2  R  ether5                              ether            1500                  02:1A:F2:F1:21:B5
+[admin@MikroTik] &gt; 
+</code></pre>
+<p>next thing, lets configure our ip using winbox, this is ip configuration
+<img src="server//assets/7dedfcaff5c700e6e724ad760e3b5fc2436b7c644d63310b24aaaf93490a6b8d5cf51677ce32e719a4e0237ec43dfd8ed5e624c58e890d7c37f81ce1.png" alt="image" /></p>
+<p>DHCP server section
+<img src="server//assets/ca1cdfa9afe3e1d127ce07a5c1e57d47f87842aa0d4804d3b926fcf883b73ed90cc602012200326be8fdbcb021a7f40fa974427ce40f6ccb530c9322.png" alt="image" /></p>
+<p>now, try run <code>udhcpc -i eth0</code> on each vm</p>
+<h1 id="result-on-pc-1"><a class="header" href="#result-on-pc-1">result on pc-1</a></h1>
+<p><img src="server//assets/4e13804d5d7b7ceb052ab19a79d8bf0720b28671348a035f0bfe9809eff022183489033a1c0c11482e99cb3c8dea4785747482724f5a37ab6ad8b61c.png" alt="image" /></p>
+<h1 id="result-on-pc-2"><a class="header" href="#result-on-pc-2">result on pc-2</a></h1>
+<p><img src="server//assets/1458eceef396746ef428f3d19210c34e564131ad6f30a26d5f075ef170fa0ae20f403f5dbf1f44d924f85b7105a51568576bb16246475772d26d0c55.png" alt="image" /></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="database"><a class="header" href="#database">Database</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="psql-command"><a class="header" href="#psql-command">psql command</a></h1>
 <h2 id="general"><a class="header" href="#general">General</a></h2>
@@ -2397,12 +2626,39 @@ Switch&gt;
                 -enable-kvm \
                 -boot order=d \
                 -cdrom Win10_22H2_English_x64v1.iso \
-                -drive file=tealinux.img,format=qcow2 \
+                -drive file=windows-tealinux-mbr.img,format=qcow2 \
                 -m 4G \
                 -enable-kvm \
                 -smp 4 \
                 -net user,hostfwd=tcp::20022-:22 \
                 -net nic
+</code></pre>
+<p>uefi version</p>
+<pre><code class="language-sh">qemu-system-x86_64 \
+                 -enable-kvm \
+                 -boot order=d \
+                 -cdrom Win10_22H2_English_x64v1.iso \
+                 -drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
+                 -drive if=pflash,format=raw,file=OVMF_VARS.4m.fd \
+                 -drive file=tealinux.img,format=qcow2 \
+                 -m 4G \
+                 -enable-kvm \
+                 -smp 4 \
+                 -net user,hostfwd=tcp::20022-:22
+</code></pre>
+<p>note: bug unwrap error</p>
+<pre><code class="language-sh">qemu-system-x86_64 \
+                      -enable-kvm \
+                      -boot order=d \
+                      -cdrom tealinux-2025.02.16-x86_64.iso \
+      -drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
+                      -drive if=pflash,format=raw,file=OVMF_VARS.4m.fd \
+                      -drive file=tealinux.img,format=qcow2 \
+                      -m 4G \
+                      -enable-kvm \
+                      -smp 4 \
+                      -net user,hostfwd=tcp::20022-:22 \
+      -net nic
 </code></pre>
 <h2 id="misc"><a class="header" href="#misc">misc</a></h2>
 <h3 id="add-more-drive"><a class="header" href="#add-more-drive">add more drive</a></h3>
