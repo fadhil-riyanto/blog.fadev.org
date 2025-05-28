@@ -43,6 +43,10 @@
 	- [Alpine install on live cd qemu](./server/alpine_install_on_live_cd_qemu.md)
 	- [Run router-OS on qemu](./server/run_router_os_on_qemu.md)
 	- [setup linux bridge between RouterOS & Alpine linux hosts](./server/setup_linux_bridge_routeros_alpine.md)
+	- [Linux iptables preview (try making a nat)](./server/iptables_nat.md)
+	- [Linux QEMU network address translation](./server/qemu_nat.md)
+	- [QEMU block 8.8.8.8 from host](./server/qemu_block_8888_from_host.md)
+	- [two alpine guest VM, block custom ports](./server/alpine_vm_block_custom_ports.md)
 
 - [Database](./database/readme-database.md)
 	- [psql command](./database/psql_command.md)

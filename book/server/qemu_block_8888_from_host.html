@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Database - Fadhil Books &amp; Notes</title>
+        <title>QEMU block 8.8.8.8 from host - Fadhil Books &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -157,17 +157,65 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="database"><a class="header" href="#database">Database</a></h1>
+                        <h1 id="qemu-block-8888-from-host"><a class="header" href="#qemu-block-8888-from-host">QEMU block 8.8.8.8 from host</a></h1>
+<p>after <a href="../server/qemu_nat.html">this</a></p>
+<p>I want this rule</p>
+<ul>
+<li>allow other ICMP (i.e 1.1.1.1)</li>
+<li>deny ICMP 8.8.8.8</li>
+</ul>
+<h1 id="iptables-rule"><a class="header" href="#iptables-rule">iptables rule</a></h1>
+<p>suppose, vm ip is 192.168.12.2, so the iptables command is</p>
+<pre><code class="language-sh">sudo iptables -t filter -A FORWARD -s 192.168.12.2 -d 8.8.8.8 -p icmp -j DROP
+</code></pre>
+<p>note:</p>
+<ul>
+<li>t: explicit table</li>
+<li>a: table FORWARD</li>
+<li>s: source from 192.168.12.2 (OUR VM)</li>
+<li>d: destination: 8.8.8.8</li>
+<li>p: protocol (which is ICMP)</li>
+<li>j: jump</li>
+</ul>
+<h1 id="the-problem"><a class="header" href="#the-problem">the problem</a></h1>
+<p>you may see ping 8.8.8.8 still success, let check iptables rule</p>
+<pre><code class="language-sh">sudo iptables -t filter -L FORWARD -n --line-numbers -v
+</code></pre>
+<p>the output</p>
+<pre><code class="language-txt">Chain FORWARD (policy ACCEPT)
+num  target     prot opt source               destination         
+1    ACCEPT     all  --  0.0.0.0/0            0.0.0.0/0            state RELATED,ESTABLISHED
+2    ACCEPT     all  --  0.0.0.0/0            0.0.0.0/0           
+3    DROP       icmp --  192.168.12.2         8.8.8.8             
+</code></pre>
+<p>see? when ping to 8.8.8.8, its stop at rule 2, which abort 3st rule, in order to fix it, we need re-order this</p>
+<p>remote all rule</p>
+<pre><code class="language-sh">sudo iptables -t filter -F FORWARD
+</code></pre>
+<p>re-add</p>
+<pre><code class="language-sh">sudo iptables -t filter -A FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
+sudo iptables -t filter -A FORWARD -s 192.168.12.2 -d 8.8.8.8 -p icmp -j DROP
+sudo iptables -t filter -A FORWARD -s 192.168.12.2/24 -j ACCEPT
+</code></pre>
+<p>Try re-run <code>sudo iptables -t filter -L FORWARD -n --line-numbers</code></p>
+<p>the order should be fixed</p>
+<pre><code class="language-txt">Chain FORWARD (policy ACCEPT)
+num  target     prot opt source               destination         
+1               all  --  0.0.0.0/0            0.0.0.0/0            state RELATED,ESTABLISHED
+2    DROP       icmp --  192.168.12.2         8.8.8.8             
+3    ACCEPT     all  --  0.0.0.0/0            0.0.0.0/0           
+</code></pre>
+<p><img src="/assets/fe70890c7092ec6722fc720cd7358a0107ebfa293c9a1474d84672fb2d07dddff6a1e8027dc13e5f047194144034338506a30d6420584eda58a6019b.png" alt="image" /></p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../server/alpine_vm_block_custom_ports.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../server/qemu_nat.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../database/psql_command.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../server/alpine_vm_block_custom_ports.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -177,11 +225,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../server/alpine_vm_block_custom_ports.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../server/qemu_nat.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../database/psql_command.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../server/alpine_vm_block_custom_ports.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

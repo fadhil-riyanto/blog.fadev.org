@@ -126,3 +126,9 @@ VLAN Name                             Status    Ports
 1005 trnet-default                    active    
 Switch>
 ```
+
+## tambahan 
+- encapsulation dot1q: router on stick routing
+
+
+### Advanced switch cisco command
