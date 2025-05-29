@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>two alpine guest VM, block custom ports - Fadhil Books &amp; Notes</title>
+        <title>logic netfilter linux kernel - Fadhil Books &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -157,17 +157,54 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="two-alpine-guest-vm-block-custom-ports"><a class="header" href="#two-alpine-guest-vm-block-custom-ports">two alpine guest VM, block custom ports</a></h1>
+                        <h1 id="logic-netfilter-linux-kernel"><a class="header" href="#logic-netfilter-linux-kernel">logic netfilter linux kernel</a></h1>
+<h1 id="logic-nat"><a class="header" href="#logic-nat">Logic NAT</a></h1>
+<p>misalkan kita ada virtual interface br0, dengan anggotanya tap0, tap1 lalu ingin forward semua traffic ke wlan0 (karna memang wlan0 tidak bisa di jadikan master dari x y z)</p>
+<p>maka solusinya iptables</p>
+<pre><code class="language-sh">sudo iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE
+</code></pre>
+<p>logic nya</p>
+<ul>
+<li>fill dulu tabel nat</li>
+<li>append ke postrouting, jadi setelah packet di routing oleh linux kernel, ada 2 field, source addr (katakanlah ip tap0) lalu destination addr (misal 8.8.8.8)</li>
+<li>nah, semisal tidak di apa apakan, packet sent ke 8.8.8.8, tapi 8.8.8.8 tidak bisa mengirim back packetnya karna source addr nya invalid (di stage ini, source ip nya adalah IP LAN)</li>
+<li>maka, setelah linux kernel meng-routingkan packet nya, seketika setelah itu (postrouting), kita ganti source addrnya dengan source ip PUBLIK milik firewall, jadi 8.8.8.8 bisa tahu kemana packet harus dikirim kembali</li>
+<li>didalam firewall, packet yang tadi diterima, direverse balik oleh nat, dan dikirim balik ke perangkat aslinya.</li>
+<li>pakai MASQUERADE</li>
+</ul>
+<h1 id="logic-forward-data-dari-br0-ke-wlan"><a class="header" href="#logic-forward-data-dari-br0-ke-wlan">logic forward data dari br0 ke wlan</a></h1>
+<pre><code class="language-sh">sudo iptables -A FORWARD -i br0 -o wlan0 -j ACCEPT
+</code></pre>
+<p>important notes:</p>
+<ul>
+<li>chain FORWARD: This chain is only used for packets that are not destined for the local machine, but are routed through it (i.e., from one interface to another).</li>
+<li>In this case: a device connected to br0 (e.g., a VM or container) wants to access the internet via wlan0.</li>
+</ul>
+<p>analoginya</p>
+<pre><code class="language-txt">[Device 192.168.100.2] ──&gt; [br0 (Linux bridge)] ──&gt; Linux router ──&gt; [wlan0] ──&gt; Internet
+</code></pre>
+<p>bisa juga -j diganti drop, maka aliran data akan terputus</p>
+<h1 id="logic-forward-dari-wlan0-ke-br0-sebaliknya"><a class="header" href="#logic-forward-dari-wlan0-ke-br0-sebaliknya">logic forward dari wlan0 ke br0 (sebaliknya)</a></h1>
+<pre><code class="language-sh">sudo iptables -A FORWARD -i wlan0 -o br0 -m state --state RELATED,ESTABLISHED -j ACCEPT
+</code></pre>
+<p>logic:</p>
+<ul>
+<li>misal vm tap0 buat koneksi keluar, misal ke 8.8.8.8</li>
+<li>dari tap0 -&gt; br0 -&gt; wlan0 di allow oleh rule <code>sudo iptables -A FORWARD -i br0 -o wlan0 -j ACCEPT</code></li>
+<li>ketika server mengirim respon balik, maka alurnya dari wlan0 ke br0, nah ini fungsi dari <code>sudo iptables -A FORWARD -i wlan0 -o br0 -j ACCEPT</code></li>
+</ul>
+<p>KENAPA harus pakai <code>--state RELATED,ESTABLISHED</code>
+karna kita butuh packet yg sudah estab duluan yg boleh lewat. ini akan menghindari jaringan luar (wlan0) mengakses br0 -&gt; tap0 &amp; tap1</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../server/qemu_block_8888_from_host.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../server/alpine_vm_block_custom_ports.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../server/logic_netfilter_linux_kernel.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../database/readme-database.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -177,11 +214,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../server/qemu_block_8888_from_host.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../server/alpine_vm_block_custom_ports.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../server/logic_netfilter_linux_kernel.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../database/readme-database.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

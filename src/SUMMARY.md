@@ -47,6 +47,7 @@
 	- [Linux QEMU network address translation](./server/qemu_nat.md)
 	- [QEMU block 8.8.8.8 from host](./server/qemu_block_8888_from_host.md)
 	- [two alpine guest VM, block custom ports](./server/alpine_vm_block_custom_ports.md)
+	- [logic netfilter linux kernel](./server/logic_netfilter_linux_kernel.md)
 
 - [Database](./database/readme-database.md)
 	- [psql command](./database/psql_command.md)

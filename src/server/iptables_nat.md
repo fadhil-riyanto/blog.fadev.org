@@ -49,9 +49,47 @@ iptables contains five tables:
 - filter is the default table, and is where all the actions typically associated with a firewall take place.
 - nat is used for network address translation (e.g. port forwarding).
 - mangle is used for specialized packet alterations.
-- security is used for Mandatory Access Control networking rules (e.g. SELinux -- see this article for more details).
+- security is used for Mandatory Access Control networking rules (e.g. SELinux -- [see this article](https://lwn.net/Articles/267140/) for more details).
 
 In most common use cases, you will only use two of these: filter and nat. The other tables are aimed at complex configurations involving multiple routers and routing decisions and are in any case beyond the scope of these introductory remarks. 
+
+# Tables & chain details
+
+all iptables chain information can be gathered by this command
+
+```sh
+sudo iptables -t filter -L
+sudo iptables -t nat -L
+sudo iptables -t mangle -L
+sudo iptables -t raw -L
+sudo iptables -t security -L
+```
+
+this is list of all chain by corresponding table
+
+## table `raw`
+  - PREROUTING
+  - OUTPUT
+## table `nat`
+  - PREROUTING
+  - INPUT
+  - OUTPUT
+  - POSTROUTING
+## table `mangle`
+  - PREROUTING
+  - INPUT
+  - FORWARD
+  - OUTPUT
+  - POSTROUTING
+## table `filter`
+  - INPUT
+  - FORWARD
+  - OUTPUT
+## table `security`
+  - INPUT
+  - FORWARD
+  - OUTPUT
+
 
 we will focus on `NAT` section.
 

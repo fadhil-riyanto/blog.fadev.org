@@ -204,9 +204,50 @@
 <li>filter is the default table, and is where all the actions typically associated with a firewall take place.</li>
 <li>nat is used for network address translation (e.g. port forwarding).</li>
 <li>mangle is used for specialized packet alterations.</li>
-<li>security is used for Mandatory Access Control networking rules (e.g. SELinux -- see this article for more details).</li>
+<li>security is used for Mandatory Access Control networking rules (e.g. SELinux -- <a href="https://lwn.net/Articles/267140/">see this article</a> for more details).</li>
 </ul>
 <p>In most common use cases, you will only use two of these: filter and nat. The other tables are aimed at complex configurations involving multiple routers and routing decisions and are in any case beyond the scope of these introductory remarks.</p>
+<h1 id="tables--chain-details"><a class="header" href="#tables--chain-details">Tables &amp; chain details</a></h1>
+<p>all iptables chain information can be gathered by this command</p>
+<pre><code class="language-sh">sudo iptables -t filter -L
+sudo iptables -t nat -L
+sudo iptables -t mangle -L
+sudo iptables -t raw -L
+sudo iptables -t security -L
+</code></pre>
+<p>this is list of all chain by corresponding table</p>
+<h2 id="table-raw"><a class="header" href="#table-raw">table <code>raw</code></a></h2>
+<ul>
+<li>PREROUTING</li>
+<li>OUTPUT</li>
+</ul>
+<h2 id="table-nat"><a class="header" href="#table-nat">table <code>nat</code></a></h2>
+<ul>
+<li>PREROUTING</li>
+<li>INPUT</li>
+<li>OUTPUT</li>
+<li>POSTROUTING</li>
+</ul>
+<h2 id="table-mangle"><a class="header" href="#table-mangle">table <code>mangle</code></a></h2>
+<ul>
+<li>PREROUTING</li>
+<li>INPUT</li>
+<li>FORWARD</li>
+<li>OUTPUT</li>
+<li>POSTROUTING</li>
+</ul>
+<h2 id="table-filter"><a class="header" href="#table-filter">table <code>filter</code></a></h2>
+<ul>
+<li>INPUT</li>
+<li>FORWARD</li>
+<li>OUTPUT</li>
+</ul>
+<h2 id="table-security"><a class="header" href="#table-security">table <code>security</code></a></h2>
+<ul>
+<li>INPUT</li>
+<li>FORWARD</li>
+<li>OUTPUT</li>
+</ul>
 <p>we will focus on <code>NAT</code> section.</p>
 <h1 id="machine-session"><a class="header" href="#machine-session">machine session</a></h1>
 <p>In iptables, packet often categorized as 4 different state, such</p>
