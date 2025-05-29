@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>ip command - Fadhil Books &amp; Notes</title>
+        <title>mikrotik firewall - Fadhil Books &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -157,81 +157,78 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="ip-command"><a class="header" href="#ip-command">ip command</a></h1>
-<h2 id="ip-addr"><a class="header" href="#ip-addr"><code>ip addr</code></a></h2>
-<p>ip addr is used to display and manage IP addresses assigned to network interfaces.</p>
-<p>example:</p>
+                        <h1 id="mikrotik-firewall"><a class="header" href="#mikrotik-firewall">mikrotik firewall</a></h1>
+<p>each firewall module (called as table in iptables) has its own predefined chain</p>
 <ul>
-<li><code>ip addr</code></li>
-<li><code>ip addr show</code></li>
-<li><code>sudo ip addr add 192.168.1.100/24 dev eth0</code></li>
-<li><code>sudo ip addr del 192.168.1.100/24 dev eth0</code></li>
-</ul>
-<p>anything about ip assigment</p>
-<h2 id="ip-link"><a class="header" href="#ip-link"><code>ip link</code></a></h2>
-<p>ip link is used to display and manage network interfaces (links), focusing on layer 2 (Ethernet, loopback, etc.), not IP addresses.</p>
-<p>example:</p>
+<li>
+<p>raw:
+dipakai sebelum data dilihat oleh conntrack, NAT, masuk routing, dll. intinya di sinilah proses early sebelum benar2 di proses. karna belum sampai ke conntrack, maka akan sangat fast, dipakai untuk mitigasi ddos</p>
+<p>karna statenya ada sebelum conntrack, maka tidak ada status kayak estab, dll, tapi sangat fast + low cpu, only raw matching</p>
+<p>Karna raw table melihat packet sebelum NAT, maka</p>
 <ul>
-<li><code>ip link</code></li>
-<li><code>sudo ip link set dev eth0 up</code></li>
-<li><code>sudo ip link set dev eth0 down</code></li>
-<li><code>sudo ip link set dev eth0 mtu 1400</code></li>
+<li>Destination IPs are still the original IPs from the client</li>
+<li>Source IPs haven't been changed by masquerade or src-nat yet</li>
 </ul>
-<p>anyting about interface</p>
-<h2 id="ip-tuntap"><a class="header" href="#ip-tuntap"><code>ip tuntap</code></a></h2>
-<p>ip tuntap manages TUN/TAP virtual network interfaces, which provide a way for user-space programs to interact with network packets as if they were network devices.</p>
+<p>chain chain nya</p>
 <ul>
-<li>TUN: Simulates a point-to-point device (layer 3), used for routing IP packets (e.g., VPN tunnels).</li>
-<li>TAP: Simulates an Ethernet device (layer 2), used for bridging Ethernet frames (e.g., virtual switches, VMs).</li>
+<li>prerouting: packet yang datang dari luar just sebelum masuk conntrack</li>
+<li>output: packet yang digenerate oleh aplikasi, juga statenya sebelum di track oleh conntrack</li>
 </ul>
-<p>example:</p>
+<h2 id="contoh"><a class="header" href="#contoh">contoh</a></h2>
 <ul>
-<li><code>sudo ip tuntap add mode tap dev tap0</code></li>
-<li><code>sudo ip tuntap add mode tun dev tun0</code></li>
-<li><code>sudo ip tuntap del mode tap dev tap0</code></li>
+<li><code>/ip firewall raw add chain=prerouting src-address=8.8.8.8 action=drop</code></li>
 </ul>
-<h2 id="ip-route"><a class="header" href="#ip-route"><code>ip route</code></a></h2>
-<p>IP routing is the process by which data packets are directed from their source to their destination across interconnected networks using Internet Protocol (IP). This process is fundamental to the operation of the Internet and all IP-based networks.</p>
-<ul>
-<li><a href="https://www.link11.com/en/glossar/ip-routing/">https://www.link11.com/en/glossar/ip-routing/</a></li>
-<li><a href="https://www.cloudflare.com/learning/network-layer/what-is-routing/">https://www.cloudflare.com/learning/network-layer/what-is-routing/</a></li>
-<li><a href="https://info.support.huawei.com/info-finder/encyclopedia/en/IP+routing.html">https://info.support.huawei.com/info-finder/encyclopedia/en/IP+routing.html</a></li>
-</ul>
-<p>View routing table:</p>
-<ul>
-<li><code>ip route</code></li>
-</ul>
-<p>add route</p>
-<ul>
-<li><code>ip route add &lt;destination&gt; via &lt;gateway&gt; dev &lt;interface&gt;</code></li>
-</ul>
-<p>example:</p>
-<pre><code class="language-sh">pc-1:~# ip route add default via 192.168.15.1 dev eth0
-pc-1:~# ip route
-default via 192.168.15.1 dev eth0 
-192.168.15.0/24 dev eth0 scope link  src 192.168.15.2 
-
+<h2 id="tambahan"><a class="header" href="#tambahan">tambahan:</a></h2>
+<p>letak raw di packet flow</p>
+<pre><code class="language-txt">IN → RAW → MANGLE (pre) → CONNECTION TRACKING → NAT (dstnat) → FILTER (input/forward) → MANGLE (post) → NAT (srcnat) → OUT
 </code></pre>
-<p>delete route</p>
+</li>
+<li>
+<p>filter</p>
 <ul>
-<li><code>sudo ip route del &lt;destination&gt; [via &lt;gateway&gt;] [dev &lt;interface&gt;]</code></li>
+<li>input</li>
+<li>forward</li>
+<li>output</li>
 </ul>
-<p>example:</p>
-<pre><code class="language-sh">pc-1:~# ip route delete default via 192.168.15.1 dev eth0
-pc-1:~# ip r
-192.168.15.0/24 dev eth0 scope link  src 192.168.15.2 
-pc-1:~# 
-</code></pre>
+</li>
+<li>
+<p>mangle</p>
+<ul>
+<li>prerouting</li>
+<li>input</li>
+<li>forward</li>
+<li>output</li>
+<li>postrouting</li>
+<li></li>
+</ul>
+</li>
+<li>
+<p>nat</p>
+<ul>
+<li>srcnat</li>
+<li>dstnat</li>
+</ul>
+</li>
+</ul>
+<h1 id="chains"><a class="header" href="#chains">chains</a></h1>
+<p>RouterOS consist of a few default chains. These chains allow you to filter packets at various points:</p>
+<ul>
+<li>The PREROUTING chain: Rules in this chain apply to packets as they just arrive on the network interface. This chain is present in the nat, mangle and raw tables.</li>
+<li>The INPUT chain: Rules in this chain apply to packets just before they’re given to a local process. This chain is present in the mangle and filter tables.</li>
+<li>The OUTPUT chain: The rules here apply to packets just after they’ve been produced by a process. This chain is present in the raw, mangle, nat, and filter tables.</li>
+<li>The FORWARD chain: The rules here apply to any packets that are routed through the current host. This chain is only present in the mangle and filter tables.</li>
+<li>The POSTROUTING chain: The rules in this chain apply to packets as they just leave the network interface. This chain is present in the nat and mangle tables.</li>
+</ul>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../server/resep_nginx.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../server/qemu_default_network.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../server/qemu_default_network.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../server/bring_wlan0_conn_to_netns.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -241,11 +238,11 @@ pc-1:~#
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../server/resep_nginx.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../server/qemu_default_network.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../server/qemu_default_network.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../server/bring_wlan0_conn_to_netns.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

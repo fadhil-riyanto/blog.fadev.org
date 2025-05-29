@@ -2327,6 +2327,189 @@ server {
 <li><code>sudo ip tuntap add mode tun dev tun0</code></li>
 <li><code>sudo ip tuntap del mode tap dev tap0</code></li>
 </ul>
+<h2 id="ip-route"><a class="header" href="#ip-route"><code>ip route</code></a></h2>
+<p>IP routing is the process by which data packets are directed from their source to their destination across interconnected networks using Internet Protocol (IP). This process is fundamental to the operation of the Internet and all IP-based networks.</p>
+<ul>
+<li><a href="https://www.link11.com/en/glossar/ip-routing/">https://www.link11.com/en/glossar/ip-routing/</a></li>
+<li><a href="https://www.cloudflare.com/learning/network-layer/what-is-routing/">https://www.cloudflare.com/learning/network-layer/what-is-routing/</a></li>
+<li><a href="https://info.support.huawei.com/info-finder/encyclopedia/en/IP+routing.html">https://info.support.huawei.com/info-finder/encyclopedia/en/IP+routing.html</a></li>
+</ul>
+<p>View routing table:</p>
+<ul>
+<li><code>ip route</code></li>
+</ul>
+<p>add route</p>
+<ul>
+<li><code>ip route add &lt;destination&gt; via &lt;gateway&gt; dev &lt;interface&gt;</code></li>
+</ul>
+<p>example:</p>
+<pre><code class="language-sh">pc-1:~# ip route add default via 192.168.15.1 dev eth0
+pc-1:~# ip route
+default via 192.168.15.1 dev eth0 
+192.168.15.0/24 dev eth0 scope link  src 192.168.15.2 
+
+</code></pre>
+<p>delete route</p>
+<ul>
+<li><code>sudo ip route del &lt;destination&gt; [via &lt;gateway&gt;] [dev &lt;interface&gt;]</code></li>
+</ul>
+<p>example:</p>
+<pre><code class="language-sh">pc-1:~# ip route delete default via 192.168.15.1 dev eth0
+pc-1:~# ip r
+192.168.15.0/24 dev eth0 scope link  src 192.168.15.2 
+pc-1:~# 
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="qemu-default-network"><a class="header" href="#qemu-default-network">qemu default network</a></h1>
+<p>The default gateway in QEMU when using the default user-mode networking (SLIRP) is typically 10.0.2.2 on the network 10.0.2.0/24. QEMU creates a virtual NAT network where the guest is assigned an IP like 10.0.2.15 by DHCP, and the gateway for the guest to reach outside networks is 10.0.2.2. This gateway is implemented inside QEMU and handles routing and NAT for the guest's traffic.</p>
+<ul>
+<li>Default network: 10.0.2.0/24</li>
+<li>Default gateway: 10.0.2.2</li>
+<li>Default guest IP (DHCP assigned): 10.0.2.15</li>
+<li>Default DNS server in guest: 10.0.2.3</li>
+</ul>
+<p>This setup requires no special host configuration or root privileges and is the default networking mode for QEMU user mode networking.</p>
+<p>additional</p>
+<ul>
+<li><a href="https://docs.zephyrproject.org/latest/connectivity/networking/qemu_user_setup.html">https://docs.zephyrproject.org/latest/connectivity/networking/qemu_user_setup.html</a></li>
+<li><a href="https://darnassus.sceen.net/~hurd-web/hurd/running/qemu/networking/">https://darnassus.sceen.net/~hurd-web/hurd/running/qemu/networking/</a></li>
+<li><a href="https://wiki.qemu.org/Documentation/Networking">https://wiki.qemu.org/Documentation/Networking</a></li>
+</ul>
+<p><img src="server//assets/48f2d507fd958141a00b350df469bf5d076debc3f89ecb8785b87ff2f44e56f5eeb4ab6639640679f02cf29cbb0942992cfd0d92592042be8685c4ae.png" alt="image" /></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="mikrotik-firewall"><a class="header" href="#mikrotik-firewall">mikrotik firewall</a></h1>
+<p>each firewall module (called as table in iptables) has its own predefined chain</p>
+<ul>
+<li>
+<p>raw:
+dipakai sebelum data dilihat oleh conntrack, NAT, masuk routing, dll. intinya di sinilah proses early sebelum benar2 di proses. karna belum sampai ke conntrack, maka akan sangat fast, dipakai untuk mitigasi ddos</p>
+<p>karna statenya ada sebelum conntrack, maka tidak ada status kayak estab, dll, tapi sangat fast + low cpu, only raw matching</p>
+<p>Karna raw table melihat packet sebelum NAT, maka</p>
+<ul>
+<li>Destination IPs are still the original IPs from the client</li>
+<li>Source IPs haven't been changed by masquerade or src-nat yet</li>
+</ul>
+<p>chain chain nya</p>
+<ul>
+<li>prerouting: packet yang datang dari luar just sebelum masuk conntrack</li>
+<li>output: packet yang digenerate oleh aplikasi, juga statenya sebelum di track oleh conntrack</li>
+</ul>
+<h2 id="contoh"><a class="header" href="#contoh">contoh</a></h2>
+<ul>
+<li><code>/ip firewall raw add chain=prerouting src-address=8.8.8.8 action=drop</code></li>
+</ul>
+<h2 id="tambahan-1"><a class="header" href="#tambahan-1">tambahan:</a></h2>
+<p>letak raw di packet flow</p>
+<pre><code class="language-txt">IN → RAW → MANGLE (pre) → CONNECTION TRACKING → NAT (dstnat) → FILTER (input/forward) → MANGLE (post) → NAT (srcnat) → OUT
+</code></pre>
+</li>
+<li>
+<p>filter</p>
+<ul>
+<li>input</li>
+<li>forward</li>
+<li>output</li>
+</ul>
+</li>
+<li>
+<p>mangle</p>
+<ul>
+<li>prerouting</li>
+<li>input</li>
+<li>forward</li>
+<li>output</li>
+<li>postrouting</li>
+<li></li>
+</ul>
+</li>
+<li>
+<p>nat</p>
+<ul>
+<li>srcnat</li>
+<li>dstnat</li>
+</ul>
+</li>
+</ul>
+<h1 id="chains"><a class="header" href="#chains">chains</a></h1>
+<p>RouterOS consist of a few default chains. These chains allow you to filter packets at various points:</p>
+<ul>
+<li>The PREROUTING chain: Rules in this chain apply to packets as they just arrive on the network interface. This chain is present in the nat, mangle and raw tables.</li>
+<li>The INPUT chain: Rules in this chain apply to packets just before they’re given to a local process. This chain is present in the mangle and filter tables.</li>
+<li>The OUTPUT chain: The rules here apply to packets just after they’ve been produced by a process. This chain is present in the raw, mangle, nat, and filter tables.</li>
+<li>The FORWARD chain: The rules here apply to any packets that are routed through the current host. This chain is only present in the mangle and filter tables.</li>
+<li>The POSTROUTING chain: The rules in this chain apply to packets as they just leave the network interface. This chain is present in the nat and mangle tables.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="bring-wlan0-connectivity-to-the-network-namespace-linux--test-routeros"><a class="header" href="#bring-wlan0-connectivity-to-the-network-namespace-linux--test-routeros">bring wlan0 connectivity to the network namespace linux &amp; test routerOS</a></h1>
+<h1 id="setup-network-namespace"><a class="header" href="#setup-network-namespace">setup network namespace</a></h1>
+<ul>
+<li><code>sudo ip netns add firefoxns</code></li>
+<li><code>sudo ip netns exec firefoxns ip link add br0-lan type bridge</code></li>
+<li><code>sudo ip netns exec firefoxns ip tuntap add tap0 mode tap</code></li>
+<li><code>sudo ip netns exec firefoxns ip tuntap add tap1 mode tap</code></li>
+<li><code>sudo ip netns exec firefoxns ip tuntap add tap2 mode tap</code></li>
+<li><code>sudo ip netns exec firefoxns ip link set dev tap0 master br0-lan</code></li>
+<li><code>sudo ip netns exec firefoxns ip link set dev tap1 master br0-lan</code></li>
+<li><code>sudo ip netns exec firefoxns ip link set dev tap2 master br0-lan</code></li>
+</ul>
+<h1 id="enable-the-network-interface-inside-netns"><a class="header" href="#enable-the-network-interface-inside-netns">enable the network interface (inside netns)</a></h1>
+<ul>
+<li><code>sudo ip netns exec firefoxns ip link set br0-lan up</code></li>
+<li><code>sudo ip netns exec firefoxns ip link set tap0 up</code></li>
+<li><code>sudo ip netns exec firefoxns ip link set tap1 up</code></li>
+<li><code>sudo ip netns exec firefoxns ip link set tap2 up</code></li>
+</ul>
+<h1 id="create-virtual-eth-pair-between-host--netns"><a class="header" href="#create-virtual-eth-pair-between-host--netns">create virtual eth pair between host &amp; netns</a></h1>
+<ul>
+<li><code>sudo ip link add veth0 type veth peer name veth0-peer</code></li>
+<li><code>sudo ip link set veth0-peer netns firefoxns</code></li>
+</ul>
+<h1 id="assign-ip-for-virtual-eth--virtual-eth-peer"><a class="header" href="#assign-ip-for-virtual-eth--virtual-eth-peer">assign ip for virtual eth &amp; virtual eth peer</a></h1>
+<ul>
+<li><code>sudo ip addr add 10.200.1.1/24 dev veth0</code></li>
+<li><code>sudo ip netns exec firefoxns ip addr add 10.200.1.2/24 dev veth0-peer</code></li>
+<li><code>sudo ip link set veth0 up</code></li>
+<li><code>sudo ip netns exec firefoxns ip link set veth0 up</code></li>
+</ul>
+<h1 id="setup-routing-table"><a class="header" href="#setup-routing-table">setup routing table</a></h1>
+<ul>
+<li><code>sudo ip netns exec firefoxns ip route add default via 10.200.1.1</code></li>
+</ul>
+<h1 id="setup-ip-forwarding--network-address-translation"><a class="header" href="#setup-ip-forwarding--network-address-translation">setup ip forwarding &amp; network address translation</a></h1>
+<ul>
+<li><code>sudo sysctl -w net.ipv4.ip_forward=1</code></li>
+<li><code>sudo iptables -t nat -A POSTROUTING -s 10.200.1.0/24 -o wlan0 -j MASQUERADE</code></li>
+</ul>
+<h1 id="test"><a class="header" href="#test">test</a></h1>
+<ul>
+<li><code>sudo ip netns exec ping 1.1.1.1</code></li>
+</ul>
+<h1 id="now-run-routeros--alpine-inside-of-netns"><a class="header" href="#now-run-routeros--alpine-inside-of-netns">now, run routeros &amp; alpine inside of netns</a></h1>
+<h2 id="routeros"><a class="header" href="#routeros">routeros</a></h2>
+<pre><code class="language-sh">sudo ip netns exec firefoxns qemu-system-x86_64 \
+            -enable-kvm \
+            -m 256 \
+            -smp 4 \
+            -cpu host \
+            -drive file=chr.qcow2,format=qcow2 \
+            -boot d \
+            -nographic \
+            -netdev tap,id=net0,ifname=tap0,script=no,downscript=no \
+            -device virtio-net-pci,netdev=net0,mac=02:aa:bb:cc:dd:ee \
+            -net user,hostfwd=tcp::8291-:8291 \
+            -net nic
+</code></pre>
+<h2 id="alpine"><a class="header" href="#alpine">alpine</a></h2>
+<pre><code class="language-sh">sudo ip netns exec firefoxns qemu-system-x86_64 \
+            -enable-kvm \
+            -m 256 \
+            -smp 4 \
+            -cpu host \
+            -drive file=pc-2.qcow2,format=qcow2 \
+            -cdrom alpine-virt-3.21.3-x86_64.iso \
+            -boot d \
+            -nographic \
+            -netdev tap,id=net0,ifname=tap2,script=no,downscript=no \
+            -device virtio-net-pci,netdev=net0,mac=$(randommac)
+
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="database"><a class="header" href="#database">Database</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="psql-command"><a class="header" href="#psql-command">psql command</a></h1>
 <h2 id="general"><a class="header" href="#general">General</a></h2>
@@ -3025,14 +3208,14 @@ max int int 24 bit: 16777216</p>
 <h1 id="kumpulan-rumus-rumus"><a class="header" href="#kumpulan-rumus-rumus">kumpulan rumus rumus</a></h1>
 <h2 id="subnet"><a class="header" href="#subnet">subnet</a></h2>
 <p>rumusnya: \( 2^{jumlah \space angka \space 1 \space di \space setiap \space padding \space subnet}\)</p>
-<h3 id="contoh"><a class="header" href="#contoh">contoh</a></h3>
+<h3 id="contoh-1"><a class="header" href="#contoh-1">contoh</a></h3>
 <ul>
 <li>prefix /19, pad terdekatnya /16, maka dari 16 ke 19 ada 3 angka 1 (<code>0b11100000</code>), maka jumlah subnet yang akan terbentuk adalah 2^3 = 8 subnet</li>
 <li>prefix /26, pad terdekatnya 24, maka dari 24 ke 26 ada 2 angka 1 (<code>0b11000000</code>), maka jumlah subnetnya 2^2 = 4</li>
 </ul>
 <h2 id="jumlah-hosts"><a class="header" href="#jumlah-hosts">jumlah hosts</a></h2>
 <p>rumusnya: \( 2^{jumlah \space angka \space 0 \space dari \space 32} \)</p>
-<h3 id="contoh-1"><a class="header" href="#contoh-1">contoh</a></h3>
+<h3 id="contoh-2"><a class="header" href="#contoh-2">contoh</a></h3>
 <ul>
 <li>prefix /19, 32 - 19 = 13 angka 0, maka \( 2^{13} = 8192 \space hosts \)</li>
 <li>prefix /26, 32 - 26 = 6 angka 0, maka \( 2^{6} = 64 \space hosts \)</li>
@@ -3150,7 +3333,7 @@ VLAN Name                             Status    Ports
 1005 trnet-default                    active    
 Switch&gt;
 </code></pre>
-<h2 id="tambahan-1"><a class="header" href="#tambahan-1">tambahan</a></h2>
+<h2 id="tambahan-2"><a class="header" href="#tambahan-2">tambahan</a></h2>
 <ul>
 <li>encapsulation dot1q: router on stick routing</li>
 </ul>
@@ -3266,6 +3449,7 @@ Switch&gt;
 <p>imagine you need to forward another port, not only ssh, the correct command is
 <code>-net user,hostfwd=tcp::10022-:22,hostfwd=tcp::8080-:8080,hostfwd=tcp::5173-:5173</code></p>
 <p>5173 is our port.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="binary-operation"><a class="header" href="#binary-operation">binary operation</a></h1>
 
                     </main>
 

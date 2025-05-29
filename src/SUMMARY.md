@@ -61,6 +61,9 @@
 	- [logic netfilter linux kernel](./server/logic_netfilter_linux_kernel.md)
 	- [resep nginx oleh pak hanif](./server/resep_nginx.md)
 	- [ip command](./server/ip_command.md)
+	- [qemu default network](./server/qemu_default_network.md)
+	- [mikrotik firewall](./server/mikrotik_firewall.md)
+	- [bring wlan0 connectivity to the network namespace linux & test routerOS](./server/bring_wlan0_conn_to_netns.md)
 
 - [Database](./database/readme-database.md)
 	- [psql command](./database/psql_command.md)
@@ -79,3 +82,4 @@
 	- [Subnetting](./other/subnetting.md)
 	- [Inter-VLAN routing](./other/intervlan-routing.md)
 	- [Tealinux qemu promp & testing](./other/tealinux-promp-testing.md)
+	- [binary operation](./other/binary_operation.md)
