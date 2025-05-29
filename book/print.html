@@ -364,6 +364,176 @@ full 64 bit move</p>
 </code></pre>
 <p><a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/fs/ext4/ext4.h#n2188">https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/fs/ext4/ext4.h#n2188</a></p>
 <p><a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/fs/ext4/ext4.h#n2024">https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/fs/ext4/ext4.h#n2024</a></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="qemu-custom-cpio-hda"><a class="header" href="#qemu-custom-cpio-hda">qemu custom cpio HDA</a></h1>
+<p>skrip init custom linux</p>
+<pre><code class="language-sh">qemu-system-x86_64 \-kernel ./vmlinux \
+                                                 -nographic \
+                                                 --append "console=tty0 console=ttyS0 panic=1 root=/dev/sda rootfstype=ext2" \
+                                                 -hda root.img \
+                                                 -m 1024 \
+                                                 -vga none \
+                                                 -display none \
+                                                 -serial mon:stdio \
+                                                 -no-reboot \
+                                                 -initrd vfs/root.cpio.gz
+</code></pre>
+<p>generate cpio</p>
+<pre><code class="language-sh">find . | cpio -o -H newc | gzip &gt; root.cpio.gz
+``</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="step-tcp"><a class="header" href="#step-tcp">step TCP</a></h1>
+<p>TCP steps</p>
+<ul>
+<li>isi dulu sockaddr_storage, isi pakai inet_pton(); .so_family = AF_INET; sin_port = htons(port)</li>
+<li>syscall socket(AF_INET, SOCK_STREAM, 0);</li>
+<li>setsocksopt(fd, SO_REUSEADDR = 1)</li>
+<li>bind(fd, ss_addr (cast dulu ke sockaddr_in), len nya)</li>
+<li>listen()</li>
+</ul>
+<p>penjelasan ttg kenapa pakai sockaddr_storage dipakai
+https://stackoverflow.com/questions/19528820/difference-between-sockaddr-and-sockaddr-storage</p>
+<p>kenapa harus setsocksopt SO_REUSEADDR? karna jika tidak, TCP Masuk ke timewait state.</p>
+<p>sekiranya itu aja sih step TCP ini. untuk UDP pakai aja dgram.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="gdb-attach"><a class="header" href="#gdb-attach">GDB attach</a></h1>
+<p>jadi ceritanya, ada bug yg kala di run di terminal, ia buggy, pas di run di gdb, dia gak error sama sekali</p>
+<p>gw bingung dah, nah disini. ternyata ada trick nya</p>
+<ul>
+<li>
+<p>jalanin dulu programnya kek biasa di terminal, dah running kan</p>
+</li>
+<li>
+<p>ambil pid nya pakai ps aux | grep xyz</p>
+</li>
+<li>
+<p>setelah dapet pid nya, jalankan gdb dengan mode attach pid</p>
+</li>
+</ul>
+<p>pakai <code>sudo gdb -p 12345</code></p>
+<ul>
+<li>program akan freeze sejenak, pencet <code>c</code>, <code>enter</code></li>
+</ul>
+<p>nah, lakukan cara yg dipake buat reproduce bug nya, misal pakai nc buat nyepam tcp ke program. ok dapet bug nya</p>
+<p>ni kalau kata orang internet, beberapa bug kek app multi thread agak susah di caught. pakai valgrind pun perlu flags2 khusus buat inspect sampai thread nya</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="hasil-oprek-socket-programming-case-socks5-server"><a class="header" href="#hasil-oprek-socket-programming-case-socks5-server">hasil oprek socket programming, case socks5 server</a></h1>
+<p>bagian IETF SOCKS5 section 6</p>
+<p><a href="https://datatracker.ietf.org/doc/html/rfc1928#section-6">https://datatracker.ietf.org/doc/html/rfc1928#section-6</a></p>
+<p>BND.ADDR haruslah berupa IPV4/IPV6 address, bukan domain :)</p>
+<p>secara general, bentuk packet yg akan dikirim untuk versi IPV4 seperti ini</p>
+<pre><code class="language-txt">[0] [VER] =&gt; 0x5
+[1] [REP] =&gt; 0x0
+[2] [RSV] =&gt; 0x0
+[3] [ATYP] =&gt; 0x1 atau 0x4
+[4] [BND.ADDR] 0xac
+[5] [BND.ADDR] 0x43
+[6] [BND.ADDR] 0x93
+[7] [BND.ADDR] 0x39
+[8] [BND.PORT] 0x50 
+[9] [BND.PORT] 0x50
+</code></pre>
+<p>maka perhitungannya memory awal + 4 (karna 4 field dah dipakai), start dari sini, insert 4 oktet lagi ipv4 address, lalu insert 2 oktet uint8 sebagai port.</p>
+<p>bagian BND.PORT itu unsigned int 16 bit. jadi harus digabung bitnya + diubah dari network order ke host order</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="fix-ncurses-kernel-build"><a class="header" href="#fix-ncurses-kernel-build">fix ncurses kernel build</a></h1>
+<p>suppose</p>
+<pre><code class="language-txt">*** Unable to find the ncurses libraries or the
+ *** required header files.
+ *** 'make menuconfig' requires the ncurses libraries.
+ *** 
+ *** Install ncurses (ncurses-devel) and try again.
+ *** 
+make[2]: *** [/home/fadhil_riyanto/linux-kernel/busybox-1.37.0/scripts/kconfig/lxdialog/Makefile:15: scripts/kconfig/lxdialog/dochecklxdialog] Error 1
+make[1]: *** [/home/fadhil_riyanto/linux-kernel/busybox-1.37.0/scripts/kconfig/Makefile:14: menuconfig] Error 2
+make: *** [Makefile:444: menuconfig] Error 2
+</code></pre>
+<p>maka solusi
+<code>nano scripts/kconfig/lxdialog/Makefile</code></p>
+<p>ubah</p>
+<pre><code class="language-txt">always         := $(hostprogs-y) dochecklxdialog
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="php-src-variadic-params"><a class="header" href="#php-src-variadic-params">PHP-SRC variadic params</a></h1>
+<p>the source code: <a href="https://github.com/php/php-src/blob/ba6c00505d4218ff9fe4feb060f636524acfb125/ext/standard/array.c#L1204">https://github.com/php/php-src/blob/ba6c00505d4218ff9fe4feb060f636524acfb125/ext/standard/array.c#L1204</a></p>
+<p>mayan ngebantu jg gw ngepahami variadic params di php.
+ref: <a href="https://www.zend.com/resources/php-extensions/basic-php-structures">https://www.zend.com/resources/php-extensions/basic-php-structures</a></p>
+<p>selfnote :</p>
+<p>ZEND_PARSE_PARAMETERS_START(num_required_args, num_max_args)
+Z_PARAM_VARIADIC('*' or '+', destptr, argc);</p>
+<p>catatan:</p>
+<ul>
+<li>* nol atau lebih parameter</li>
+<li>+ satu atau lebih parameter</li>
+</ul>
+<p>nb: akan diupdate berkala</p>
+<p>ref: https://wiki.php.net/rfc/fast_zpp</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="php-src-minit"><a class="header" href="#php-src-minit">PHP-SRC minit()</a></h1>
+<p><a href="https://github.com/php/php-src/blob/3704947696fe0ee93e025fa85621d297ac7a1e4d/main/main.c#L2009">https://github.com/php/php-src/blob/3704947696fe0ee93e025fa85621d297ac7a1e4d/main/main.c#L2009</a></p>
+<p>Ketika module PHP diload ke zend engine, yang dipanggil adalah MINIT(), di step ini yg terjadi cuman memory alokasi di ZendMM, dan disini engga ada process atau thread yg dijalan, pure cuman initialisasi data</p>
+<p>nah, yang mentrigger MINIT() adalah zend_startup_modules(), trus secara beurutan, ia jg manggil RINIT() via PHP_RINIT_FUNCTION()</p>
+<p>struct nya
+<img src="sysprog//assets/71ee438d7728f41eb71942cc4e8b9693efcc03aa4ffd227e6c035b6aa383863ef79c48eb122af41f7ef3ec4eb4623a48560272461dc5ba20f83fd296.png" alt="image" /> zend_result (*request_startup_func)(INIT_FUNC_ARGS);</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="gcc-compiler-visibility"><a class="header" href="#gcc-compiler-visibility">gcc compiler visibility</a></h1>
+<p>intresting buat diulik</p>
+<pre><code class="language-cc">class rectangle {
+        int width, height;
+
+        public:
+                void set_value(int, int);
+                int area();
+};
+
+void rectangle::set_value(int x, int y) 
+{
+        width = x;
+        height = y;
+}
+
+
+int rectangle::area()
+{
+        return width * height;
+}
+
+</code></pre>
+<p>compile pakai</p>
+<ul>
+<li><code>g++ -Wall -c -fPIC abc.cc</code></li>
+<li><code>g++ -o librec.so --shared abc.o</code></li>
+<li><code>nm -C librec.so</code></li>
+</ul>
+<p>akan ada</p>
+<pre><code class="language-txt">000000000000110e T rectangle::area()
+00000000000010ea T rectangle::set_value(int, int)
+</code></pre>
+<p>nah, disitu kalau di compile pakai <code>-fvisibility=hidden</code>
+ntar pas di cek pakai
+<code>nm -CD librec.so </code></p>
+<p>bakalan gak ada. nah ini ada kaitannya sama
+<code>__attribute__ ((visibility ("hidden")))</code></p>
+<p>tambahan: <a href="https://groups.google.com/g/ode-users/c/T3qiy-4dviQ">https://groups.google.com/g/ode-users/c/T3qiy-4dviQ</a></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="load-effective-address"><a class="header" href="#load-effective-address">load effective address</a></h1>
+<p>computes a memory address using the same arithmetic that a MOV instruction uses. But unlike the MOV instruction, the LEA instruction just stores the computed address in its target register, instead of loading the contents of that address and storing it.</p>
+<p>Consider your first LEA instruction:</p>
+<p>tldr nya: mov bisa mengkalkulasi operasi aritmetika dari alamat memori, trus ngambil isinya
+kalau lea, ia cuman mengkalkulasi alamatnya, hasil itung2an nya disimpan ke operand2</p>
+<pre><code class="language-asm">lea -0x18(%ebp), %ebx
+</code></pre>
+<p>tambahan catatan</p>
+<p>mov (op1, op2, op3), dest</p>
+<p>equal (pseudo):
+mov op1 + op2 * op3, dest</p>
+<p>and
+lea op1(op2), dest</p>
+<p>equal
+lea op2 + op1, dest (address of op2 + op1, store result into dest)</p>
+<p>bahasan tentang rip
+<a href="https://stackoverflow.com/questions/54745872/how-do-rip-relative-variable-references-like-rip-a-in-x86-64-gas-intel-sy">https://stackoverflow.com/questions/54745872/how-do-rip-relative-variable-references-like-rip-a-in-x86-64-gas-intel-sy</a></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="att-asm-prelude"><a class="header" href="#att-asm-prelude">AT&amp;T asm prelude</a></h1>
+<p>push eax
+equal with:
+mov [esp], eax
+sub esp, 4</p>
+<p>pop eax
+get values out of stack
+equal with</p>
+<p>add rsp, 4
+mov eax, [esp]</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-stuff"><a class="header" href="#rust-stuff">Rust stuff</a></h1>
 <p>Welcome in this rust stuff section.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-cursor-how-it-works"><a class="header" href="#rust-cursor-how-it-works">Rust cursor, How it works</a></h1>
@@ -1367,6 +1537,15 @@ cd fadhil_riyanto
 lakukan <code>chown -R fadhil_riyanto fadhil-riyanto</code>, jika engga nanti error "git submodule update" failed with 'fatal: detected dubious ownership in repository at...' etc...</p>
 <p>ok, saatnya push
 <code>git remote add cgit fadhil_riyanto@123.123.111.222:/root/git/fadhil-riyanto/reponame.git</code></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="config-https-nginx"><a class="header" href="#config-https-nginx">config HTTPS nginx</a></h1>
+<p>Cara config HTTPS di server pakai certbot (NGINX)</p>
+<ul>
+<li>apt install certbot python3-certbot-nginx</li>
+<li>verify config na pakai nginx -t</li>
+<li>generate cert na pakai certbot --nginx -d namasite.com</li>
+</ul>
+<p>ganti namasite.com dengan embel2 di /etc/nginx/sites-enabled/somefile.conf</p>
+<p>didalamnya kan ada server_name, nah diganti dgn itu</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="setup-virtual-network-interface"><a class="header" href="#setup-virtual-network-interface">Setup virtual network interface</a></h1>
 <p>cara setup virtual ethernet + assign ip nya</p>
 <ul>
@@ -2094,6 +2273,27 @@ num  target     prot opt source               destination
 </ul>
 <p>KENAPA harus pakai <code>--state RELATED,ESTABLISHED</code>
 karna kita butuh packet yg sudah estab duluan yg boleh lewat. ini akan menghindari jaringan luar (wlan0) mengakses br0 -&gt; tap0 &amp; tap1</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="resep-nginx-oleh-pak-hanif"><a class="header" href="#resep-nginx-oleh-pak-hanif">resep nginx oleh pak hanif</a></h1>
+<p>cuplikan config nginx di server, cc <a href="https://github.com/hansputera">@hansputera</a></p>
+<pre><code class="language-txt">
+server {
+        listen 80; # tanpa server_default
+        listen [::]:80;
+
+        root /var/www/html/blablabla.fadev.org;
+        
+        index index.php index.html index.htm index.nginx-debian.html;
+
+        server_name blablabla.fadev.org;
+
+        location ~ \.php$ {
+                include snippets/fastcgi-php.conf;
+
+                fastcgi_pass unix:/run/php/php-fpm.sock;
+        }
+}
+
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="database"><a class="header" href="#database">Database</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="psql-command"><a class="header" href="#psql-command">psql command</a></h1>
 <h2 id="general"><a class="header" href="#general">General</a></h2>
@@ -2290,6 +2490,60 @@ connect to new database (currently "fadev_infra")</li>
 <pre><code>sqlx migrate run
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="other"><a class="header" href="#other">Other</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="bookmarks-highly-useful-link"><a class="header" href="#bookmarks-highly-useful-link">bookmarks highly useful link</a></h1>
+<h2 id="this-section-is-derived-from-my-original-channel-xorriso"><a class="header" href="#this-section-is-derived-from-my-original-channel-xorriso">this section is derived from my original channel <a href="https://t.me/xorriso">@xorriso</a></a></h2>
+<h3 id="httpsxenbitsxenorgdocs46-testingmiscpvhhtml"><a class="header" href="#httpsxenbitsxenorgdocs46-testingmiscpvhhtml"><a href="https://xenbits.xen.org/docs/4.6-testing/misc/pvh.html">https://xenbits.xen.org/docs/4.6-testing/misc/pvh.html</a></a></h3>
+<p><code>"PVH is to make use of the hardware virtualization extensions present in modern x86 CPUs in order to improve performance."</code></p>
+<h3 id="httpswikixenprojectorgwikilinux_pvh"><a class="header" href="#httpswikixenprojectorgwikilinux_pvh"><a href="https://wiki.xenproject.org/wiki/Linux_PVH">https://wiki.xenproject.org/wiki/Linux_PVH</a></a></h3>
+<p><code>Where one will select Processor type and features ---&gt; Linux guest support ---&gt;Support for running as a PVH guest</code></p>
+<h3 id="httpsgithubcomgoldside543goldspace"><a class="header" href="#httpsgithubcomgoldside543goldspace"><a href="https://github.com/Goldside543/goldspace">https://github.com/Goldside543/goldspace</a></a></h3>
+<h3 id="httpsmongocorglibmongoccurrentmongoc_client_newhtml"><a class="header" href="#httpsmongocorglibmongoccurrentmongoc_client_newhtml"><a href="https://mongoc.org/libmongoc/current/mongoc_client_new.html">https://mongoc.org/libmongoc/current/mongoc_client_new.html</a></a></h3>
+<pre><code>kesimpulan: mongoc_client_new return null on error, but not even the string are correct
+no connection checked.
+
+jangan ngeharap mongoc_client_new ngeluarin null
+</code></pre>
+<h3 id="httpsfacultycsniueduhutchinscsci480signalshtm"><a class="header" href="#httpsfacultycsniueduhutchinscsci480signalshtm"><a href="https://faculty.cs.niu.edu/~hutchins/csci480/signals.htm">https://faculty.cs.niu.edu/~hutchins/csci480/signals.htm</a></a></h3>
+<p>daftar exit code</p>
+<h3 id="httpsgitkernelorgpubscmlinuxkernelgittorvaldslinuxgittreearchx86entrysyscallssyscall_64tbl"><a class="header" href="#httpsgitkernelorgpubscmlinuxkernelgittorvaldslinuxgittreearchx86entrysyscallssyscall_64tbl"><a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/arch/x86/entry/syscalls/syscall_64.tbl">https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/arch/x86/entry/syscalls/syscall_64.tbl</a></a></h3>
+<p><code>list syscall</code></p>
+<h3 id="httpswwwbitsinthewindcomabout-dacpublicationsunix-systems-programming"><a class="header" href="#httpswwwbitsinthewindcomabout-dacpublicationsunix-systems-programming"><a href="https://www.bitsinthewind.com/about-dac/publications/unix-systems-programming">https://www.bitsinthewind.com/about-dac/publications/unix-systems-programming</a></a></h3>
+<p><code>system programming</code></p>
+<h3 id="httpslwnnetarticles205126"><a class="header" href="#httpslwnnetarticles205126"><a href="https://lwn.net/Articles/205126/">https://lwn.net/Articles/205126/</a></a></h3>
+<p><code>In recent times, Al's work has resulted in a long series of patches merged into the mainline, almost all of which have been marked as "endianness annotations." These patches mostly change the declared types for various functions, variables, and structure members. The new types may be unfamiliar to many, since they are relatively new - though not that new; they were introduced in 2.6.9. These types are __le16, __le32, __le64, __be16, __be32, and __be64. </code></p>
+<h3 id="httpsgithubcomaugusttandocumentsblobmasterunix20network20programmingvolume12c3rdpdf"><a class="header" href="#httpsgithubcomaugusttandocumentsblobmasterunix20network20programmingvolume12c3rdpdf"><a href="https://github.com/AugustTan/documents/blob/master/UNIX%20Network%20Programming(Volume1%2C3rd).pdf">https://github.com/AugustTan/documents/blob/master/UNIX%20Network%20Programming(Volume1%2C3rd).pdf</a></a></h3>
+<h3 id="httpsicsucieduaburtsev143a2017falllectures"><a class="header" href="#httpsicsucieduaburtsev143a2017falllectures"><a href="https://ics.uci.edu/~aburtsev/143A/2017fall/lectures/">https://ics.uci.edu/~aburtsev/143A/2017fall/lectures/</a></a></h3>
+<p><code>Gas kuliah online tiada kata untuk tidak belajar, di topik ini Pak aburtsev membahas sistem operasi, sistem locknya, memory managemen, kernel, boot step nya, dll</code></p>
+<h3 id="httposblogstephenmarzcomindexhtml"><a class="header" href="#httposblogstephenmarzcomindexhtml"><a href="http://osblog.stephenmarz.com/index.html">http://osblog.stephenmarz.com/index.html</a></a></h3>
+<h3 id="httpsc-aresorgdocshtmlexamples"><a class="header" href="#httpsc-aresorgdocshtmlexamples"><a href="https://c-ares.org/docs.html#examples">https://c-ares.org/docs.html#examples</a></a></h3>
+<p>dokumentasi C-ares (async dns resolver)</p>
+<h3 id="httpsgithubcomtorvaldslinuxblobd683b96b072dc4680fc74964eca77e6a23d1fa6edriverscharrandomcl55"><a class="header" href="#httpsgithubcomtorvaldslinuxblobd683b96b072dc4680fc74964eca77e6a23d1fa6edriverscharrandomcl55"><a href="https://github.com/torvalds/linux/blob/d683b96b072dc4680fc74964eca77e6a23d1fa6e/drivers/char/random.c#L55">https://github.com/torvalds/linux/blob/d683b96b072dc4680fc74964eca77e6a23d1fa6e/drivers/char/random.c#L55</a></a></h3>
+<p>"Computers are very predictable devices.  Hence it is extremely hard to produce truly random numbers on a computer"</p>
+<h3 id="httpsstackoverflowcomquestions17898989what-is-global-start-in-assembly-language"><a class="header" href="#httpsstackoverflowcomquestions17898989what-is-global-start-in-assembly-language"><a href="https://stackoverflow.com/questions/17898989/what-is-global-start-in-assembly-language">https://stackoverflow.com/questions/17898989/what-is-global-start-in-assembly-language</a></a></h3>
+<p>If you want to use a different entry point name other than _start (which is the default), you can specify -e parameter to ld like</p>
+<p><code>ld -e my_entry_point -o output_filename object_filename</code></p>
+<h3 id="inline-asm-gcc"><a class="header" href="#inline-asm-gcc">inline ASM GCC</a></h3>
+<ul>
+<li><a href="https://gcc.gnu.org/onlinedocs/gcc/Extended-Asm.html">https://gcc.gnu.org/onlinedocs/gcc/Extended-Asm.html</a></li>
+<li><a href="https://gcc.gnu.org/onlinedocs/gcc/Extended-Asm.html#AssemblerTemplate">https://gcc.gnu.org/onlinedocs/gcc/Extended-Asm.html#AssemblerTemplate</a></li>
+<li><a href="https://splichal.eu/gccsphinx-final/html/gcc/extensions-to-the-c-language-family/how-to-use-inline-assembly-language-in-c-code.html#inputoperands">https://splichal.eu/gccsphinx-final/html/gcc/extensions-to-the-c-language-family/how-to-use-inline-assembly-language-in-c-code.html#inputoperands</a></li>
+</ul>
+<h3 id="httpwwwucwczhubickapapersamd64node1html"><a class="header" href="#httpwwwucwczhubickapapersamd64node1html"><a href="http://www.ucw.cz/~hubicka/papers/amd64/node1.html">http://www.ucw.cz/~hubicka/papers/amd64/node1.html</a></a></h3>
+<p>movabs is ATT-syntax for mov al/ax/eax/rax, byte/[d|q]word ptr [&lt;64-bit absolute address&gt;] or mov byte/[d|q]word ptr[&lt;64-bit absolute address&gt;], al/ax/eax/rax</p>
+<p>tambahan:
+movabs is used for absolute data moves, to either load an arbitrary 64-bit constant into a register or to load data in a register from a 64-bit address.</p>
+<h3 id="httpselectronicsreferencecomassembly-languageassembly-language-registers"><a class="header" href="#httpselectronicsreferencecomassembly-languageassembly-language-registers"><a href="https://electronicsreference.com/assembly-language/assembly-language-registers/">https://electronicsreference.com/assembly-language/assembly-language-registers/</a></a></h3>
+<h3 id="bookmark-movabs"><a class="header" href="#bookmark-movabs">bookmark movabs</a></h3>
+<ul>
+<li>http://www.ucw.cz/~hubicka/papers/amd64/node1.html</li>
+<li>https://gcc.gnu.org/bugzilla/show_bug.cgi?id=82339</li>
+<li>https://cs4157.github.io/www/2024-1/lect/13-x86-assembly.html</li>
+</ul>
+<h3 id="memory-layout-linux"><a class="header" href="#memory-layout-linux">memory layout linux</a></h3>
+<ul>
+<li><a href="https://www.kernel.org/doc/html/v5.8/x86/x86_64/mm.html">https://www.kernel.org/doc/html/v5.8/x86/x86_64/mm.html</a></li>
+</ul>
+<h2 id="this-section-is-pure-form-created-when-i-use-mdbook"><a class="header" href="#this-section-is-pure-form-created-when-i-use-mdbook">this section is pure form, created when I use mdbook</a></h2>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="resume-alpro"><a class="header" href="#resume-alpro">Resume alpro</a></h1>
 <h2 id="flowchart"><a class="header" href="#flowchart">flowchart</a></h2>
 <p>Apa itu flowchart? simplenya, flowchat itu semacam bentuk gambar atau visual dari suatu langkah langkah algoritma. dan tentunya karna ini algoritma, maka ada step step seperti jika x maka y, lalu panah panah dari atas ke bawah, lalu input, dll. contoh flowchart cara memperbiaki lampu</p>

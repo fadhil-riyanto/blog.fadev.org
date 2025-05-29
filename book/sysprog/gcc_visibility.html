@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>ext4 unknown RO compact features - Fadhil Books &amp; Notes</title>
+        <title>gcc compiler visibility - Fadhil Books &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -157,46 +157,55 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="ext4-unknown-ro-compact-features"><a class="header" href="#ext4-unknown-ro-compact-features">ext4 unknown RO compact features</a></h1>
-<p>this error come from linux kernel</p>
-<pre><code class="language-c">	/* Check that feature set is OK for a read-write mount */
-	if (ext4_has_unknown_ext4_ro_compat_features(sb)) {
-		ext4_msg(sb, KERN_ERR, "couldn't mount RDWR because of "
-			 "unsupported optional features (%x)",
-			 (le32_to_cpu(EXT4_SB(sb)-&gt;s_es-&gt;s_feature_ro_compat) &amp;
-				~EXT4_FEATURE_RO_COMPAT_SUPP));
-		return 0;
-	}
+                        <h1 id="gcc-compiler-visibility"><a class="header" href="#gcc-compiler-visibility">gcc compiler visibility</a></h1>
+<p>intresting buat diulik</p>
+<pre><code class="language-cc">class rectangle {
+        int width, height;
+
+        public:
+                void set_value(int, int);
+                int area();
+};
+
+void rectangle::set_value(int x, int y) 
+{
+        width = x;
+        height = y;
+}
+
+
+int rectangle::area()
+{
+        return width * height;
+}
+
 </code></pre>
-<p>which EXT4_FEATURE_RO_COMPAT_SUPP</p>
-<pre><code class="language-c">#define EXT4_FEATURE_RO_COMPAT_SUPP	(EXT4_FEATURE_RO_COMPAT_SPARSE_SUPER| \
-					 EXT4_FEATURE_RO_COMPAT_LARGE_FILE| \
-					 EXT4_FEATURE_RO_COMPAT_GDT_CSUM| \
-					 EXT4_FEATURE_RO_COMPAT_DIR_NLINK | \
-					 EXT4_FEATURE_RO_COMPAT_EXTRA_ISIZE | \
-					 EXT4_FEATURE_RO_COMPAT_BTREE_DIR |\
-					 EXT4_FEATURE_RO_COMPAT_HUGE_FILE |\
-					 EXT4_FEATURE_RO_COMPAT_BIGALLOC |\
-					 EXT4_FEATURE_RO_COMPAT_METADATA_CSUM|\
-					 EXT4_FEATURE_RO_COMPAT_QUOTA |\
-					 EXT4_FEATURE_RO_COMPAT_PROJECT |\
-					 EXT4_FEATURE_RO_COMPAT_VERITY |\
-					 EXT4_FEATURE_RO_COMPAT_ORPHAN_PRESENT)
+<p>compile pakai</p>
+<ul>
+<li><code>g++ -Wall -c -fPIC abc.cc</code></li>
+<li><code>g++ -o librec.so --shared abc.o</code></li>
+<li><code>nm -C librec.so</code></li>
+</ul>
+<p>akan ada</p>
+<pre><code class="language-txt">000000000000110e T rectangle::area()
+00000000000010ea T rectangle::set_value(int, int)
 </code></pre>
-<pre><code class="language-c">#define EXT4_FEATURE_RO_COMPAT_GDT_CSUM		0x0010
-</code></pre>
-<p><a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/fs/ext4/ext4.h#n2188">https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/fs/ext4/ext4.h#n2188</a></p>
-<p><a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/fs/ext4/ext4.h#n2024">https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/fs/ext4/ext4.h#n2024</a></p>
+<p>nah, disitu kalau di compile pakai <code>-fvisibility=hidden</code>
+ntar pas di cek pakai
+<code>nm -CD librec.so </code></p>
+<p>bakalan gak ada. nah ini ada kaitannya sama
+<code>__attribute__ ((visibility ("hidden")))</code></p>
+<p>tambahan: <a href="https://groups.google.com/g/ode-users/c/T3qiy-4dviQ">https://groups.google.com/g/ode-users/c/T3qiy-4dviQ</a></p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../sysprog/0xffffffff_analysis_movq.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../sysprog/php_src_minit.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../sysprog/qemu_custom_cpio_hda.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../sysprog/lea.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -206,11 +215,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../sysprog/0xffffffff_analysis_movq.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../sysprog/php_src_minit.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../sysprog/qemu_custom_cpio_hda.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../sysprog/lea.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

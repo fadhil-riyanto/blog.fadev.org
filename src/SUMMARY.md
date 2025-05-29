@@ -11,6 +11,16 @@
 	- [analisis kenapa pakai movabsq, daripada movq](./sysprog/movabsq_movq_vs.md)
 	- [analisis patch movq pakai 0xffffffff](./sysprog/0xffffffff_analysis_movq.md)
 	- [ext4 unknown RO compact features](./sysprog/ext4_unknown_RO_compact_features.md)
+	- [qemu custom cpio HDA](./sysprog/qemu_custom_cpio_hda.md)
+	- [step TCP](./sysprog/step_tcp.md)
+	- [GDB attach](./sysprog/gdb_attach.md)
+	- [hasil oprek socket programming, case socks5 server](./sysprog/socks5_protocol_1.md)
+	- [fix ncurses kernel build](./sysprog/fix_ncurses_kernel_build.md)
+	- [PHP-SRC variadic params](./sysprog/php_src_variadic_params.md)
+	- [PHP-SRC minit()](./sysprog/php_src_minit.md)
+	- [gcc compiler visibility](./sysprog/gcc_visibility.md)
+	- [load effective address](./sysprog/lea.md)
+	- [AT&T asm prelude](./sysprog/asm_prelude.md)
 
 - [Rust stuff](./rust/readme-rust-stuff.md)
 	- [Rust Cursor & fseek concept](./rust/cursor_1.md)
@@ -36,6 +46,7 @@
 
 - [Server](./server/readme-server.md)
 	- [Cgit setup](./server/cgit-setup.md)
+	- [config HTTPS nginx](./server/config_https_nginx.md)
 	- [Setup virtual network interface](./server/virtual-network-linux.md)
 	- [ip aliasing](./server/ip-aliasing.md)
 	- [setup bridge enp0s16u1](./server/setup-bridge-enp0s16u1.md)
@@ -48,6 +59,7 @@
 	- [QEMU block 8.8.8.8 from host](./server/qemu_block_8888_from_host.md)
 	- [two alpine guest VM, block custom ports](./server/alpine_vm_block_custom_ports.md)
 	- [logic netfilter linux kernel](./server/logic_netfilter_linux_kernel.md)
+	- [resep nginx oleh pak hanif](./server/resep_nginx.md)
 
 - [Database](./database/readme-database.md)
 	- [psql command](./database/psql_command.md)
@@ -56,6 +68,7 @@
 	- [how to use SQLX cli tools for db migration such laravel migrations](./database/sqlx-migration-tools.md)
 
 - [Other](./other/other-readme.md)
+	- [bookmarks highly useful link](./other/bookmarks_useful_links.md)
 	- [Resume alpro](./other/resume-alpro.md)
 	- [Resume alpro double linkedlists](./other/resume-alpro-dll.md)
 	- [Rumus sector disk Linux](./other/rumus-sector-disk-linux.md)

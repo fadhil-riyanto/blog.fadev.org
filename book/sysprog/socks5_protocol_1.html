@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>ext4 unknown RO compact features - Fadhil Books &amp; Notes</title>
+        <title>hasil oprek socket programming, case socks5 server - Fadhil Books &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -157,46 +157,34 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="ext4-unknown-ro-compact-features"><a class="header" href="#ext4-unknown-ro-compact-features">ext4 unknown RO compact features</a></h1>
-<p>this error come from linux kernel</p>
-<pre><code class="language-c">	/* Check that feature set is OK for a read-write mount */
-	if (ext4_has_unknown_ext4_ro_compat_features(sb)) {
-		ext4_msg(sb, KERN_ERR, "couldn't mount RDWR because of "
-			 "unsupported optional features (%x)",
-			 (le32_to_cpu(EXT4_SB(sb)-&gt;s_es-&gt;s_feature_ro_compat) &amp;
-				~EXT4_FEATURE_RO_COMPAT_SUPP));
-		return 0;
-	}
+                        <h1 id="hasil-oprek-socket-programming-case-socks5-server"><a class="header" href="#hasil-oprek-socket-programming-case-socks5-server">hasil oprek socket programming, case socks5 server</a></h1>
+<p>bagian IETF SOCKS5 section 6</p>
+<p><a href="https://datatracker.ietf.org/doc/html/rfc1928#section-6">https://datatracker.ietf.org/doc/html/rfc1928#section-6</a></p>
+<p>BND.ADDR haruslah berupa IPV4/IPV6 address, bukan domain :)</p>
+<p>secara general, bentuk packet yg akan dikirim untuk versi IPV4 seperti ini</p>
+<pre><code class="language-txt">[0] [VER] =&gt; 0x5
+[1] [REP] =&gt; 0x0
+[2] [RSV] =&gt; 0x0
+[3] [ATYP] =&gt; 0x1 atau 0x4
+[4] [BND.ADDR] 0xac
+[5] [BND.ADDR] 0x43
+[6] [BND.ADDR] 0x93
+[7] [BND.ADDR] 0x39
+[8] [BND.PORT] 0x50 
+[9] [BND.PORT] 0x50
 </code></pre>
-<p>which EXT4_FEATURE_RO_COMPAT_SUPP</p>
-<pre><code class="language-c">#define EXT4_FEATURE_RO_COMPAT_SUPP	(EXT4_FEATURE_RO_COMPAT_SPARSE_SUPER| \
-					 EXT4_FEATURE_RO_COMPAT_LARGE_FILE| \
-					 EXT4_FEATURE_RO_COMPAT_GDT_CSUM| \
-					 EXT4_FEATURE_RO_COMPAT_DIR_NLINK | \
-					 EXT4_FEATURE_RO_COMPAT_EXTRA_ISIZE | \
-					 EXT4_FEATURE_RO_COMPAT_BTREE_DIR |\
-					 EXT4_FEATURE_RO_COMPAT_HUGE_FILE |\
-					 EXT4_FEATURE_RO_COMPAT_BIGALLOC |\
-					 EXT4_FEATURE_RO_COMPAT_METADATA_CSUM|\
-					 EXT4_FEATURE_RO_COMPAT_QUOTA |\
-					 EXT4_FEATURE_RO_COMPAT_PROJECT |\
-					 EXT4_FEATURE_RO_COMPAT_VERITY |\
-					 EXT4_FEATURE_RO_COMPAT_ORPHAN_PRESENT)
-</code></pre>
-<pre><code class="language-c">#define EXT4_FEATURE_RO_COMPAT_GDT_CSUM		0x0010
-</code></pre>
-<p><a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/fs/ext4/ext4.h#n2188">https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/fs/ext4/ext4.h#n2188</a></p>
-<p><a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/fs/ext4/ext4.h#n2024">https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/fs/ext4/ext4.h#n2024</a></p>
+<p>maka perhitungannya memory awal + 4 (karna 4 field dah dipakai), start dari sini, insert 4 oktet lagi ipv4 address, lalu insert 2 oktet uint8 sebagai port.</p>
+<p>bagian BND.PORT itu unsigned int 16 bit. jadi harus digabung bitnya + diubah dari network order ke host order</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../sysprog/0xffffffff_analysis_movq.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../sysprog/gdb_attach.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../sysprog/qemu_custom_cpio_hda.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../sysprog/fix_ncurses_kernel_build.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -206,11 +194,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../sysprog/0xffffffff_analysis_movq.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../sysprog/gdb_attach.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../sysprog/qemu_custom_cpio_hda.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../sysprog/fix_ncurses_kernel_build.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
