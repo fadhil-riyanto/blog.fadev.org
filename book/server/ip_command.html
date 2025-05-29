@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>resep nginx oleh pak hanif - Fadhil Books &amp; Notes</title>
+        <title>ip command - Fadhil Books &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -157,37 +157,49 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="resep-nginx-oleh-pak-hanif"><a class="header" href="#resep-nginx-oleh-pak-hanif">resep nginx oleh pak hanif</a></h1>
-<p>cuplikan config nginx di server, cc <a href="https://github.com/hansputera">@hansputera</a></p>
-<pre><code class="language-txt">
-server {
-        listen 80; # tanpa server_default
-        listen [::]:80;
-
-        root /var/www/html/blablabla.fadev.org;
-        
-        index index.php index.html index.htm index.nginx-debian.html;
-
-        server_name blablabla.fadev.org;
-
-        location ~ \.php$ {
-                include snippets/fastcgi-php.conf;
-
-                fastcgi_pass unix:/run/php/php-fpm.sock;
-        }
-}
-
-</code></pre>
+                        <h1 id="ip-command"><a class="header" href="#ip-command">ip command</a></h1>
+<h2 id="ip-addr"><a class="header" href="#ip-addr"><code>ip addr</code></a></h2>
+<p>ip addr is used to display and manage IP addresses assigned to network interfaces.</p>
+<p>example:</p>
+<ul>
+<li><code>ip addr</code></li>
+<li><code>ip addr show</code></li>
+<li><code>sudo ip addr add 192.168.1.100/24 dev eth0</code></li>
+<li><code>sudo ip addr del 192.168.1.100/24 dev eth0</code></li>
+</ul>
+<p>anything about ip assigment</p>
+<h2 id="ip-link"><a class="header" href="#ip-link"><code>ip link</code></a></h2>
+<p>ip link is used to display and manage network interfaces (links), focusing on layer 2 (Ethernet, loopback, etc.), not IP addresses.</p>
+<p>example:</p>
+<ul>
+<li><code>ip link</code></li>
+<li><code>sudo ip link set dev eth0 up</code></li>
+<li><code>sudo ip link set dev eth0 down</code></li>
+<li><code>sudo ip link set dev eth0 mtu 1400</code></li>
+</ul>
+<p>anyting about interface</p>
+<h2 id="ip-tuntap"><a class="header" href="#ip-tuntap"><code>ip tuntap</code></a></h2>
+<p>ip tuntap manages TUN/TAP virtual network interfaces, which provide a way for user-space programs to interact with network packets as if they were network devices.</p>
+<ul>
+<li>TUN: Simulates a point-to-point device (layer 3), used for routing IP packets (e.g., VPN tunnels).</li>
+<li>TAP: Simulates an Ethernet device (layer 2), used for bridging Ethernet frames (e.g., virtual switches, VMs).</li>
+</ul>
+<p>example:</p>
+<ul>
+<li><code>sudo ip tuntap add mode tap dev tap0</code></li>
+<li><code>sudo ip tuntap add mode tun dev tun0</code></li>
+<li><code>sudo ip tuntap del mode tap dev tap0</code></li>
+</ul>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../server/logic_netfilter_linux_kernel.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../server/resep_nginx.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../server/ip_command.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../database/readme-database.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -197,11 +209,11 @@ server {
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../server/logic_netfilter_linux_kernel.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../server/resep_nginx.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../server/ip_command.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../database/readme-database.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

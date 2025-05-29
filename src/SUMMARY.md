@@ -60,6 +60,7 @@
 	- [two alpine guest VM, block custom ports](./server/alpine_vm_block_custom_ports.md)
 	- [logic netfilter linux kernel](./server/logic_netfilter_linux_kernel.md)
 	- [resep nginx oleh pak hanif](./server/resep_nginx.md)
+	- [ip command](./server/ip_command.md)
 
 - [Database](./database/readme-database.md)
 	- [psql command](./database/psql_command.md)

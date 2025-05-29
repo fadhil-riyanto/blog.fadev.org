@@ -2294,6 +2294,39 @@ server {
 }
 
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="ip-command"><a class="header" href="#ip-command">ip command</a></h1>
+<h2 id="ip-addr"><a class="header" href="#ip-addr"><code>ip addr</code></a></h2>
+<p>ip addr is used to display and manage IP addresses assigned to network interfaces.</p>
+<p>example:</p>
+<ul>
+<li><code>ip addr</code></li>
+<li><code>ip addr show</code></li>
+<li><code>sudo ip addr add 192.168.1.100/24 dev eth0</code></li>
+<li><code>sudo ip addr del 192.168.1.100/24 dev eth0</code></li>
+</ul>
+<p>anything about ip assigment</p>
+<h2 id="ip-link"><a class="header" href="#ip-link"><code>ip link</code></a></h2>
+<p>ip link is used to display and manage network interfaces (links), focusing on layer 2 (Ethernet, loopback, etc.), not IP addresses.</p>
+<p>example:</p>
+<ul>
+<li><code>ip link</code></li>
+<li><code>sudo ip link set dev eth0 up</code></li>
+<li><code>sudo ip link set dev eth0 down</code></li>
+<li><code>sudo ip link set dev eth0 mtu 1400</code></li>
+</ul>
+<p>anyting about interface</p>
+<h2 id="ip-tuntap"><a class="header" href="#ip-tuntap"><code>ip tuntap</code></a></h2>
+<p>ip tuntap manages TUN/TAP virtual network interfaces, which provide a way for user-space programs to interact with network packets as if they were network devices.</p>
+<ul>
+<li>TUN: Simulates a point-to-point device (layer 3), used for routing IP packets (e.g., VPN tunnels).</li>
+<li>TAP: Simulates an Ethernet device (layer 2), used for bridging Ethernet frames (e.g., virtual switches, VMs).</li>
+</ul>
+<p>example:</p>
+<ul>
+<li><code>sudo ip tuntap add mode tap dev tap0</code></li>
+<li><code>sudo ip tuntap add mode tun dev tun0</code></li>
+<li><code>sudo ip tuntap del mode tap dev tap0</code></li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="database"><a class="header" href="#database">Database</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="psql-command"><a class="header" href="#psql-command">psql command</a></h1>
 <h2 id="general"><a class="header" href="#general">General</a></h2>
