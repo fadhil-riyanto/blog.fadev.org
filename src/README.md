@@ -2,6 +2,8 @@
 
 Let me introduce my self, Who is Fadhil? Fadhil Riyanto (real-name), is a self-taught system programmer which live in Indonesian, This is some short & dirty tutorial about computer science and litte about math.
 
+mirrors: [blog.fadhils.eu.org](https://blog.fadhils.eu.org)
+
 # Contributing
 Found a mistake? You can freely DM me on [telegram](https://t.me/fadhil_riyanto) or just email me on 
 

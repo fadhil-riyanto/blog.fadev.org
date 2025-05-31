@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>how to use SQLX cli tools for db migration such laravel migrations - Fadhil Books &amp; Notes</title>
+        <title>Postgresql internal (server) - Fadhil Books &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -157,27 +157,132 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="how-to-use-sqlx-cli-tools-for-db-migration-such-laravel-migrations"><a class="header" href="#how-to-use-sqlx-cli-tools-for-db-migration-such-laravel-migrations">how to use SQLX cli tools for db migration such laravel migrations</a></h1>
-<p>let's meet with this crate, <a href="https://crates.io/crates/sqlx-cli">https://crates.io/crates/sqlx-cli</a>, this tools allow you to use db migration such as laravel migration tools;</p>
-<p>first, let's create env variable</p>
-<pre><code>export DATABASE_URL=postgres://fadhil_riyanto:&lt;your_pass&gt;@localhost/&lt;target_db&gt;
+                        <h1 id="postgresql-internal-server"><a class="header" href="#postgresql-internal-server">Postgresql internal (server)</a></h1>
+<p>this thing explain the internal of pgsql system (not the source code I mean)</p>
+<h2 id="difference-between-catalog-vs-schema"><a class="header" href="#difference-between-catalog-vs-schema">difference between catalog vs schema</a></h2>
+<p>key point:</p>
+<ul>
+<li>
+<p>schema is folder like, grouping table together, can be created using</p>
+<pre><code class="language-sql">CREATE SCHEMA my_catalog;
+CREATE TABLE my_catalog.metadata_table (...);
 </code></pre>
-<p>then, the things that we do next is only</p>
-<pre><code>sqlx migrate add -r &lt;name&gt;
+</li>
+<li>
+<p>catalog is system schema, can't be created manually, part of internal pgsql system</p>
+</li>
+<li>
+<p>view is a resulted table from XYZ queries, example</p>
+<pre><code class="language-sql">CREATE VIEW active_users AS 
+	SELECT id, name, 
+	FROM
+		users 
+	WHERE
+		active = true;
 </code></pre>
-<p>running</p>
-<pre><code>sqlx migrate run
+<p>then query it</p>
+<pre><code class="language-sql">SELECT * FROM active_users;
+</code></pre>
+</li>
+</ul>
+<h2 id="pg_catalog-inside"><a class="header" href="#pg_catalog-inside">pg_catalog inside</a></h2>
+<p>this is some stuff inside of pg catalog, you can do that using <code>\dt pg_catalog.*</code></p>
+<ul>
+<li>pg_aggregate: Stores information about aggregate functions (like <code>SUM</code>, <code>AVG</code>, etc.).</li>
+<li>pg_am: Lists access methods for indexes (e.g., <code>btree</code>, <code>hash</code>).</li>
+<li>pg_amop: Defines operators used in access methods.</li>
+<li>pg_amproc: Defines support functions used in access methods.</li>
+<li>pg_attrdef: Stores default values for columns.</li>
+<li>pg_attribute: Contains column definitions for all tables.</li>
+<li>pg_auth_members: Shows role memberships (who is a member of what).</li>
+<li>pg_authid: Stores user/role definitions (superuser access required).</li>
+<li>pg_cast: Contains rules for casting between data types.</li>
+<li>pg_class: Contains all table-like objects (tables, views, indexes, sequences, etc.).</li>
+<li>pg_collation: Defines collations (rules for string comparison).</li>
+<li>pg_constraint: Stores constraints like PRIMARY KEY, UNIQUE, CHECK, and FOREIGN KEY.</li>
+<li>pg_conversion: Defines character set conversions.</li>
+<li>pg_database: Stores information about each database in the cluster.</li>
+<li>pg_db_role_setting: Stores per-user/per-database configuration settings (GUCs).</li>
+<li>pg_default_acl: Defines default privileges for newly created objects.</li>
+<li>pg_depend: Stores dependency relationships between database objects.</li>
+<li>pg_description: Stores comments/descriptions on database objects.</li>
+<li>pg_enum: Stores values for <code>ENUM</code> data types.</li>
+<li>pg_event_trigger: Stores event trigger definitions (triggers on DDL commands).</li>
+<li>pg_extension: Tracks installed extensions (like <code>uuid-ossp</code>, <code>pgcrypto</code>, etc.).</li>
+<li>pg_foreign_data_wrapper: Stores definitions of foreign data wrappers (FDW).</li>
+<li>pg_foreign_server: Stores foreign servers used by FDWs.</li>
+<li>pg_foreign_table: Stores metadata for foreign tables.</li>
+<li>pg_index: Contains metadata about indexes (e.g., indexed columns).</li>
+<li>pg_inherits: Stores table inheritance relationships.</li>
+<li>pg_init_privs: Records original privileges on built-in objects.</li>
+<li>pg_language: Stores information about supported procedural languages.</li>
+<li>pg_largeobject: Stores the actual data of large objects (blobs).</li>
+<li>pg_largeobject_metadata: Stores metadata about large objects.</li>
+<li>pg_namespace: Lists all schemas in the database (IMPORTANT)</li>
+<li>pg_opclass: Stores index operator classes (how a datatype is indexed).</li>
+<li>pg_operator: Stores SQL operators (like <code>=</code>, <code>&lt;</code>, <code>+</code>, etc.).</li>
+<li>pg_opfamily: Groups related operator classes.</li>
+<li>pg_parameter_acl: Stores access control for configuration parameters (PostgreSQL 16+).</li>
+<li>pg_partitioned_table: Stores metadata for partitioned tables.</li>
+<li>pg_policy: Stores row-level security policies.</li>
+<li>pg_proc: Contains all function and procedure definitions.</li>
+<li>pg_publication: Stores logical replication publications.</li>
+<li>pg_publication_namespace: Links publications to schemas.</li>
+<li>pg_publication_rel: Links publications to individual tables.</li>
+<li>pg_range: Stores definitions of range types (e.g., <code>int4range</code>).</li>
+<li>pg_replication_origin: Tracks origins for logical replication.</li>
+<li>pg_rewrite: Stores query rewrite rules (used in views, rules).</li>
+<li>pg_seclabel: Stores security labels for database objects.</li>
+<li>pg_sequence: Contains metadata for sequence generators.</li>
+<li>pg_shdepend: Tracks dependencies involving shared objects (like roles, databases).</li>
+<li>pg_shdescription: Stores comments on shared objects.</li>
+<li>pg_shseclabel: Stores security labels on shared objects.</li>
+<li>pg_statistic: Stores planner statistics for columns.</li>
+<li>pg_statistic_ext: Stores extended planner statistics (multi-column, NDV, etc.).</li>
+<li>pg_statistic_ext_data: Contains actual values for extended statistics.</li>
+<li>pg_subscription: Defines logical replication subscriptions.</li>
+<li>pg_subscription_rel: Lists tables included in subscriptions.</li>
+<li>pg_tablespace: Lists all tablespaces (disk locations for data).</li>
+<li>pg_transform: Stores type transformation functions for procedural languages.</li>
+<li>pg_trigger: Stores triggers on tables.</li>
+<li>pg_ts_config: Stores full-text search configurations.</li>
+<li>pg_ts_config_map: Maps text search config tokens to dictionaries.</li>
+<li>pg_ts_dict: Stores text search dictionaries.</li>
+<li>pg_ts_parser: Defines tokenizers for full-text search.</li>
+<li>pg_ts_template: Defines templates for building text search dictionaries.</li>
+<li>pg_type: Stores all data types (built-in, custom, enum, composite). (IMPORTANT)</li>
+<li>pg_user_mapping: Maps users to foreign servers.</li>
+</ul>
+<h2 id="management-script-collection"><a class="header" href="#management-script-collection">management script collection</a></h2>
+<h3 id="show-all-databases-in-current-user"><a class="header" href="#show-all-databases-in-current-user">show all databases (in current user)</a></h3>
+<pre><code class="language-sql">SELECT * FROM pg_catalog.pg_database;`:
+</code></pre>
+<h3 id="show-pg_catalogpg_tables-definition"><a class="header" href="#show-pg_catalogpg_tables-definition">show <code>pg_catalog.pg_tables</code> definition</a></h3>
+<p>go back on top in order to see what actually view is</p>
+<pre><code class="language-sql">SELECT pg_get_viewdef('pg_catalog.pg_tables', true);`: 
+</code></pre>
+<h3 id="show-all-available-pgsql-datatype"><a class="header" href="#show-all-available-pgsql-datatype">show all available pgsql datatype</a></h3>
+<pre><code class="language-sql">SELECT 
+	*
+FROM
+	pg_catalog.pg_type;
+</code></pre>
+<h3 id="lists-all-schema"><a class="header" href="#lists-all-schema">lists all schema</a></h3>
+<pre><code class="language-sql">SELECT
+    *
+FROM
+    pg_catalog.pg_namespace;
 </code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../database/postgresql_db_creation.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../database/sqlx-migration-tools.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../database/postgresql_internal_as_server.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../other/other-readme.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -187,11 +292,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../database/postgresql_db_creation.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../database/sqlx-migration-tools.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../database/postgresql_internal_as_server.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../other/other-readme.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

@@ -160,6 +160,7 @@
                     <main>
                         <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
 <p>Let me introduce my self, Who is Fadhil? Fadhil Riyanto (real-name), is a self-taught system programmer which live in Indonesian, This is some short &amp; dirty tutorial about computer science and litte about math.</p>
+<p>mirrors: <a href="https://blog.fadhils.eu.org">blog.fadhils.eu.org</a></p>
 <h1 id="contributing"><a class="header" href="#contributing">Contributing</a></h1>
 <p>Found a mistake? You can freely DM me on <a href="https://t.me/fadhil_riyanto">telegram</a> or just email me on</p>
 <ul>
@@ -2510,6 +2511,48 @@ dipakai sebelum data dilihat oleh conntrack, NAT, masuk routing, dll. intinya di
             -device virtio-net-pci,netdev=net0,mac=$(randommac)
 
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="network-namespace--nat-notes"><a class="header" href="#network-namespace--nat-notes">network namespace + NAT notes</a></h1>
+<ul>
+<li><code>ip a</code></li>
+<li><code>sudo ip link add veth0 type veth peer name veth0-peer</code></li>
+<li><code>sudo ip addr add 10.200.1.1/24 dev veth0</code></li>
+<li><code>sudo ip netns add firefoxns</code></li>
+<li><code>sudo ip link set veth0-peer netns firefoxns</code></li>
+<li><code>sudo sysctl -w net.ipv4.ip_forward=1</code></li>
+<li><code>sudo iptables -t nat -A POSTROUTING -s 10.200.1.0/24 -o wlan0 -j MASQUERADE</code></li>
+<li><code>sudo ip netns exec firefoxns ip addr add 10.200.1.2/24 dev veth0-peer</code></li>
+<li><code>sudo ip netns exec firefoxns ip addr add 127.0.0.1/8 dev lo</code></li>
+<li><code>sudo ip netns exec firefoxns ip link set lo up</code></li>
+<li><code>sudo ip netns exec firefoxns ip link set veth0-peer up</code></li>
+<li><code>sudo ip netns exec firefoxns ip route add default via 10.200.1.1</code></li>
+<li><code>sudo ip netns exec firefoxns ip link add br0-lan type bridge</code></li>
+<li><code>sudo ip netns exec firefoxns ip tuntap add tap0 mode tap</code></li>
+<li><code>sudo ip netns exec firefoxns ip tuntap add tap1 mode tap</code></li>
+<li><code>sudo ip netns exec firefoxns ip tuntap add tap2 mode tap</code></li>
+<li><code>sudo ip netns exec firefoxns ip link set dev tap0 master br0-lan</code></li>
+<li><code>sudo ip netns exec firefoxns ip link set dev tap1 master br0-lan</code></li>
+<li><code>sudo ip netns exec firefoxns ip link set dev tap2 master br0-lan</code></li>
+<li><code>sudo ip netns exec firefoxns ip link set dev tap0 up</code></li>
+<li><code>sudo ip netns exec firefoxns ip link set dev tap1 up</code></li>
+<li><code>sudo ip netns exec firefoxns ip link set dev tap2 up</code></li>
+<li><code>sudo ip netns exec firefoxns ip link set dev br0-lan up</code></li>
+<li><code>sudo ip netns exec firefoxns qemu-system-x86_64 -enable-kvm -m 256 -smp 4 -cpu host -drive file=chr.qcow2,format=qcow2 -boot d -nographic -netdev tap,id=net0,ifname=tap0,script=no,downscript=no -device virtio-net-pci,netdev=net0,mac=02:aa:bb:cc:dd:ee -net user,hostfwd=tcp::8291-:8291 -net nic</code></li>
+<li><code>sudo ip netns exec firefoxns qemu-system-x86_64 -enable-kvm -m 256 -smp 4 -cpu host -drive file=pc-1.qcow2,format=qcow2 -cdrom alpine-virt-3.21.3-x86_64.iso -boot d -nographic -netdev tap,id=net0,ifname=tap1,script=no,downscript=no -device virtio-net-pci,netdev=net0,mac=$(randommac)</code></li>
+</ul>
+<p>randommac source code</p>
+<pre><pre class="playground"><code class="language-rust">use rand::Rng;
+
+fn main() {
+    let mut rng = rand::thread_rng();
+    let mac = format!(
+        "52:54:00:{:02x}:{:02x}:{:02x}",
+        rng.gen::&lt;u8&gt;(),
+        rng.gen::&lt;u8&gt;(),
+        rng.gen::&lt;u8&gt;()
+    );
+    println!("{}", mac);
+}
+</code></pre></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="database"><a class="header" href="#database">Database</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="psql-command"><a class="header" href="#psql-command">psql command</a></h1>
 <h2 id="general"><a class="header" href="#general">General</a></h2>
@@ -2671,6 +2714,7 @@ connect to new database (currently "fadev_infra")</li>
 <h2 id="psql"><a class="header" href="#psql">psql</a></h2>
 <ul>
 <li><code>\df *.*</code> Lists all relations</li>
+<li><code>\l</code> Lists all database</li>
 </ul>
 <h2 id="command"><a class="header" href="#command">command</a></h2>
 <ul>
@@ -2704,6 +2748,122 @@ connect to new database (currently "fadev_infra")</li>
 </code></pre>
 <p>running</p>
 <pre><code>sqlx migrate run
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="postgresql-internal-server"><a class="header" href="#postgresql-internal-server">Postgresql internal (server)</a></h1>
+<p>this thing explain the internal of pgsql system (not the source code I mean)</p>
+<h2 id="difference-between-catalog-vs-schema"><a class="header" href="#difference-between-catalog-vs-schema">difference between catalog vs schema</a></h2>
+<p>key point:</p>
+<ul>
+<li>
+<p>schema is folder like, grouping table together, can be created using</p>
+<pre><code class="language-sql">CREATE SCHEMA my_catalog;
+CREATE TABLE my_catalog.metadata_table (...);
+</code></pre>
+</li>
+<li>
+<p>catalog is system schema, can't be created manually, part of internal pgsql system</p>
+</li>
+<li>
+<p>view is a resulted table from XYZ queries, example</p>
+<pre><code class="language-sql">CREATE VIEW active_users AS 
+	SELECT id, name, 
+	FROM
+		users 
+	WHERE
+		active = true;
+</code></pre>
+<p>then query it</p>
+<pre><code class="language-sql">SELECT * FROM active_users;
+</code></pre>
+</li>
+</ul>
+<h2 id="pg_catalog-inside"><a class="header" href="#pg_catalog-inside">pg_catalog inside</a></h2>
+<p>this is some stuff inside of pg catalog, you can do that using <code>\dt pg_catalog.*</code></p>
+<ul>
+<li>pg_aggregate: Stores information about aggregate functions (like <code>SUM</code>, <code>AVG</code>, etc.).</li>
+<li>pg_am: Lists access methods for indexes (e.g., <code>btree</code>, <code>hash</code>).</li>
+<li>pg_amop: Defines operators used in access methods.</li>
+<li>pg_amproc: Defines support functions used in access methods.</li>
+<li>pg_attrdef: Stores default values for columns.</li>
+<li>pg_attribute: Contains column definitions for all tables.</li>
+<li>pg_auth_members: Shows role memberships (who is a member of what).</li>
+<li>pg_authid: Stores user/role definitions (superuser access required).</li>
+<li>pg_cast: Contains rules for casting between data types.</li>
+<li>pg_class: Contains all table-like objects (tables, views, indexes, sequences, etc.).</li>
+<li>pg_collation: Defines collations (rules for string comparison).</li>
+<li>pg_constraint: Stores constraints like PRIMARY KEY, UNIQUE, CHECK, and FOREIGN KEY.</li>
+<li>pg_conversion: Defines character set conversions.</li>
+<li>pg_database: Stores information about each database in the cluster.</li>
+<li>pg_db_role_setting: Stores per-user/per-database configuration settings (GUCs).</li>
+<li>pg_default_acl: Defines default privileges for newly created objects.</li>
+<li>pg_depend: Stores dependency relationships between database objects.</li>
+<li>pg_description: Stores comments/descriptions on database objects.</li>
+<li>pg_enum: Stores values for <code>ENUM</code> data types.</li>
+<li>pg_event_trigger: Stores event trigger definitions (triggers on DDL commands).</li>
+<li>pg_extension: Tracks installed extensions (like <code>uuid-ossp</code>, <code>pgcrypto</code>, etc.).</li>
+<li>pg_foreign_data_wrapper: Stores definitions of foreign data wrappers (FDW).</li>
+<li>pg_foreign_server: Stores foreign servers used by FDWs.</li>
+<li>pg_foreign_table: Stores metadata for foreign tables.</li>
+<li>pg_index: Contains metadata about indexes (e.g., indexed columns).</li>
+<li>pg_inherits: Stores table inheritance relationships.</li>
+<li>pg_init_privs: Records original privileges on built-in objects.</li>
+<li>pg_language: Stores information about supported procedural languages.</li>
+<li>pg_largeobject: Stores the actual data of large objects (blobs).</li>
+<li>pg_largeobject_metadata: Stores metadata about large objects.</li>
+<li>pg_namespace: Lists all schemas in the database (IMPORTANT)</li>
+<li>pg_opclass: Stores index operator classes (how a datatype is indexed).</li>
+<li>pg_operator: Stores SQL operators (like <code>=</code>, <code>&lt;</code>, <code>+</code>, etc.).</li>
+<li>pg_opfamily: Groups related operator classes.</li>
+<li>pg_parameter_acl: Stores access control for configuration parameters (PostgreSQL 16+).</li>
+<li>pg_partitioned_table: Stores metadata for partitioned tables.</li>
+<li>pg_policy: Stores row-level security policies.</li>
+<li>pg_proc: Contains all function and procedure definitions.</li>
+<li>pg_publication: Stores logical replication publications.</li>
+<li>pg_publication_namespace: Links publications to schemas.</li>
+<li>pg_publication_rel: Links publications to individual tables.</li>
+<li>pg_range: Stores definitions of range types (e.g., <code>int4range</code>).</li>
+<li>pg_replication_origin: Tracks origins for logical replication.</li>
+<li>pg_rewrite: Stores query rewrite rules (used in views, rules).</li>
+<li>pg_seclabel: Stores security labels for database objects.</li>
+<li>pg_sequence: Contains metadata for sequence generators.</li>
+<li>pg_shdepend: Tracks dependencies involving shared objects (like roles, databases).</li>
+<li>pg_shdescription: Stores comments on shared objects.</li>
+<li>pg_shseclabel: Stores security labels on shared objects.</li>
+<li>pg_statistic: Stores planner statistics for columns.</li>
+<li>pg_statistic_ext: Stores extended planner statistics (multi-column, NDV, etc.).</li>
+<li>pg_statistic_ext_data: Contains actual values for extended statistics.</li>
+<li>pg_subscription: Defines logical replication subscriptions.</li>
+<li>pg_subscription_rel: Lists tables included in subscriptions.</li>
+<li>pg_tablespace: Lists all tablespaces (disk locations for data).</li>
+<li>pg_transform: Stores type transformation functions for procedural languages.</li>
+<li>pg_trigger: Stores triggers on tables.</li>
+<li>pg_ts_config: Stores full-text search configurations.</li>
+<li>pg_ts_config_map: Maps text search config tokens to dictionaries.</li>
+<li>pg_ts_dict: Stores text search dictionaries.</li>
+<li>pg_ts_parser: Defines tokenizers for full-text search.</li>
+<li>pg_ts_template: Defines templates for building text search dictionaries.</li>
+<li>pg_type: Stores all data types (built-in, custom, enum, composite). (IMPORTANT)</li>
+<li>pg_user_mapping: Maps users to foreign servers.</li>
+</ul>
+<h2 id="management-script-collection"><a class="header" href="#management-script-collection">management script collection</a></h2>
+<h3 id="show-all-databases-in-current-user"><a class="header" href="#show-all-databases-in-current-user">show all databases (in current user)</a></h3>
+<pre><code class="language-sql">SELECT * FROM pg_catalog.pg_database;`:
+</code></pre>
+<h3 id="show-pg_catalogpg_tables-definition"><a class="header" href="#show-pg_catalogpg_tables-definition">show <code>pg_catalog.pg_tables</code> definition</a></h3>
+<p>go back on top in order to see what actually view is</p>
+<pre><code class="language-sql">SELECT pg_get_viewdef('pg_catalog.pg_tables', true);`: 
+</code></pre>
+<h3 id="show-all-available-pgsql-datatype"><a class="header" href="#show-all-available-pgsql-datatype">show all available pgsql datatype</a></h3>
+<pre><code class="language-sql">SELECT 
+	*
+FROM
+	pg_catalog.pg_type;
+</code></pre>
+<h3 id="lists-all-schema"><a class="header" href="#lists-all-schema">lists all schema</a></h3>
+<pre><code class="language-sql">SELECT
+    *
+FROM
+    pg_catalog.pg_namespace;
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="other"><a class="header" href="#other">Other</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="bookmarks-highly-useful-link"><a class="header" href="#bookmarks-highly-useful-link">bookmarks highly useful link</a></h1>
@@ -3450,6 +3610,94 @@ Switch&gt;
 <code>-net user,hostfwd=tcp::10022-:22,hostfwd=tcp::8080-:8080,hostfwd=tcp::5173-:5173</code></p>
 <p>5173 is our port.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="binary-operation"><a class="header" href="#binary-operation">binary operation</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="catatan-subnetting-from-scratch"><a class="header" href="#catatan-subnetting-from-scratch">catatan subnetting from scratch</a></h1>
+<p>origin: pakai acuan ip kelas c</p>
+<p>jumlah hosts, misal cidr 24, itu max nya 256 kalau 0b11111111, kenapa 0b10000000 itu 128, dan kenapa 0b11000000 itu 192</p>
+<p>ok, lalu kenapa jika cidr /26, itu 255.255.255.192, punya 64 hosts, 4 network. semua ini didapat dari
+(max int case ini 8 bit) / maxint - pad network</p>
+<p>ini start dari /24</p>
+<ul>
+<li><code>0b00000000</code> -&gt; 0 (katakanlah octet ke 4, cidr 24)				// 1 network</li>
+<li><code>0b10000000</code> -&gt; 0 (cidr 25, 128 hosts)							// 2 network</li>
+<li><code>0b11000000</code> -&gt; 0 (cidr 26, 128 + 64)								// 4 network</li>
+<li><code>0b11100000</code> -&gt; 0 (cidr 27, 128 + 64 + 32)						// 8 network</li>
+<li><code>0b11110000</code> -&gt; 0 (cidr 28, 128 + 64 + 32 + 16)					// 16 network</li>
+<li><code>0b11111000</code> -&gt; 0 (cidr 29, 128 + 64 + 32 + 16 + 8)				// 32 network</li>
+<li><code>0b11111100</code> -&gt; 0 (cidr 30, 128 + 64 + 32 + 16 + 8 + 4)			// 64 network</li>
+<li><code>0b11111110</code> -&gt; 0 (cidr 31, 128 + 64 + 32 + 16 + 8 + 4 + 2)		// 128 network</li>
+<li><code>0b11111111</code> -&gt; 0 (cidr 32, 128 + 64 + 32 + 16 + 8 + 4 + 2 + 1)	// 256 network</li>
+</ul>
+<p>start dari /16</p>
+<ul>
+<li><code>0b0000000000000000</code> -&gt; 0 (cidr 16, 65535)								// 1 net, 65535 hosts</li>
+<li><code>0b1000000000000000</code> -&gt; 0 (cidr 17, 65535 + )							// 2 net, 32767 hosts</li>
+<li><code>0b1100000000000000</code> -&gt; 0 (cidr 26, 128 + 64)								// 4 net</li>
+<li><code>0b1110000000000000</code> -&gt; 0 (cidr 27, 128 + 64 + 32)						// 8 net</li>
+<li><code>0b1111000000000000</code> -&gt; 0 (cidr 28, 128 + 64 + 32 + 16)					// 16 net</li>
+<li><code>0b1111100000000000</code> -&gt; 0 (cidr 29, 128 + 64 + 32 + 16 + 8)				// 32 net</li>
+<li><code>0b1111110000000000</code> -&gt; 0 (cidr 30, 128 + 64 + 32 + 16 + 8 + 4)			// 64 net</li>
+<li><code>0b1111111000000000</code> -&gt; 0 (cidr 31, 128 + 64 + 32 + 16 + 8 + 4 + 2)		// 128 net</li>
+<li><code>0b1111111100000000</code> -&gt; 0 (cidr 32, 128 + 64 + 32 + 16 + 8 + 4 + 2 + 1)	// 256 net</li>
+</ul>
+<p>-- stagging (perhitungan ip cidr 16 keatas)
+max int 16 bit: 65536</p>
+<ul>
+<li>/16 : 0b0000000000000000 = 0</li>
+<li>/17 : 0b1000000000000000 = 32768, maka 65536 / 32768 = 2, alias 2 network, 32768 hosts</li>
+<li>/18 : 0b1100000000000000 = 49152, maka 65536 / (65536 - 49152)  = 4 network, 16384 hosts,</li>
+<li>/19 : 0b1110000000000000 = 57344, maka 65536 / (65536 - 57344)  = 8 network, 8192 hosts,</li>
+<li>/20 : 0b1111000000000000 = 61440, maka 65536 / (65536 - 61440)  = 16 network, 4096 hosts,</li>
+<li>/21 : 0b1111100000000000 = 61440, maka 65536 / (65536 - 61440)  = 32 network, 2048 hosts,</li>
+<li>/22 : 0b1111110000000000 = 64512, maka 65536 / (65536 - 64512)  = 64 network, 1024 hosts,</li>
+<li>/23 : 0b1111111000000000 = 64512, maka 65536 / (65536 - 64512)  = 128 network, 512 hosts,</li>
+<li>/24 : 0b1111111100000000 = 64512, maka 65536 / (65536 - 64512)  = 256 network, 256 hosts,</li>
+</ul>
+<p>-- stagging cidr 8 keatas
+max int int 24 bit: 16777216</p>
+<ul>
+<li>
+<p>/9 : 0b100000000000000000000000 = 16777216 / (16777216 - 8388608) = 2 network, 8388608 hosts</p>
+</li>
+<li>
+<p>/10: 0b110000000000000000000000 = 16777216 / (16777216 - 12582912)= 4 network, 4194304 hosts</p>
+</li>
+<li>
+<p>/11: 0b111000000000000000000000 = 16777216 / (16777216 - 14680064)= 8 network, 2097152 hosts</p>
+</li>
+<li>
+<p>/12: 0b111100000000000000000000 = 16777216 / (16777216 - 15728640)= 16 network, 1048576 hosts</p>
+</li>
+<li>
+<p>/13: 0b111110000000000000000000 = 16777216 / (16777216 - 16252928)= 32 network, 524288 hosts</p>
+</li>
+<li>
+<p>/14: 0b111111000000000000000000 = 16777216 / (16777216 - 16515072) = 64 network, 262144 hosts</p>
+</li>
+<li>
+<p>/15: 0b111111100000000000000000 = 16777216 / (16777216 - 16646144) = 128 network, 131072 hosts</p>
+</li>
+<li>
+<p>/16: 0b111111110000000000000000 = 16777216 / (16777216 - 16711680) = 256 network, 65536 hosts</p>
+</li>
+<li>
+<p>/17: 0b111111111000000000000000 = 16777216 / (16777216 - 16744448) = 512 network, 32768 hosts</p>
+</li>
+<li>
+<p>/18: 0b111111111100000000000000 = 16777216 / (16777216 - 16760832) = 1024 network, 16384 hosts</p>
+</li>
+<li>
+<p>/19: 0b111111111110000000000000 = 16777216 / (16777216 - 16769024) = 2048 network, 8192 hosts</p>
+</li>
+<li>
+<p>/20: 0b111111111111000000000000 = 16777216 / (16777216 - 16773120) = 4096 network, 4096 hosts</p>
+</li>
+<li>
+<p>/21: 0b111111111111100000000000 = 16777216 / (16777216 - 16775168) = 8192 network, 2048 hosts</p>
+</li>
+<li>
+<p>/9 : 0b100000000000000000000000:</p>
+</li>
+</ul>
 
                     </main>
 

@@ -64,12 +64,14 @@
 	- [qemu default network](./server/qemu_default_network.md)
 	- [mikrotik firewall](./server/mikrotik_firewall.md)
 	- [bring wlan0 connectivity to the network namespace linux & test routerOS](./server/bring_wlan0_conn_to_netns.md)
+	- [network namespace + NAT notes](./server/netns_nat_notes.md)
 
 - [Database](./database/readme-database.md)
 	- [psql command](./database/psql_command.md)
 	- [psql snippet](./database/psql_snippet.md)
 	- [PostgreSQL database creation flow](./database/postgresql_db_creation.md)
 	- [how to use SQLX cli tools for db migration such laravel migrations](./database/sqlx-migration-tools.md)
+	- [Postgresql internal (server)](./database/postgresql_internal_as_server.md)
 
 - [Other](./other/other-readme.md)
 	- [bookmarks highly useful link](./other/bookmarks_useful_links.md)
@@ -83,3 +85,4 @@
 	- [Inter-VLAN routing](./other/intervlan-routing.md)
 	- [Tealinux qemu promp & testing](./other/tealinux-promp-testing.md)
 	- [binary operation](./other/binary_operation.md)
+	- [catatan subnetting from scratch](./other/subnetting_from_scratch.md)
