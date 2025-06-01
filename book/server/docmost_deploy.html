@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Database - Fadhil Books &amp; Notes</title>
+        <title>deploy Docmost on server - Fadhil Books &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -157,17 +157,99 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="database"><a class="header" href="#database">Database</a></h1>
+                        <h1 id="deploy-docmost-on-server"><a class="header" href="#deploy-docmost-on-server">deploy Docmost on server</a></h1>
+<p>please read this doc first, <a href="https://docmost.com/docs/installation">https://docmost.com/docs/installation</a></p>
+<h2 id="docker-compose-config"><a class="header" href="#docker-compose-config">docker compose config</a></h2>
+<pre><code class="language-yml">version: "3"
+
+services:
+  docmost:
+    image: docmost/docmost:latest
+    depends_on:
+      - db
+      - redis
+    environment:
+      APP_URL: "http://localhost:3000"
+      APP_SECRET: "REPLACE_WITH_LONG_SECRET"
+      DATABASE_URL: "postgresql://docmost:STRONG_DB_PASSWORD@db:5432/docmost?schema=public"
+      REDIS_URL: "redis://redis:6379"
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    volumes:
+      - docmost:/app/data/storage
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: docmost
+      POSTGRES_USER: docmost
+      POSTGRES_PASSWORD: STRONG_DB_PASSWORD
+    restart: unless-stopped
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7.2-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+
+volumes:
+  docmost:
+  db_data:
+  redis_data:
+</code></pre>
+<p>replace your <code>STRONG_DB_PASSWORD</code> with <code>openssl rand -hex 10</code>, and <code>REPLACE_WITH_LONG_SECRET</code> with <code>openssl rand -hex 32</code>, and <code>APP_URL</code>, for example, in my case is <code>https://docmost.fadev.org</code></p>
+<p>run <code>docker compose run</code></p>
+<h2 id="setup-reverse-proxy-nginx"><a class="header" href="#setup-reverse-proxy-nginx">setup reverse proxy (nginx)</a></h2>
+<p>go to <code>/etc/nginx/sites-enabled</code>, and create a clone with <code>cp default docmost.fadev.org</code></p>
+<p>fill it like this</p>
+<pre><code class="language-conf">server_name docmost.fadev.org;
+
+location / {
+	# First attempt to serve request as file, then
+	# as directory, then fall back to displaying a 404.
+	#try_files $uri $uri/ =404;
+
+	proxy_pass http://127.0.0.1:3000;
+}
+
+location /socket.io/ {
+	proxy_pass http://127.0.0.1:3000;
+	proxy_http_version 1.1;
+	proxy_set_header Upgrade $http_upgrade;
+	proxy_set_header Connection "upgrade";
+	proxy_set_header Host $host;
+}
+
+location /collab {
+	proxy_pass http://127.0.0.1:3000;
+	proxy_http_version 1.1;
+	proxy_set_header Upgrade $http_upgrade;
+	proxy_set_header Connection "upgrade";
+	proxy_set_header Host $host;
+}
+
+</code></pre>
+<h2 id="https"><a class="header" href="#https">HTTPS</a></h2>
+<p>run</p>
+<ul>
+<li><code>sudo apt install certbot python3-certbot-nginx</code></li>
+<li><code>sudo certbot --nginx -d docmost.fadev.org</code></li>
+</ul>
+<h2 id="firewall"><a class="header" href="#firewall">Firewall</a></h2>
+<p>allow port 443</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../server/docmost_deploy.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../server/netns_nat_notes.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../database/psql_command.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../database/readme-database.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -177,11 +259,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../server/docmost_deploy.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../server/netns_nat_notes.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../database/psql_command.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../database/readme-database.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

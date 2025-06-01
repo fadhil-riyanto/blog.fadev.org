@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Database - Fadhil Books &amp; Notes</title>
+        <title>Postgresql II SQL language docs summary - Fadhil Books &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -157,17 +157,27 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="database"><a class="header" href="#database">Database</a></h1>
+                        <h1 id="postgresql-ii-sql-language-docs-summary"><a class="header" href="#postgresql-ii-sql-language-docs-summary">Postgresql II SQL language docs summary</a></h1>
+<p>this is incomplete documentation summary of postgresql (SQL section), see complete docs <a href="https://www.postgresql.org/docs/current/sql.html">here</a></p>
+<h2 id="5-data-definition"><a class="header" href="#5-data-definition">5. Data Definition</a></h2>
+<h3 id="52-default-values"><a class="header" href="#52-default-values">5.2. Default values</a></h3>
+<p>When a new row is created and no values are specified for some of the columns, those columns will be filled with their respective default values. A data manipulation command can also request explicitly that a column be set to its default value, without having to know what that value is</p>
+<p>example</p>
+<pre><code class="language-sql">CREATE TABLE state (
+	uid				integer,
+	enable			bool DEFAULT false
+)
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../server/docmost_deploy.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../database/postgresql_internal_as_server.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../database/psql_command.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../other/other-readme.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -177,11 +187,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../server/docmost_deploy.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../database/postgresql_internal_as_server.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../database/psql_command.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../other/other-readme.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

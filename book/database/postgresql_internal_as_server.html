@@ -253,25 +253,60 @@ CREATE TABLE my_catalog.metadata_table (...);
 <li>pg_type: Stores all data types (built-in, custom, enum, composite). (IMPORTANT)</li>
 <li>pg_user_mapping: Maps users to foreign servers.</li>
 </ul>
+<h3 id="pg_catalogpg_database-details"><a class="header" href="#pg_catalogpg_database-details">pg_catalog.pg_database details</a></h3>
+<p>this docs can be found in <a href="https://www.postgresql.org/docs/16/catalog-pg-database.html">https://www.postgresql.org/docs/16/catalog-pg-database.html</a></p>
+<div class="table-wrapper"><table><thead><tr><th>Column Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><strong><code>datname</code></strong></td><td><code>name</code></td><td>The name of the database.</td></tr>
+<tr><td><strong><code>datdba</code></strong></td><td><code>oid</code></td><td>The OID of the role (user) that owns the database. Use <code>pg_get_userbyid(datdba)</code> to resolve it.</td></tr>
+<tr><td><strong><code>encoding</code></strong></td><td><code>int</code></td><td>The character encoding of the database (e.g., UTF8 = 6). Use <code>pg_encoding_to_char(encoding)</code> to get the name.</td></tr>
+<tr><td><strong><code>datlocprovider</code></strong></td><td><code>char</code></td><td>Locale provider used (<code>c</code> = libc, <code>i</code> = ICU).</td></tr>
+<tr><td><strong><code>datistemplate</code></strong></td><td><code>bool</code></td><td>If <code>true</code>, the database can be used as a template for <code>CREATE DATABASE ... TEMPLATE</code>.</td></tr>
+<tr><td><strong><code>datallowconn</code></strong></td><td><code>bool</code></td><td>If <code>false</code>, connections to this database are not allowed (except by superusers).</td></tr>
+<tr><td><strong><code>datconnlimit</code></strong></td><td><code>int</code></td><td>The maximum number of concurrent connections allowed (-1 = no limit).</td></tr>
+<tr><td><strong><code>datlastsysoid</code></strong></td><td><code>oid</code></td><td>The last system OID used in this database at creation (mainly historical).</td></tr>
+<tr><td><strong><code>datfrozenxid</code></strong></td><td><code>xid</code></td><td>The transaction ID at which all tuples are known to be frozen (related to VACUUM).</td></tr>
+<tr><td><strong><code>datminmxid</code></strong></td><td><code>xid</code></td><td>The minimum multixact ID that is still considered potentially unfrozen.</td></tr>
+<tr><td><strong><code>dattablespace</code></strong></td><td><code>oid</code></td><td>OID of the default tablespace for the database. Use <code>pg_tablespace</code> to resolve.</td></tr>
+<tr><td><strong><code>datcollate</code></strong></td><td><code>name</code></td><td>LC_COLLATE setting (how strings are sorted).</td></tr>
+<tr><td><strong><code>datctype</code></strong></td><td><code>name</code></td><td>LC_CTYPE setting (how character classification works).</td></tr>
+<tr><td><strong><code>daticulocale</code></strong></td><td><code>text</code></td><td>ICU locale (used if <code>datlocprovider = 'i'</code>).</td></tr>
+<tr><td><strong><code>datcollversion</code></strong></td><td><code>text</code></td><td>Version of the collation used (important for collation versioning with ICU).</td></tr>
+<tr><td><strong><code>datacl</code></strong></td><td><code>aclitem[]</code></td><td>Access privileges (GRANTs), stored as an array of ACL items.</td></tr>
+</tbody></table>
+</div>
 <h2 id="management-script-collection"><a class="header" href="#management-script-collection">management script collection</a></h2>
-<h3 id="show-all-databases-in-current-user"><a class="header" href="#show-all-databases-in-current-user">show all databases (in current user)</a></h3>
+<h4 id="--show-all-databases-in-current-user"><a class="header" href="#--show-all-databases-in-current-user">- show all databases (in current user)</a></h4>
 <pre><code class="language-sql">SELECT * FROM pg_catalog.pg_database;`:
 </code></pre>
-<h3 id="show-pg_catalogpg_tables-definition"><a class="header" href="#show-pg_catalogpg_tables-definition">show <code>pg_catalog.pg_tables</code> definition</a></h3>
+<h4 id="--show-pg_catalogpg_tables-definition"><a class="header" href="#--show-pg_catalogpg_tables-definition">- show <code>pg_catalog.pg_tables</code> definition</a></h4>
 <p>go back on top in order to see what actually view is</p>
 <pre><code class="language-sql">SELECT pg_get_viewdef('pg_catalog.pg_tables', true);`: 
 </code></pre>
-<h3 id="show-all-available-pgsql-datatype"><a class="header" href="#show-all-available-pgsql-datatype">show all available pgsql datatype</a></h3>
+<h4 id="--show-all-available-pgsql-datatype"><a class="header" href="#--show-all-available-pgsql-datatype">- show all available pgsql datatype</a></h4>
 <pre><code class="language-sql">SELECT 
 	*
 FROM
 	pg_catalog.pg_type;
 </code></pre>
-<h3 id="lists-all-schema"><a class="header" href="#lists-all-schema">lists all schema</a></h3>
+<h4 id="--lists-all-schema"><a class="header" href="#--lists-all-schema">- lists all schema</a></h4>
 <pre><code class="language-sql">SELECT
     *
 FROM
     pg_catalog.pg_namespace;
+</code></pre>
+<h4 id="--show-all-dbs-with-owner"><a class="header" href="#--show-all-dbs-with-owner">- show all dbs with owner</a></h4>
+<pre><code class="language-sql">SELECT 
+        x.oid as object_id,
+        x.datname as db_name,
+        CASE 
+                WHEN pg_catalog.pg_get_userbyid(x.datdba) LIKE 'unknown (OID=%)' THEN 'UNKNOWN'
+                ELSE pg_catalog.pg_get_userbyid(x.datdba)
+        END as owner
+FROM pg_catalog.pg_database as x;
+</code></pre>
+<p>cond: <a href="https://www.postgresql.org/docs/current/functions-conditional.html#FUNCTIONS-CASE">https://www.postgresql.org/docs/current/functions-conditional.html#FUNCTIONS-CASE</a></p>
+<h4 id="--rename-db-as-postgres-user"><a class="header" href="#--rename-db-as-postgres-user">- RENAME db (as postgres user)</a></h4>
+<pre><code class="language-sql">ALTER DATABASE xyz RENAME TO abc;
 </code></pre>
 
                     </main>
@@ -282,7 +317,7 @@ FROM
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../other/other-readme.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../database/postgresql_ii_sql_summary.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -296,7 +331,7 @@ FROM
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../other/other-readme.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../database/postgresql_ii_sql_summary.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

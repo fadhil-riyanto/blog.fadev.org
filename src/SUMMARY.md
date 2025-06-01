@@ -65,6 +65,7 @@
 	- [mikrotik firewall](./server/mikrotik_firewall.md)
 	- [bring wlan0 connectivity to the network namespace linux & test routerOS](./server/bring_wlan0_conn_to_netns.md)
 	- [network namespace + NAT notes](./server/netns_nat_notes.md)
+	- [deploy Docmost on server](./server/docmost_deploy.md)
 
 - [Database](./database/readme-database.md)
 	- [psql command](./database/psql_command.md)
@@ -72,6 +73,7 @@
 	- [PostgreSQL database creation flow](./database/postgresql_db_creation.md)
 	- [how to use SQLX cli tools for db migration such laravel migrations](./database/sqlx-migration-tools.md)
 	- [Postgresql internal (server)](./database/postgresql_internal_as_server.md)
+	- [Postgresql II SQL language docs summary](./database/postgresql_ii_sql_summary.md)
 
 - [Other](./other/other-readme.md)
 	- [bookmarks highly useful link](./other/bookmarks_useful_links.md)

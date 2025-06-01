@@ -96,20 +96,43 @@ this is some stuff inside of pg catalog, you can do that using `\dt pg_catalog.*
 * pg\_type: Stores all data types (built-in, custom, enum, composite). (IMPORTANT)
 * pg\_user\_mapping: Maps users to foreign servers.
 
+### pg_catalog.pg_database details
+this docs can be found in [https://www.postgresql.org/docs/16/catalog-pg-database.html](https://www.postgresql.org/docs/16/catalog-pg-database.html)
+
+| Column Name          | Type        | Description                                                                                                   |
+| -------------------- | ----------- | ------------------------------------------------------------------------------------------------------------- |
+| **`datname`**        | `name`      | The name of the database.                                                                                     |
+| **`datdba`**         | `oid`       | The OID of the role (user) that owns the database. Use `pg_get_userbyid(datdba)` to resolve it.               |
+| **`encoding`**       | `int`       | The character encoding of the database (e.g., UTF8 = 6). Use `pg_encoding_to_char(encoding)` to get the name. |
+| **`datlocprovider`** | `char`      | Locale provider used (`c` = libc, `i` = ICU).                                                                 |
+| **`datistemplate`**  | `bool`      | If `true`, the database can be used as a template for `CREATE DATABASE ... TEMPLATE`.                         |
+| **`datallowconn`**   | `bool`      | If `false`, connections to this database are not allowed (except by superusers).                              |
+| **`datconnlimit`**   | `int`       | The maximum number of concurrent connections allowed (-1 = no limit).                                         |
+| **`datlastsysoid`**  | `oid`       | The last system OID used in this database at creation (mainly historical).                                    |
+| **`datfrozenxid`**   | `xid`       | The transaction ID at which all tuples are known to be frozen (related to VACUUM).                            |
+| **`datminmxid`**     | `xid`       | The minimum multixact ID that is still considered potentially unfrozen.                                       |
+| **`dattablespace`**  | `oid`       | OID of the default tablespace for the database. Use `pg_tablespace` to resolve.                               |
+| **`datcollate`**     | `name`      | LC\_COLLATE setting (how strings are sorted).                                                                 |
+| **`datctype`**       | `name`      | LC\_CTYPE setting (how character classification works).                                                       |
+| **`daticulocale`**   | `text`      | ICU locale (used if `datlocprovider = 'i'`).                                                                  |
+| **`datcollversion`** | `text`      | Version of the collation used (important for collation versioning with ICU).                                  |
+| **`datacl`**         | `aclitem[]` | Access privileges (GRANTs), stored as an array of ACL items.                                                  |
+
+
 ## management script collection
 
-### show all databases (in current user)
+#### - show all databases (in current user)
 ```sql
 SELECT * FROM pg_catalog.pg_database;`:
 ```
-### show `pg_catalog.pg_tables` definition
+#### - show `pg_catalog.pg_tables` definition
 
 go back on top in order to see what actually view is
 ```sql
 SELECT pg_get_viewdef('pg_catalog.pg_tables', true);`: 
 ```
 
-### show all available pgsql datatype
+#### - show all available pgsql datatype
 ```sql
 SELECT 
 	*
@@ -117,10 +140,30 @@ FROM
 	pg_catalog.pg_type;
 ```
 
-### lists all schema
+#### - lists all schema
 ```sql
 SELECT
     *
 FROM
     pg_catalog.pg_namespace;
+```
+
+#### - show all dbs with owner
+
+```sql
+SELECT 
+        x.oid as object_id,
+        x.datname as db_name,
+        CASE 
+                WHEN pg_catalog.pg_get_userbyid(x.datdba) LIKE 'unknown (OID=%)' THEN 'UNKNOWN'
+                ELSE pg_catalog.pg_get_userbyid(x.datdba)
+        END as owner
+FROM pg_catalog.pg_database as x;
+```
+
+cond: [https://www.postgresql.org/docs/current/functions-conditional.html#FUNCTIONS-CASE](https://www.postgresql.org/docs/current/functions-conditional.html#FUNCTIONS-CASE)
+
+#### - RENAME db (as postgres user)
+```sql
+ALTER DATABASE xyz RENAME TO abc;
 ```
