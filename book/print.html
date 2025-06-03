@@ -2994,6 +2994,61 @@ FROM pg_catalog.pg_database as x;
 	enable			bool DEFAULT false
 )
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="system-table-in-pgsql-catalog"><a class="header" href="#system-table-in-pgsql-catalog">system table in pgsql (catalog)</a></h1>
+<h3 id="pg_tables--docs"><a class="header" href="#pg_tables--docs">pg_tables | <a href="https://www.postgresql.org/docs/current/view-pg-tables.html">docs</a></a></h3>
+<p>catalog pgsql yang isinya data ttg table (di db saat ini), contoh query nya</p>
+<pre><code>SELECT
+        *
+FROM 
+        pg_catalog.pg_tables as x
+WHERE
+        x.schemaname = 'public';
+</code></pre>
+<h3 id="pg_sequences"><a class="header" href="#pg_sequences">pg_sequences</a></h3>
+<p>yg ini isinya sequence2 semua, mirip kayak serial datatype di pgsql
+<img src="database//assets/94e4349ca37d30c1e51bc9e722767e2932e7c3d863bd4d0bfc941a764de78e033e68f4ecde81c5fa0152f9985d8f2d7e27502786debddaec09a57f68.png" alt="image" /></p>
+<p>NOTES: <code>pg_sequence</code> adalah versi low levelnya, sedangkan <code>pg_sequences</code> adalah versi view dari join-an <code>pg_sequence</code> dan <code>pg_class</code>, bukti</p>
+<pre><code class="language-sql">SELECT
+        *
+FROM
+        pg_get_viewdef('pg_catalog.pg_sequences', true)
+</code></pre>
+<p>hasil</p>
+<pre><code class="language-sql">SELECT 
+        n.nspname AS schemaname, 
+        c.relname AS sequencename, 
+        pg_get_userbyid(c.relowner) AS sequenceowner, 
+        s.seqtypid :: regtype AS data_type, 
+        s.seqstart AS start_value, 
+        s.seqmin AS min_value, 
+        s.seqmax AS max_value, 
+        s.seqincrement AS increment_by, 
+        s.seqcycle AS cycle, 
+        s.seqcache AS cache_size, 
+        CASE WHEN has_sequence_privilege(c.oid, 'SELECT,USAGE' :: text) THEN pg_sequence_last_value(c.oid :: regclass) ELSE NULL :: bigint END AS last_value 
+FROM 
+        pg_sequence s 
+        JOIN pg_class c ON c.oid = s.seqrelid 
+        LEFT JOIN pg_namespace n ON n.oid = c.relnamespace 
+WHERE 
+        NOT pg_is_other_temp_schema(n.oid) 
+        AND c.relkind = 'S' :: "char";
+
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="pgsql-functions"><a class="header" href="#pgsql-functions">pgsql functions()</a></h1>
+<h3 id="pg_get_viewdef"><a class="header" href="#pg_get_viewdef"><code>pg_get_viewdef</code></a></h3>
+<p>see sql script for particular view, I call this as view reverser</p>
+<p>example:</p>
+<pre><code class="language-sql">SELECT
+        *
+FROM
+        pg_get_viewdef('pg_catalog.pg_sequences', true)
+</code></pre>
+<p>ref:</p>
+<ul>
+<li><a href="https://pgpedia.info/p/pg_get_viewdef.html">https://pgpedia.info/p/pg_get_viewdef.html</a></li>
+<li><a href="https://www.postgresql.org/docs/current/functions-info.html">https://www.postgresql.org/docs/current/functions-info.html</a></li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="other"><a class="header" href="#other">Other</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="bookmarks-highly-useful-link"><a class="header" href="#bookmarks-highly-useful-link">bookmarks highly useful link</a></h1>
 <h2 id="this-section-is-derived-from-my-original-channel-xorriso"><a class="header" href="#this-section-is-derived-from-my-original-channel-xorriso">this section is derived from my original channel <a href="https://t.me/xorriso">@xorriso</a></a></h2>

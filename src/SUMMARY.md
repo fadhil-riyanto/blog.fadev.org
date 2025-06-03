@@ -74,6 +74,8 @@
 	- [how to use SQLX cli tools for db migration such laravel migrations](./database/sqlx-migration-tools.md)
 	- [Postgresql internal (server)](./database/postgresql_internal_as_server.md)
 	- [Postgresql II SQL language docs summary](./database/postgresql_ii_sql_summary.md)
+	- [system table in pgsql (catalog)](./database/postgresql_system_table.md)
+	- [pgsql functions()](./database/postgresql_functions.md)
 
 - [Other](./other/other-readme.md)
 	- [bookmarks highly useful link](./other/bookmarks_useful_links.md)

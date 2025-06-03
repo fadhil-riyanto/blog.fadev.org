@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Other - Fadhil Books &amp; Notes</title>
+        <title>system table in pgsql (catalog) - Fadhil Books &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -157,17 +157,57 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="other"><a class="header" href="#other">Other</a></h1>
+                        <h1 id="system-table-in-pgsql-catalog"><a class="header" href="#system-table-in-pgsql-catalog">system table in pgsql (catalog)</a></h1>
+<h3 id="pg_tables--docs"><a class="header" href="#pg_tables--docs">pg_tables | <a href="https://www.postgresql.org/docs/current/view-pg-tables.html">docs</a></a></h3>
+<p>catalog pgsql yang isinya data ttg table (di db saat ini), contoh query nya</p>
+<pre><code>SELECT
+        *
+FROM 
+        pg_catalog.pg_tables as x
+WHERE
+        x.schemaname = 'public';
+</code></pre>
+<h3 id="pg_sequences"><a class="header" href="#pg_sequences">pg_sequences</a></h3>
+<p>yg ini isinya sequence2 semua, mirip kayak serial datatype di pgsql
+<img src="/assets/94e4349ca37d30c1e51bc9e722767e2932e7c3d863bd4d0bfc941a764de78e033e68f4ecde81c5fa0152f9985d8f2d7e27502786debddaec09a57f68.png" alt="image" /></p>
+<p>NOTES: <code>pg_sequence</code> adalah versi low levelnya, sedangkan <code>pg_sequences</code> adalah versi view dari join-an <code>pg_sequence</code> dan <code>pg_class</code>, bukti</p>
+<pre><code class="language-sql">SELECT
+        *
+FROM
+        pg_get_viewdef('pg_catalog.pg_sequences', true)
+</code></pre>
+<p>hasil</p>
+<pre><code class="language-sql">SELECT 
+        n.nspname AS schemaname, 
+        c.relname AS sequencename, 
+        pg_get_userbyid(c.relowner) AS sequenceowner, 
+        s.seqtypid :: regtype AS data_type, 
+        s.seqstart AS start_value, 
+        s.seqmin AS min_value, 
+        s.seqmax AS max_value, 
+        s.seqincrement AS increment_by, 
+        s.seqcycle AS cycle, 
+        s.seqcache AS cache_size, 
+        CASE WHEN has_sequence_privilege(c.oid, 'SELECT,USAGE' :: text) THEN pg_sequence_last_value(c.oid :: regclass) ELSE NULL :: bigint END AS last_value 
+FROM 
+        pg_sequence s 
+        JOIN pg_class c ON c.oid = s.seqrelid 
+        LEFT JOIN pg_namespace n ON n.oid = c.relnamespace 
+WHERE 
+        NOT pg_is_other_temp_schema(n.oid) 
+        AND c.relkind = 'S' :: "char";
+
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../database/postgresql_functions.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../database/postgresql_ii_sql_summary.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../other/bookmarks_useful_links.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../database/postgresql_functions.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -177,11 +217,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../database/postgresql_functions.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../database/postgresql_ii_sql_summary.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../other/bookmarks_useful_links.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../database/postgresql_functions.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
