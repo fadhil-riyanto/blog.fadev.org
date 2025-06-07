@@ -1,9 +1,26 @@
 [book]
 authors = ["fadhil riyanto"]
 language = "en"
-multilingual = false
+multilingual = true
 src = "src"
 title = "Fadhil Books & Notes"
 
 [output.html]
 mathjax-support = true
+default-theme = "coal"
+preferred-dark-theme = "coal"
+git-repository-url = "https://github.com/fadhil-riyanto"
+
+[output.html.print]
+enable = true    # include support for printable output
+page-break = true # insert page-break after each chapter
+
+[output.html.playground]
+editable = true         # allows editing the source code
+copyable = true          # include the copy button for copying code snippets
+copy-js = true           # includes the JavaScript for the code editor
+line-numbers = false     # displays line numbers for editable code
+runnable = false          # displays a run button for rust code
+
+[output.html.fold]
+enable = true

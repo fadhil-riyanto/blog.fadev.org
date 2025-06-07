@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Regex notes - Fadhil Books &amp; Notes</title>
+        <title>php:8.3.20-fpm-bullseye + nginx - Fadhil Books &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -160,28 +160,75 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="regex-notes"><a class="header" href="#regex-notes">Regex notes</a></h1>
-<h2 id="letter--digits"><a class="header" href="#letter--digits">letter &amp; digits</a></h2>
-<ul>
-<li><code>\D+</code>: Matching all non digits, then  grouping</li>
-</ul>
-<h1 id="match-any-using-"><a class="header" href="#match-any-using-">match any using <code>.</code></a></h1>
-<h2 id="the--match-all-chars-except-r-or-n"><a class="header" href="#the--match-all-chars-except-r-or-n">the <code>.</code> match all chars, except \r or \n</a></h2>
-<p>example:
-regexp: <code>r".+"</code></p>
-<p>It will match anything as long as there is at least one character present. no empty string such ""</p>
+                        <h1 id="php8320-fpm-bullseye--nginx"><a class="header" href="#php8320-fpm-bullseye--nginx">php:8.3.20-fpm-bullseye + nginx</a></h1>
+<pre><code class="language-dockerfile">FROM php:8.3.20-fpm-bullseye 
+
+RUN apt-get update &amp;&amp; apt-get install -y libpq-dev
+RUN docker-php-ext-install pdo pdo_pgsql
+
+COPY . /app
+WORKDIR /app
+
+COPY ./docker/fpm/www.conf /usr/local/etc/php-fpm.d/www.conf
+# karna php-fpm running pakai user www-data
+RUN chown -R www-data:www-data /app/storage
+
+
+CMD [ "php-fpm" ]
+</code></pre>
+<p>default.conf (nginx)</p>
+<pre><code class="language-dockerfile">server {
+    listen       80;
+    server_name  localhost;
+
+    access_log  off;
+    root /app/public;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   /usr/share/nginx/html;
+    }
+
+
+    location ~ \.php$ {
+
+        fastcgi_pass   php:9000; 
+        fastcgi_param  SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param  DOCUMENT_ROOT $document_root;
+        include        fastcgi_params;
+    }
+}
+
+</code></pre>
+<p>www.conf</p>
+<pre><code class="language-conf">
+[www]
+access.log = /dev/null
+
+user = www-data
+group = www-data
+
+listen = 0.0.0.0:9000
+
+pm = dynamic
+pm.max_children = 5
+pm.start_servers = 2
+pm.min_spare_servers = 1
+pm.max_spare_servers = 3
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../other/rumus-sector-disk-linux.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../dockerfile/php-8.3_debian_v11_(bullseye)_dev-env.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../other/workspace-template.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
 
                         <div style="clear: both"></div>
                     </nav>
@@ -189,13 +236,10 @@ regexp: <code>r".+"</code></p>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../other/rumus-sector-disk-linux.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../dockerfile/php-8.3_debian_v11_(bullseye)_dev-env.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../other/workspace-template.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

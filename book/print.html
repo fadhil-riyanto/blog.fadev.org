@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html lang="en" class="light sidebar-visible" dir="ltr">
+<html lang="en" class="coal sidebar-visible" dir="ltr">
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
@@ -37,8 +37,8 @@
         <!-- Provide site root and default themes to javascript -->
         <script>
             const path_to_root = "";
-            const default_light_theme = "light";
-            const default_dark_theme = "navy";
+            const default_light_theme = "coal";
+            const default_dark_theme = "coal";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -68,7 +68,7 @@
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
-            html.classList.remove('light')
+            html.classList.remove('coal')
             html.classList.add(theme);
             html.classList.add("js");
         </script>
@@ -131,6 +131,9 @@
                     <div class="right-buttons">
                         <a href="print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/fadhil-riyanto" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
                         </a>
 
                     </div>
@@ -545,13 +548,10 @@ mov eax, [esp]</p>
 <p>seek start from 1, is <code>bcde</code>, start from 2 is <code>cde</code> and so-on, this is also happen when we use seek from end, for example, seek end -1 is mean <code>e</code>, -2 is <code>de</code>, etc.</p>
 <h1 id="from-code-perspective"><a class="header" href="#from-code-perspective">From code perspective</a></h1>
 <p>this is signature of cursor</p>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>pub struct Cursor&lt;T&gt; {
+<pre><code class="language-rust">pub struct Cursor&lt;T&gt; {
     inner: T,
     pos: u64,
-}
-<span class="boring">}</span></code></pre></pre>
+}</code></pre>
 <p>and also, this struct implement <a href="https://doc.rust-lang.org/src/std/io/cursor.rs.html#566">Write</a> and <a href="https://doc.rust-lang.org/src/std/io/cursor.rs.html#289">Seek</a></p>
 <p>so, in order to understanding this concept, let code first in C</p>
 <pre><code class="language-c">
@@ -606,7 +606,7 @@ etc...</p>
 <p>this concept is basically same in Rust</p>
 <h1 id="rust-context"><a class="header" href="#rust-context">Rust context</a></h1>
 <p>this is small example show Seek works (in-memory) instead utilize <em>real</em> file</p>
-<pre><pre class="playground"><code class="language-rust">use std::io::prelude::*;
+<pre><code class="language-rust">use std::io::prelude::*;
 use std::io::{self, SeekFrom};
 use std::io::Cursor;
 
@@ -626,7 +626,7 @@ fn main() {
     write_bytes(&amp;mut buf).unwrap();
     println!("{:?}", &amp;buf.get_ref()); // print vector
 }
-</code></pre></pre>
+</code></pre>
 <p>this is the output</p>
 <pre><code class="language-txt">[0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 </code></pre>
@@ -635,9 +635,7 @@ fn main() {
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-bytes-has_remaining-method"><a class="header" href="#rust-bytes-has_remaining-method">Rust bytes has_remaining() method</a></h1>
 <p>this function return whatever any best left on buffer. example, let make simple tcp/ip</p>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>impl Connection {
+<pre><code class="language-rust">impl Connection {
     pub fn new(stream: TcpStream) -&gt; Connection {
         Connection {
             stream: BufWriter::new(stream),
@@ -662,8 +660,7 @@ fn main() {
 
         Ok(Some(Frame::Null))
     }
-}
-<span class="boring">}</span></code></pre></pre>
+}</code></pre>
 <p>let's see the server result using <code>ncat</code></p>
 <p><img src="rust/../assets/tcp-ncat-snapshot.png" alt="ncat-result" /></p>
 <p>which the input is something look like this</p>
@@ -684,21 +681,13 @@ false &lt;--- confirm
 <p>Also, <code>get_u8</code> returns the first byte in the buffer. Each time it's called, it advances the position, so subsequent calls return the next bytes.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="how-rust-into-box--error-analysis"><a class="header" href="#how-rust-into-box--error-analysis">How Rust into() Box + Error analysis</a></h1>
 <p>suppose, we have function return signature like this</p>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>std::result::Result&lt;Option&lt;Frame&gt;, Box&lt;dyn std::error::Error + Send + Sync&gt;&gt;
-<span class="boring">}</span></code></pre></pre>
+<pre><code class="language-rust">std::result::Result&lt;Option&lt;Frame&gt;, Box&lt;dyn std::error::Error + Send + Sync&gt;&gt;</code></pre>
 <p>and then, we return something like this from our function</p>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>return Err("connection reset".into())
-<span class="boring">}</span></code></pre></pre>
+<pre><code class="language-rust">return Err("connection reset".into())</code></pre>
 <p>how the <code>into()</code> works?</p>
 <h1 id="analysis"><a class="header" href="#analysis">analysis</a></h1>
 <p>look at <a href="https://github.com/rust-lang/rust/blob/6e830462330a9e34d8176e86d4580dd0820c6fd5/library/alloc/src/boxed/convert.rs#L658">this</a> snippet</p>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>#[cfg(not(no_global_oom_handling))]
+<pre><code class="language-rust">#[cfg(not(no_global_oom_handling))]
 #[stable(feature = "rust1", since = "1.0.0")]
 impl&lt;'a&gt; From&lt;&amp;str&gt; for Box&lt;dyn Error + Send + Sync + 'a&gt; {
     /// Converts a [`str`] into a box of dyn [`Error`] + [`Send`] + [`Sync`].
@@ -720,12 +709,9 @@ impl&lt;'a&gt; From&lt;&amp;str&gt; for Box&lt;dyn Error + Send + Sync + 'a&gt; 
     fn from(err: &amp;str) -&gt; Box&lt;dyn Error + Send + Sync + 'a&gt; {
         From::from(String::from(err))
     }
-}
-<span class="boring">}</span></code></pre></pre>
+}</code></pre>
 <p>if we go deeper into <code>From::from</code>, we found <a href="https://github.com/rust-lang/rust/blob/6e830462330a9e34d8176e86d4580dd0820c6fd5/library/alloc/src/boxed/convert.rs#L608">this</a></p>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>#[inline]
+<pre><code class="language-rust">#[inline]
     fn from(err: String) -&gt; Box&lt;dyn Error + Send + Sync + 'a&gt; {
         struct StringError(String);
 
@@ -750,12 +736,11 @@ impl&lt;'a&gt; From&lt;&amp;str&gt; for Box&lt;dyn Error + Send + Sync + 'a&gt; 
         }
 
         Box::new(StringError(err))
-    }
-<span class="boring">}</span></code></pre></pre>
+    }</code></pre>
 <p>nb: actually StringError is string aliases. then, we see in this section. we created a heap-allocated using <code>Box::new(StringError(err))</code>.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-buffer-advance"><a class="header" href="#rust-buffer-advance">Rust buffer advance</a></h1>
 <p>this simple article show how buffer advance works</p>
-<pre><pre class="playground"><code class="language-rust">use bytes::Buf;
+<pre><code class="language-rust">use bytes::Buf;
 
 fn main() {
     let mut buf = &amp;b"hello world"[..];
@@ -765,20 +750,15 @@ fn main() {
     buf.advance(6);
     println!("{}", String::from_utf8_lossy(buf.chunk()));
 }
-</code></pre></pre>
+</code></pre>
 <p>and the result</p>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>hello world
-world
-<span class="boring">}</span></code></pre></pre>
+<pre><code class="language-rust">hello world
+world</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-resp-get_line-analysis"><a class="header" href="#rust-resp-get_line-analysis">Rust RESP get_line analysis</a></h1>
 <p>if we look at simple tokio redis example (mini redis), we can see how the data is parsed. look at this</p>
 <p>the resp is generally read something like this `+abc\r\n'</p>
 <p>this is the code that actually crop down the buffer</p>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>fn get_line&lt;'a&gt;(src: &amp;mut Cursor&lt;&amp;'a [u8]&gt;) -&gt; Result&lt;&amp;'a [u8], Error&gt; {
+<pre><code class="language-rust">fn get_line&lt;'a&gt;(src: &amp;mut Cursor&lt;&amp;'a [u8]&gt;) -&gt; Result&lt;&amp;'a [u8], Error&gt; {
     // Scan the bytes directly
     let start = src.position() as usize;
     // Scan to the second to last byte
@@ -795,16 +775,12 @@ world
     }
 
     Err(Error::Incomplete)
-}
-<span class="boring">}</span></code></pre></pre>
+}</code></pre>
 <p>and I will show you how they works (algorithm)</p>
 <h1 id="variables-setup"><a class="header" href="#variables-setup">variables setup</a></h1>
 <p>we have <code>start</code> and <code>end</code>, which consist of</p>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>let start = src.position() as usize;
-let end = src.get_ref().len() - 1;
-<span class="boring">}</span></code></pre></pre>
+<pre><code class="language-rust">let start = src.position() as usize;
+let end = src.get_ref().len() - 1;</code></pre>
 <p>the <code>src.position()</code> always return 0, also depending on the context. <code>src.get_ref().len()</code> return the length of the buffer, for example, <code>+rand\n\n</code> has length 7.</p>
 <p>because we wan't to read two chars at the end, which is \r and \n</p>
 <p>so we substract length with 1, <em>this is avoid buffer overflow</em></p>
@@ -816,10 +792,7 @@ idx: <code>012345 6</code>, no overflow</p>
 <p>then we check the <code>i</code> and <code>i + 1</code>, make sure there is \r\n</p>
 <h1 id="set-position"><a class="header" href="#set-position">set position</a></h1>
 <p>now, we set the cursor to the next incoming buffer. which after \r\n</p>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>src.set_position((i + 2) as u64);
-<span class="boring">}</span></code></pre></pre>
+<pre><code class="language-rust">src.set_position((i + 2) as u64);</code></pre>
 <p>suppose:</p>
 <pre><code>+rand\r\n+randomsomething\r\n
 012345 6 ^ 
@@ -828,9 +801,7 @@ ii+1 orig i
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="postgresql---get-generic-function-signature"><a class="header" href="#postgresql---get-generic-function-signature">postgresql - get() generic function signature</a></h1>
 <p>In someday, i found</p>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>#[track_caller]
+<pre><code class="language-rust">#[track_caller]
     pub fn get&lt;'a, I, T&gt;(&amp;'a self, idx: I) -&gt; T
     where
         I: RowIndex + fmt::Display,
@@ -840,24 +811,17 @@ ii+1 orig i
             Ok(ok) =&gt; ok,
             Err(err) =&gt; panic!("error retrieving column {}: {}", idx, err),
         }
-    }
-<span class="boring">}</span></code></pre></pre>
+    }</code></pre>
 <p>some sort of notes:</p>
 <ul>
 <li>https://doc.rust-lang.org/rust-by-example/generics.html</li>
 <li>https://serokell.io/blog/rust-generics</li>
 </ul>
 <p>how to call it</p>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>let data2 = data_actual[0].get::&lt;_, i32&gt;(0);
-<span class="boring">}</span></code></pre></pre>
+<pre><code class="language-rust">let data2 = data_actual[0].get::&lt;_, i32&gt;(0);</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-build-logging"><a class="header" href="#rust-build-logging">Rust build logging</a></h1>
 <p>rust build usually don't show any output if you try to println!() in build.rs, in order to force this, use</p>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>println!("cargo:warning=start build!");
-<span class="boring">}</span></code></pre></pre>
+<pre><code class="language-rust">println!("cargo:warning=start build!");</code></pre>
 <p>result</p>
 <pre><code class="language-txt">warning: ourcrate-rs@0.1.0: Something went wrong!
 </code></pre>
@@ -866,7 +830,7 @@ ii+1 orig i
 <p>topik ini khusus membahas gRPC di rust,</p>
 <h2 id="build"><a class="header" href="#build">build</a></h2>
 <p>contoh template build rs:</p>
-<pre><pre class="playground"><code class="language-rust">use std::{env, path::PathBuf};
+<pre><code class="language-rust">use std::{env, path::PathBuf};
 
 fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
     // let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
@@ -888,7 +852,7 @@ fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
 
     Ok(())
 }
-</code></pre></pre>
+</code></pre>
 <p>nb:</p>
 <ul>
 <li><code>file_descriptor_set_path</code>: dipakai sebagai reflection, bakal ketemu kalau pakai grpcurl.</li>
@@ -903,24 +867,18 @@ fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
 <h2 id="out_dir"><a class="header" href="#out_dir">OUT_DIR</a></h2>
 <p>what it is, simplenya <code>OUT_DIR</code> ini akan diset jika protobuf sudah di compile, dalam artian, file <code>*.proto</code> diubah jadi kumpulan file <code>*.rs</code> yang bakal di include sama macro, kemudian di compile</p>
 <p>urutan compile adalah, macro dievaluasi dulu, baru compile, sampai sini masuk akal. ini macro signature nya</p>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>#[macro_export]
+<pre><code class="language-rust">#[macro_export]
 macro_rules! include_proto {
     ($package: tt) =&gt; {
         include!(concat!(env!("OUT_DIR"), concat!("/", $package, ".rs")));
     };
-}
-<span class="boring">}</span></code></pre></pre>
+}</code></pre>
 <p>tambahan info bisa baca2 sendiri disini: <a href="https://doc.rust-lang.org/cargo/reference/environment-variables.html#environment-variables-cargo-sets-for-build-scripts">https://doc.rust-lang.org/cargo/reference/environment-variables.html#environment-variables-cargo-sets-for-build-scripts</a>, dan jg biasanya ini akan diinclude ke sebuah file handler. kira kira seperti itu</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-tokio-postgres-connection-config-example"><a class="header" href="#rust-tokio-postgres-connection-config-example">Rust tokio-postgres connection config example</a></h1>
 <p>first, this is example from the documentation</p>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span> let (client, conn_ctx) = tokio_postgres::connect("host=localhost user=postgres", NoTls);
-<span class="boring">}</span></code></pre></pre>
+<pre><code class="language-rust"> let (client, conn_ctx) = tokio_postgres::connect("host=localhost user=postgres", NoTls);</code></pre>
 <p>then, we want to convert it into config like ctx. <a href="https://docs.rs/postgres/latest/postgres/config/struct.Config.html">see this</a></p>
-<pre><pre class="playground"><code class="language-rust">use tokio_postgres::{NoTls, Error};
+<pre><code class="language-rust">use tokio_postgres::{NoTls, Error};
 
 #[tokio::main]
 async fn main() {
@@ -932,7 +890,7 @@ async fn main() {
         let client_ret = config.connect(NoTls);
 
 
-}</code></pre></pre>
+}</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="math"><a class="header" href="#math">Math</a></h1>
 <p>Welcome in this section.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="set-operations-formula"><a class="header" href="#set-operations-formula">Set operations formula</a></h1>
@@ -2543,7 +2501,7 @@ dipakai sebelum data dilihat oleh conntrack, NAT, masuk routing, dll. intinya di
 <li><code>sudo ip netns exec firefoxns qemu-system-x86_64 -enable-kvm -m 256 -smp 4 -cpu host -drive file=pc-1.qcow2,format=qcow2 -cdrom alpine-virt-3.21.3-x86_64.iso -boot d -nographic -netdev tap,id=net0,ifname=tap1,script=no,downscript=no -device virtio-net-pci,netdev=net0,mac=$(randommac)</code></li>
 </ul>
 <p>randommac source code</p>
-<pre><pre class="playground"><code class="language-rust">use rand::Rng;
+<pre><code class="language-rust">use rand::Rng;
 
 fn main() {
     let mut rng = rand::thread_rng();
@@ -2555,7 +2513,7 @@ fn main() {
     );
     println!("{}", mac);
 }
-</code></pre></pre>
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="deploy-docmost-on-server"><a class="header" href="#deploy-docmost-on-server">deploy Docmost on server</a></h1>
 <p>please read this doc first, <a href="https://docmost.com/docs/installation">https://docmost.com/docs/installation</a></p>
 <h2 id="docker-compose-config"><a class="header" href="#docker-compose-config">docker compose config</a></h2>
@@ -4006,6 +3964,66 @@ EXPOSE 4444
 RUN composer install
 CMD [ "php", "-S", "0.0.0.0:4444", "-t", "public" ]
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="php8320-fpm-bullseye--nginx"><a class="header" href="#php8320-fpm-bullseye--nginx">php:8.3.20-fpm-bullseye + nginx</a></h1>
+<pre><code class="language-dockerfile">FROM php:8.3.20-fpm-bullseye 
+
+RUN apt-get update &amp;&amp; apt-get install -y libpq-dev
+RUN docker-php-ext-install pdo pdo_pgsql
+
+COPY . /app
+WORKDIR /app
+
+COPY ./docker/fpm/www.conf /usr/local/etc/php-fpm.d/www.conf
+# karna php-fpm running pakai user www-data
+RUN chown -R www-data:www-data /app/storage
+
+
+CMD [ "php-fpm" ]
+</code></pre>
+<p>default.conf (nginx)</p>
+<pre><code class="language-dockerfile">server {
+    listen       80;
+    server_name  localhost;
+
+    access_log  off;
+    root /app/public;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   /usr/share/nginx/html;
+    }
+
+
+    location ~ \.php$ {
+
+        fastcgi_pass   php:9000; 
+        fastcgi_param  SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param  DOCUMENT_ROOT $document_root;
+        include        fastcgi_params;
+    }
+}
+
+</code></pre>
+<p>www.conf</p>
+<pre><code class="language-conf">
+[www]
+access.log = /dev/null
+
+user = www-data
+group = www-data
+
+listen = 0.0.0.0:9000
+
+pm = dynamic
+pm.max_children = 5
+pm.start_servers = 2
+pm.min_spare_servers = 1
+pm.max_spare_servers = 3
+</code></pre>
 
                     </main>
 
@@ -4031,6 +4049,11 @@ CMD [ "php", "-S", "0.0.0.0:4444", "-t", "public" ]
             window.playground_copyable = true;
         </script>
 
+        <script src="ace.js"></script>
+        <script src="editor.js"></script>
+        <script src="mode-rust.js"></script>
+        <script src="theme-dawn.js"></script>
+        <script src="theme-tomorrow_night.js"></script>
 
         <script src="elasticlunr.min.js"></script>
         <script src="mark.min.js"></script>
