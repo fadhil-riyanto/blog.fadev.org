@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>pgsql functions() - Fadhil Books &amp; Notes</title>
+        <title>php-8.3 debian v11 (bullseye) dev-env - Fadhil Books &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -157,33 +157,58 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="pgsql-functions"><a class="header" href="#pgsql-functions">pgsql functions()</a></h1>
-<h3 id="pg_get_viewdef"><a class="header" href="#pg_get_viewdef"><code>pg_get_viewdef</code></a></h3>
-<p>see sql script for particular view, I call this as view reverser</p>
-<p>example:</p>
-<pre><code class="language-sql">SELECT
-        *
-FROM
-        pg_get_viewdef('pg_catalog.pg_sequences', true)
+                        <h1 id="php-83-debian-v11-bullseye-dev-env"><a class="header" href="#php-83-debian-v11-bullseye-dev-env">php-8.3 debian v11 (bullseye) dev-env</a></h1>
+<p>CREATED: <code>Fri Jun  6 06:32:35 PM WIB 2025</code></p>
+<pre><code class="language-docker">FROM debian:bullseye
+
+ENV DEBIAN_FRONTEND=noninteractive
+# initial, refresh repo first
+RUN apt-get update
+
+# this install base package that need in order to download gpg key (curl, and gnupg)
+RUN apt-get install -y ca-certificates
+RUN apt-get install -y apt-transport-https
+RUN apt-get install -y lsb-release
+RUN apt-get install -y gnupg
+RUN apt-get install -y curl
+RUN apt-get install -y git
+RUN apt-get install -y unzip
+
+# add ondrej\PPA
+RUN curl -fsSL https://packages.sury.org/php/apt.gpg | gpg --dearmor -o /etc/apt/trusted.gpg.d/php.gpg
+RUN echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | tee /etc/apt/sources.list.d/php.list
+
+# install actual package, php-xml &amp; php-mbstring is needed by composer. 
+RUN apt-get update
+RUN apt-get install -y nginx
+RUN apt-get install -y php8.3
+RUN apt-get install -y php8.3-curl
+RUN apt-get install -y php8.3-xml
+RUN apt-get install -y php8.3-mbstring
+
+# download composer
+RUN curl -sS https://getcomposer.org/installer -o composer-setup.php \
+        &amp;&amp; php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
+        &amp;&amp; rm composer-setup.php
+
+COPY . /app
+WORKDIR /app
+
+EXPOSE 4444
+
+# install composer
+RUN composer install
+CMD [ "php", "-S", "0.0.0.0:4444", "-t", "public" ]
 </code></pre>
-<p>ref:</p>
-<ul>
-<li><a href="https://pgpedia.info/p/pg_get_viewdef.html">https://pgpedia.info/p/pg_get_viewdef.html</a></li>
-<li><a href="https://www.postgresql.org/docs/current/functions-info.html">https://www.postgresql.org/docs/current/functions-info.html</a></li>
-</ul>
-<h3 id="akan-ada-kelanjutan-disini"><a class="header" href="#akan-ada-kelanjutan-disini">akan ada kelanjutan disini.</a></h3>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../database/postgresql_system_table.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../dockerfile/dockerfile-readme.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../other/other-readme.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
 
                         <div style="clear: both"></div>
                     </nav>
@@ -191,13 +216,10 @@ FROM
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../database/postgresql_system_table.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../dockerfile/dockerfile-readme.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../other/other-readme.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

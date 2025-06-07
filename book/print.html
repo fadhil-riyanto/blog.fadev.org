@@ -1515,6 +1515,9 @@ export function DataCenter(
 }
 
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="ca-certificates"><a class="header" href="#ca-certificates">ca-certificates</a></h1>
+<p>draft: mengoprek kriptografi dibalik HTTPS &amp; konsep public private key pair dan juga peran CA authority, kenapa mereka harus dimasukkan ke package ???</p>
+<p>dan juga kenapa MITM (Man in the Middle) bisa melogging jaringan, ketika certificate telah dipasang. kenapa hanya dengan <code>certificate</code> mitm bisa mendecode data yang lewat.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="server"><a class="header" href="#server">Server</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="cgit-setup"><a class="header" href="#cgit-setup">Cgit setup</a></h1>
 <p>Ku mau share pengalaman bikin self hosting git server, pakai cgit, biar engga kalah aja sama git.kernel.org dan kernel.dk wkwk</p>
@@ -2636,6 +2639,74 @@ location /collab {
 </ul>
 <h2 id="firewall"><a class="header" href="#firewall">Firewall</a></h2>
 <p>allow port 443</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="fix-vthxxxxxxxx-is-not-connected-to-docker0"><a class="header" href="#fix-vthxxxxxxxx-is-not-connected-to-docker0">fix vthxxxxxxxx is not connected to docker0</a></h1>
+<p>consider</p>
+<pre><code class="language-txt">&gt; ip  a
+1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host noprefixroute 
+       valid_lft forever preferred_lft forever
+2: enp2s0: &lt;NO-CARRIER,BROADCAST,MULTICAST,UP&gt; mtu 1500 qdisc fq_codel state DOWN group default qlen 1000
+    link/ether 2c:4d:54:c6:f2:0c brd ff:ff:ff:ff:ff:ff
+    altname enx2c4d54c6f20c
+3: wlan0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue state UP group default qlen 1000
+    link/ether f0:03:8c:66:9c:21 brd ff:ff:ff:ff:ff:ff
+    inet 192.168.105.162/24 metric 1024 brd 192.168.105.255 scope global dynamic wlan0
+       valid_lft 2920sec preferred_lft 2920sec
+    inet 192.168.105.163/24 brd 192.168.105.255 scope global secondary dynamic noprefixroute wlan0
+       valid_lft 2921sec preferred_lft 2921sec
+    inet6 fe80::ee67:75f9:fa9c:2561/64 scope link noprefixroute 
+       valid_lft forever preferred_lft forever
+4: docker0: &lt;NO-CARRIER,BROADCAST,MULTICAST,UP&gt; mtu 1500 qdisc noqueue state DOWN group default 
+    link/ether 86:1e:e0:72:f4:8d brd ff:ff:ff:ff:ff:ff
+    inet 172.17.0.1/16 brd 172.17.255.255 scope global docker0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::841e:e0ff:fe72:f48d/64 scope link proto kernel_ll 
+       valid_lft forever preferred_lft forever
+17: veth914db4f@if2: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue state UP group default 
+    link/ether d2:02:61:f4:12:d0 brd ff:ff:ff:ff:ff:ff link-netnsid 0
+    inet6 fe80::d002:61ff:fef4:12d0/64 scope link proto kernel_ll 
+       valid_lft forever preferred_lft forever
+
+</code></pre>
+<p>you can see, veth914db4f is not connected to br0. let's try hard</p>
+<ul>
+<li>run image (explicitly) as bridge network: <code>docker run --network bridge -it --rm -p 127.0.0.1:8000:4000 php-test-server</code> (this is nothing happen)</li>
+<li>force connect: <code>docker network connect bridge 2cf520235e6a</code> (this is show Error response from daemon: endpoint with name mystifying_yonath already exists in network bridge, but <code>ip a</code> says vethxxxx is not master to anyone). you can try <code>disconnect</code> &amp; <code>connect</code> again</li>
+</ul>
+<p>also</p>
+<pre><code class="language-txt">docker inspect -f '{{json .NetworkSettings.Networks}}' 2cf520235e6a | jq
+{
+  "bridge": {
+    "IPAMConfig": null,
+    "Links": null,
+    "Aliases": null,
+    "MacAddress": "5a:2d:5d:7c:c1:86",
+    "DriverOpts": null,
+    "GwPriority": 0,
+    "NetworkID": "08f151565c95ba052f682c7560e55199e2d75f3d2348af8f98a9711e9294b3fd",
+    "EndpointID": "0522c15ad18fbae05071a7d5e09944b7777deaafd3490082cac237fdfcd14f0c",
+    "Gateway": "172.17.0.1",
+    "IPAddress": "172.17.0.2",
+    "IPPrefixLen": 16,
+    "IPv6Gateway": "",
+    "GlobalIPv6Address": "",
+    "GlobalIPv6PrefixLen": 0,
+    "DNSNames": null
+  }
+}
+
+</code></pre>
+<p>the medicine: <a href="https://forums.docker.com/t/no-connection-to-the-bridge-by-default/134619/8">https://forums.docker.com/t/no-connection-to-the-bridge-by-default/134619/8</a></p>
+<pre><code class="language-txt">sudo systemctl stop systemd-networkd.service                                                    
+sudo systemctl disable systemd-networkd.service                                                        
+sudo systemctl stop systemd-networkd.socket                                                            
+sudo systemctl disable systemd-networkd.socket
+sudo systemctl start NetworkManager
+sudo systemctl enable NetworkManager
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="database"><a class="header" href="#database">Database</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="psql-command"><a class="header" href="#psql-command">psql command</a></h1>
 <h2 id="general"><a class="header" href="#general">General</a></h2>
@@ -3049,6 +3120,7 @@ FROM
 <li><a href="https://pgpedia.info/p/pg_get_viewdef.html">https://pgpedia.info/p/pg_get_viewdef.html</a></li>
 <li><a href="https://www.postgresql.org/docs/current/functions-info.html">https://www.postgresql.org/docs/current/functions-info.html</a></li>
 </ul>
+<h3 id="akan-ada-kelanjutan-disini"><a class="header" href="#akan-ada-kelanjutan-disini">akan ada kelanjutan disini.</a></h3>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="other"><a class="header" href="#other">Other</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="bookmarks-highly-useful-link"><a class="header" href="#bookmarks-highly-useful-link">bookmarks highly useful link</a></h1>
 <h2 id="this-section-is-derived-from-my-original-channel-xorriso"><a class="header" href="#this-section-is-derived-from-my-original-channel-xorriso">this section is derived from my original channel <a href="https://t.me/xorriso">@xorriso</a></a></h2>
@@ -3882,6 +3954,58 @@ max int int 24 bit: 16777216</p>
 <p>/9 : 0b100000000000000000000000:</p>
 </li>
 </ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="set-path-fish-shell"><a class="header" href="#set-path-fish-shell">set PATH fish shell</a></h1>
+<p>first, edit this</p>
+<ul>
+<li><code>nvim /home/$(whoami)/.config/fish/config.fish</code></li>
+</ul>
+<p>add this line before <code>if status is-interactive</code>
+<code>set -gx PATH /new/path $PATH</code></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="dockerfile-boilerplate"><a class="header" href="#dockerfile-boilerplate">Dockerfile boilerplate</a></h1>
+<p>this folder is a set of dockerfile boilerplate that I used to build something.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="php-83-debian-v11-bullseye-dev-env"><a class="header" href="#php-83-debian-v11-bullseye-dev-env">php-8.3 debian v11 (bullseye) dev-env</a></h1>
+<p>CREATED: <code>Fri Jun  6 06:32:35 PM WIB 2025</code></p>
+<pre><code class="language-docker">FROM debian:bullseye
+
+ENV DEBIAN_FRONTEND=noninteractive
+# initial, refresh repo first
+RUN apt-get update
+
+# this install base package that need in order to download gpg key (curl, and gnupg)
+RUN apt-get install -y ca-certificates
+RUN apt-get install -y apt-transport-https
+RUN apt-get install -y lsb-release
+RUN apt-get install -y gnupg
+RUN apt-get install -y curl
+RUN apt-get install -y git
+RUN apt-get install -y unzip
+
+# add ondrej\PPA
+RUN curl -fsSL https://packages.sury.org/php/apt.gpg | gpg --dearmor -o /etc/apt/trusted.gpg.d/php.gpg
+RUN echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | tee /etc/apt/sources.list.d/php.list
+
+# install actual package, php-xml &amp; php-mbstring is needed by composer. 
+RUN apt-get update
+RUN apt-get install -y nginx
+RUN apt-get install -y php8.3
+RUN apt-get install -y php8.3-curl
+RUN apt-get install -y php8.3-xml
+RUN apt-get install -y php8.3-mbstring
+
+# download composer
+RUN curl -sS https://getcomposer.org/installer -o composer-setup.php \
+        &amp;&amp; php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
+        &amp;&amp; rm composer-setup.php
+
+COPY . /app
+WORKDIR /app
+
+EXPOSE 4444
+
+# install composer
+RUN composer install
+CMD [ "php", "-S", "0.0.0.0:4444", "-t", "public" ]
+</code></pre>
 
                     </main>
 

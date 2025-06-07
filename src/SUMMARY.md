@@ -43,6 +43,7 @@
 
 - [Cryptography](./crypto/readme-crypto.md)
 	- [Alur koneksi ke RPC server telegram](./crypto/alur_koneksi_RPC_telegram.md)
+	- [ca-certificates](./crypto/ca-certificates.md)
 
 - [Server](./server/readme-server.md)
 	- [Cgit setup](./server/cgit-setup.md)
@@ -66,6 +67,7 @@
 	- [bring wlan0 connectivity to the network namespace linux & test routerOS](./server/bring_wlan0_conn_to_netns.md)
 	- [network namespace + NAT notes](./server/netns_nat_notes.md)
 	- [deploy Docmost on server](./server/docmost_deploy.md)
+	- [fix vthxxxxxxxx is not connected to docker0](./server/fix_vethxxxx_not_connected_to_docker0.md)
 
 - [Database](./database/readme-database.md)
 	- [psql command](./database/psql_command.md)
@@ -90,3 +92,7 @@
 	- [Tealinux qemu promp & testing](./other/tealinux-promp-testing.md)
 	- [binary operation](./other/binary_operation.md)
 	- [catatan subnetting from scratch](./other/subnetting_from_scratch.md)
+	- [set PATH fish shell](./other/set_path_fish_shell.md)
+
+- [Dockerfile boilerplate](./dockerfile/dockerfile-readme.md)
+	- [php-8.3 debian v11 (bullseye) dev-env](./dockerfile/php-8.3_debian_v11_(bullseye)_dev-env.md)
