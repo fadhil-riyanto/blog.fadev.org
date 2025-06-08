@@ -161,7 +161,125 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="laravel-12-custom-auth-guard--tables"><a class="header" href="#laravel-12-custom-auth-guard--tables">laravel 12 custom auth guard + tables</a></h1>
-<p>WIP, Mon Jun  9 12:08:34 AM WIB 2025</p>
+<p>Mon Jun  9 05:36:39 AM WIB 2025</p>
+<p>di sini saya coba untuk membuat Auth::attempt <a href="https://laravel.com/docs/12.x/authentication#authenticating-users">https://laravel.com/docs/12.x/authentication#authenticating-users</a>, tapi bedanya, ia pakai totally different table. jadi tidak pakai table <code>users</code></p>
+<h2 id="setup-model"><a class="header" href="#setup-model">setup model</a></h2>
+<p>untuk setup nya, kita buat model dulu seperti biasa pakai <code>php artisan make:model Xyz</code>, disini saya buatnya <code>php artisan make:model GuestUser</code>. lalu cek bagian <code>./app/Models/GuestUser.php</code></p>
+<p>normalnya class akan extends ke <code>Illuminate\Database\Eloquent\Model</code>, nah ini kita extends kan ke <code>Illuminate\Foundation\Auth\User</code>, dimana class itu kalau dirunut lagi, pasti juga nge-extends ke class Model</p>
+<p>bukti</p>
+<pre><code class="language-php">class User extends Model implements
+    AuthenticatableContract,
+    AuthorizableContract,
+    CanResetPasswordContract
+{
+    use Authenticatable, Authorizable, CanResetPassword, MustVerifyEmail;
+}
+
+</code></pre>
+<p>ok, sudah. saatnya kita pindah ke model yang baru saja dibuat, isi $fillable seperti column database, jangan lupa ganti extends nya dengan <code>extends Authenticatable</code></p>
+<p>hasil akhir seperti ini kira2</p>
+<pre><code class="language-php">&lt;?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+
+class GuestUser extends Authenticatable
+{
+    protected $table = "guest_user";
+
+    protected $fillable = [
+        'name',
+        'picture',
+        'email',
+        'password',
+        'token',
+        'g_auth_expires_in'
+    ];
+}
+
+</code></pre>
+<h2 id="registering-guard"><a class="header" href="#registering-guard">registering guard</a></h2>
+<p>agar model kita bisa dibaca oleh <code>Auth</code> facade, maka kita harus registerkan dia dahulu di <code>./config/auth.php</code>, isi dahulu bagian <code>providers</code>. contoh</p>
+<pre><code class="language-php">/*
+    |--------------------------------------------------------------------------
+    | User Providers
+    |--------------------------------------------------------------------------
+    |
+    | All authentication guards have a user provider, which defines how the
+    | users are actually retrieved out of your database or other storage
+    | system used by the application. Typically, Eloquent is utilized.
+    |
+    | If you have multiple user tables or models you may configure multiple
+    | providers to represent the model / table. These providers may then
+    | be assigned to any extra authentication guards you have defined.
+    |
+    | Supported: "database", "eloquent"
+    |
+    */
+
+    'providers' =&gt; [
+        'users' =&gt; [
+            'driver' =&gt; 'eloquent',
+            'model' =&gt; env('AUTH_MODEL', App\Models\User::class),
+        ],
+        'guest_users' =&gt; [
+            'driver' =&gt; 'eloquent',
+            'model' =&gt; env('AUTH_MODEL', App\Models\GuestUser::class),
+        ],
+
+        // 'users' =&gt; [
+        //     'driver' =&gt; 'database',
+        //     'table' =&gt; 'users',
+        // ],
+    ],
+</code></pre>
+<p>make sense kan? <code>guest_users</code> provider, ia memiliki model App\Models\GuestUser::class (note, <code>::class</code> akan return str),</p>
+<p>setelah itu, lihat bagian atasnya, ada guards, disini kita akan naming guardsnya dan juga memberi info provider model mana yang akan dikasih, contoh</p>
+<pre><code class="language-php">/*
+    |--------------------------------------------------------------------------
+    | Authentication Guards
+    |--------------------------------------------------------------------------
+    |
+    | Next, you may define every authentication guard for your application.
+    | Of course, a great default configuration has been defined for you
+    | which utilizes session storage plus the Eloquent user provider.
+    |
+    | All authentication guards have a user provider, which defines how the
+    | users are actually retrieved out of your database or other storage
+    | system used by the application. Typically, Eloquent is utilized.
+    |
+    | Supported: "session"
+    |
+    */
+
+    'guards' =&gt; [
+        'web' =&gt; [
+            'driver' =&gt; 'session',
+            'provider' =&gt; 'users',
+        ],
+        'guest' =&gt; [
+            'driver' =&gt; 'session',
+            'provider' =&gt; 'guest_users',
+        ],
+        
+    ],
+</code></pre>
+<p>JFYI: <code>Auth::attempt()</code> secara default pakai guards <code>web</code>, nah kita sekarang juga bisa pakai custom, seperti ini <code>Auth::guard("guest")-&gt;attempt()</code> secara explicit kita tell laravel untuk pakai guard <code>guest</code></p>
+<h2 id="session"><a class="header" href="#session">session</a></h2>
+<p>general login flow</p>
+<pre><code class="language-php">if (Auth::guard("guest")-&gt;attempt($packed_arr)) {
+
+    $retq = GuestUser::where("email", $packed_arr["email"])-&gt;first();
+    $retq = Auth::guard("guest")-&gt;login($retq);
+
+    return redirect('/dashboard/index');
+} else {
+    dd("login failed");
+}
+</code></pre>
+<p><code>Auth::guard("guest")-&gt;attempt()</code> return boolean, true jika auth benar. <code>Auth::guard("guest")-&gt;login($retq);</code>  ubah state internalnya bahwa dia sudah login, lalu redirect (penting, jika tidak diredirect, nanti session akan stuck)</p>
 
                     </main>
 

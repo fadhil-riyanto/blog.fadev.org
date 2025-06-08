@@ -3113,6 +3113,7 @@ FROM pg_catalog.pg_database as x;
 	enable			bool DEFAULT false
 )
 </code></pre>
+<h3 id="53-identity-column"><a class="header" href="#53-identity-column">5.3. Identity column</a></h3>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="system-table-in-pgsql-catalog"><a class="header" href="#system-table-in-pgsql-catalog">system table in pgsql (catalog)</a></h1>
 <h3 id="pg_tables--docs"><a class="header" href="#pg_tables--docs">pg_tables | <a href="https://www.postgresql.org/docs/current/view-pg-tables.html">docs</a></a></h3>
 <p>catalog pgsql yang isinya data ttg table (di db saat ini), contoh query nya</p>
@@ -3438,7 +3439,7 @@ $this-&gt;app-&gt;singleton(Client::class, function (Application $app) {
 <p>catatan: <code>use Illuminate\Contracts\Foundation\Application</code> itu ctx bawaan laravel buat ngebind.</p>
 <h2 id="how-to-use"><a class="header" href="#how-to-use">how to use</a></h2>
 <p>lokasi: controller</p>
-<p>kita tinggal panggil saja class (aslinya)</p>
+<p>kita tinggal panggil saja class (milik aslinya)</p>
 <p>contoh</p>
 <pre><code class="language-php">use Google\Client;
 
@@ -3459,16 +3460,161 @@ class Randomclass extends Controller
 
     public function use_it() {
     	$this-&gt;client-&gt;some_google_method();
+        // $this-&gt;client was initialized
     }
 }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="laravel-12-custom-auth-guard--tables"><a class="header" href="#laravel-12-custom-auth-guard--tables">laravel 12 custom auth guard + tables</a></h1>
-<p>WIP, Mon Jun  9 12:08:34 AM WIB 2025</p>
+<p>Mon Jun  9 05:36:39 AM WIB 2025</p>
+<p>di sini saya coba untuk membuat Auth::attempt <a href="https://laravel.com/docs/12.x/authentication#authenticating-users">https://laravel.com/docs/12.x/authentication#authenticating-users</a>, tapi bedanya, ia pakai totally different table. jadi tidak pakai table <code>users</code></p>
+<h2 id="setup-model"><a class="header" href="#setup-model">setup model</a></h2>
+<p>untuk setup nya, kita buat model dulu seperti biasa pakai <code>php artisan make:model Xyz</code>, disini saya buatnya <code>php artisan make:model GuestUser</code>. lalu cek bagian <code>./app/Models/GuestUser.php</code></p>
+<p>normalnya class akan extends ke <code>Illuminate\Database\Eloquent\Model</code>, nah ini kita extends kan ke <code>Illuminate\Foundation\Auth\User</code>, dimana class itu kalau dirunut lagi, pasti juga nge-extends ke class Model</p>
+<p>bukti</p>
+<pre><code class="language-php">class User extends Model implements
+    AuthenticatableContract,
+    AuthorizableContract,
+    CanResetPasswordContract
+{
+    use Authenticatable, Authorizable, CanResetPassword, MustVerifyEmail;
+}
+
+</code></pre>
+<p>ok, sudah. saatnya kita pindah ke model yang baru saja dibuat, isi $fillable seperti column database, jangan lupa ganti extends nya dengan <code>extends Authenticatable</code></p>
+<p>hasil akhir seperti ini kira2</p>
+<pre><code class="language-php">&lt;?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+
+class GuestUser extends Authenticatable
+{
+    protected $table = "guest_user";
+
+    protected $fillable = [
+        'name',
+        'picture',
+        'email',
+        'password',
+        'token',
+        'g_auth_expires_in'
+    ];
+}
+
+</code></pre>
+<h2 id="registering-guard"><a class="header" href="#registering-guard">registering guard</a></h2>
+<p>agar model kita bisa dibaca oleh <code>Auth</code> facade, maka kita harus registerkan dia dahulu di <code>./config/auth.php</code>, isi dahulu bagian <code>providers</code>. contoh</p>
+<pre><code class="language-php">/*
+    |--------------------------------------------------------------------------
+    | User Providers
+    |--------------------------------------------------------------------------
+    |
+    | All authentication guards have a user provider, which defines how the
+    | users are actually retrieved out of your database or other storage
+    | system used by the application. Typically, Eloquent is utilized.
+    |
+    | If you have multiple user tables or models you may configure multiple
+    | providers to represent the model / table. These providers may then
+    | be assigned to any extra authentication guards you have defined.
+    |
+    | Supported: "database", "eloquent"
+    |
+    */
+
+    'providers' =&gt; [
+        'users' =&gt; [
+            'driver' =&gt; 'eloquent',
+            'model' =&gt; env('AUTH_MODEL', App\Models\User::class),
+        ],
+        'guest_users' =&gt; [
+            'driver' =&gt; 'eloquent',
+            'model' =&gt; env('AUTH_MODEL', App\Models\GuestUser::class),
+        ],
+
+        // 'users' =&gt; [
+        //     'driver' =&gt; 'database',
+        //     'table' =&gt; 'users',
+        // ],
+    ],
+</code></pre>
+<p>make sense kan? <code>guest_users</code> provider, ia memiliki model App\Models\GuestUser::class (note, <code>::class</code> akan return str),</p>
+<p>setelah itu, lihat bagian atasnya, ada guards, disini kita akan naming guardsnya dan juga memberi info provider model mana yang akan dikasih, contoh</p>
+<pre><code class="language-php">/*
+    |--------------------------------------------------------------------------
+    | Authentication Guards
+    |--------------------------------------------------------------------------
+    |
+    | Next, you may define every authentication guard for your application.
+    | Of course, a great default configuration has been defined for you
+    | which utilizes session storage plus the Eloquent user provider.
+    |
+    | All authentication guards have a user provider, which defines how the
+    | users are actually retrieved out of your database or other storage
+    | system used by the application. Typically, Eloquent is utilized.
+    |
+    | Supported: "session"
+    |
+    */
+
+    'guards' =&gt; [
+        'web' =&gt; [
+            'driver' =&gt; 'session',
+            'provider' =&gt; 'users',
+        ],
+        'guest' =&gt; [
+            'driver' =&gt; 'session',
+            'provider' =&gt; 'guest_users',
+        ],
+        
+    ],
+</code></pre>
+<p>JFYI: <code>Auth::attempt()</code> secara default pakai guards <code>web</code>, nah kita sekarang juga bisa pakai custom, seperti ini <code>Auth::guard("guest")-&gt;attempt()</code> secara explicit kita tell laravel untuk pakai guard <code>guest</code></p>
+<h2 id="session"><a class="header" href="#session">session</a></h2>
+<p>general login flow</p>
+<pre><code class="language-php">if (Auth::guard("guest")-&gt;attempt($packed_arr)) {
+
+    $retq = GuestUser::where("email", $packed_arr["email"])-&gt;first();
+    $retq = Auth::guard("guest")-&gt;login($retq);
+
+    return redirect('/dashboard/index');
+} else {
+    dd("login failed");
+}
+</code></pre>
+<p><code>Auth::guard("guest")-&gt;attempt()</code> return boolean, true jika auth benar. <code>Auth::guard("guest")-&gt;login($retq);</code>  ubah state internalnya bahwa dia sudah login, lalu redirect (penting, jika tidak diredirect, nanti session akan stuck)</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="laravel-socialite-setup"><a class="header" href="#laravel-socialite-setup">laravel Socialite setup</a></h1>
-<p>WIP</p>
+<p>Mon Jun  9 05:49:13 AM WIB 2025</p>
+<h2 id="setup"><a class="header" href="#setup">setup</a></h2>
+<p>lihat <code>config/services.php</code>, disana hanya ada slack, maka kita tambahin</p>
+<pre><code class="language-php">    'google' =&gt; [
+        'client_id' =&gt; env('G_SSO_CLIENT_ID'),
+        'client_secret' =&gt; env('G_SSO_CLIENT_SECRET'),
+        'redirect' =&gt; env('G_SSO_REDIRECT_URI'),
+        'name' =&gt; env('G_SSO_NAME'),
+    ],
+</code></pre>
+<h2 id="usage"><a class="header" href="#usage">usage</a></h2>
+<p>dapatkan link permintaan akses, pakai</p>
+<pre><code class="language-php">return Socialite::driver('google')-&gt;redirect();
+</code></pre>
+<p>ketika user sudah klik continue &amp; accept share datanya, akan dikirimkan callback, pasang ini ke callback</p>
+<pre><code class="language-php">$user = Socialite::driver('google')-&gt;user();
+dd($user);
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="laravel-pgsql-migration-setup"><a class="header" href="#laravel-pgsql-migration-setup">laravel pgsql migration setup</a></h1>
-<p>wip</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="php-password_hash"><a class="header" href="#php-password_hash">php password_hash()</a></h1>
+<p>Mon Jun  9 05:56:55 AM WIB 2025</p>
+<p>PGSQL datatype to laravel mapping function: <a href="https://api.laravel.com/docs/12.x/Illuminate/Database/Schema/Blueprint.html">https://api.laravel.com/docs/12.x/Illuminate/Database/Schema/Blueprint.html</a></p>
+<p>buat migrationnya dengan</p>
+<pre><code class="language-sh">php artisan make:migration create_table_abc
+</code></pre>
+<p>run</p>
+<pre><code class="language-sh">php artisan migrate
+</code></pre>
+<p>rollback terbaru</p>
+<pre><code class="language-sh">php artisan migrate --rollback 1
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="other"><a class="header" href="#other">Other</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="bookmarks-highly-useful-link"><a class="header" href="#bookmarks-highly-useful-link">bookmarks highly useful link</a></h1>
 <h2 id="this-section-is-derived-from-my-original-channel-xorriso"><a class="header" href="#this-section-is-derived-from-my-original-channel-xorriso">this section is derived from my original channel <a href="https://t.me/xorriso">@xorriso</a></a></h2>

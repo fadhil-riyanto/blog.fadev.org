@@ -98,7 +98,7 @@ catatan: `use Illuminate\Contracts\Foundation\Application` itu ctx bawaan larave
 ## how to use
 lokasi: controller
 
-kita tinggal panggil saja class (aslinya)
+kita tinggal panggil saja class (milik aslinya)
 
 contoh
 
@@ -122,6 +122,7 @@ class Randomclass extends Controller
 
     public function use_it() {
     	$this->client->some_google_method();
+        // $this->client was initialized
     }
 }
 ```

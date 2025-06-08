@@ -241,7 +241,7 @@ $this-&gt;app-&gt;singleton(Client::class, function (Application $app) {
 <p>catatan: <code>use Illuminate\Contracts\Foundation\Application</code> itu ctx bawaan laravel buat ngebind.</p>
 <h2 id="how-to-use"><a class="header" href="#how-to-use">how to use</a></h2>
 <p>lokasi: controller</p>
-<p>kita tinggal panggil saja class (aslinya)</p>
+<p>kita tinggal panggil saja class (milik aslinya)</p>
 <p>contoh</p>
 <pre><code class="language-php">use Google\Client;
 
@@ -262,6 +262,7 @@ class Randomclass extends Controller
 
     public function use_it() {
     	$this-&gt;client-&gt;some_google_method();
+        // $this-&gt;client was initialized
     }
 }
 </code></pre>

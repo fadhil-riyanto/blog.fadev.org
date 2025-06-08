@@ -15,3 +15,5 @@ CREATE TABLE state (
 	enable			bool DEFAULT false
 )
 ```
+
+### 5.3. Identity column

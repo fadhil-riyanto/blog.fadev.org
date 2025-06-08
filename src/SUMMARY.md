@@ -91,7 +91,6 @@
 	- [laravel 12 custom auth guard + tables](./php/custom_auth_guard_w_tables.md)
 	- [laravel Socialite setup](./php/laravel_socialite_setup.md)
 	- [laravel pgsql migration setup](./php/laravel_pgsql_migration_setup.md)
-	- [php password_hash()](./php/password_hash.md)
 	
 - [Other](./other/other-readme.md)
 	- [bookmarks highly useful link](./other/bookmarks_useful_links.md)
