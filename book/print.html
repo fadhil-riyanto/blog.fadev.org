@@ -2665,6 +2665,96 @@ sudo systemctl disable systemd-networkd.socket
 sudo systemctl start NetworkManager
 sudo systemctl enable NetworkManager
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="php-fpm-config"><a class="header" href="#php-fpm-config">php-fpm config</a></h1>
+<p>file ini biasanya ada di</p>
+<ul>
+<li><code>/usr/local/etc/php-fpm.d/www.conf</code> (di docker php-fpm)</li>
+<li><code>/etc/php/8.3/fpm/pool.d/www.conf</code> (di debian bullseye)</li>
+</ul>
+<p>intinya, tidak pasti haha.</p>
+<h2 id="config-structure"><a class="header" href="#config-structure">config structure</a></h2>
+<p>general structure nya seperti ini kalau ';' dihilangkan</p>
+<pre><code class="language-ini">[www]
+user = www-data
+group = www-data
+listen = /run/php/php8.3-fpm.sock
+listen.owner = www-data
+listen.group = www-data
+pm = dynamic
+pm.max_children = 5
+pm.start_servers = 2
+pm.min_spare_servers = 1
+pm.max_spare_servers = 3
+</code></pre>
+<h2 id="config-global-wip"><a class="header" href="#config-global-wip">config global (WIP)</a></h2>
+<h2 id="config-untuk-pool-each"><a class="header" href="#config-untuk-pool-each">config untuk pool (each)</a></h2>
+<p>best read <a href="https://www.php.net/manual/en/install.fpm.configuration.php">https://www.php.net/manual/en/install.fpm.configuration.php</a></p>
+<ul>
+<li><b>[pool_name]</b>
+intinya ini unique, tidak ada yang sama</li>
+<li><b>user / group</b>
+<ul>
+<li><code>user</code>: dimana child process akan di run (as user?)</li>
+<li><code>group</code>: liat /etc/passwd</li>
+</ul>
+</li>
+<li><b>listen</b>
+<ul>
+<li>
+<p><code>listen</code>: dimana daemon akan listen yg nanti akan di reverse proxy oleh nginx,
+nilai defaultnya biasanya <code>/run/php/php8.3-fpm.sock</code> atau <code>127.0.0.1:9000</code>, contoh:</p>
+<ul>
+<li><code>ip.add.re.ss:port</code></li>
+<li><code>[ip:6:addr:ess]:port</code></li>
+<li><code>port</code></li>
+<li>/path/to/unix/socket</li>
+</ul>
+</li>
+<li>
+<p><code>listen.backlog</code>: jumlah queue pending connection yang bisa di hold</p>
+</li>
+<li>
+<p><code>listen.owner</code>: configure ke mana kah <code>/run/php/php8.3-fpm.sock</code> itu ownernya</p>
+</li>
+<li>
+<p><code>listen.group</code>: same as <code>listen.owner</code></p>
+</li>
+<li>
+<p><code>listen.mode</code>: nomor permission si <code>/run/php/php8.3-fpm.sock</code> listen</p>
+</li>
+<li>
+<p><code>listen.acl_users</code>: WIP</p>
+</li>
+<li>
+<p><code>listen.acl_groups</code>: WIP</p>
+</li>
+<li>
+<p><code>listen.allowed_clients</code>: set dari mana FCGI boleh diakses, di kasus nginx, mostly 127.0.0.1, except docker, dia pakai br-xxxxxx yang ip nya pasti bukan 127.0.0.1</p>
+</li>
+<li>
+<p><code>listen.setfib</code>: WIP</p>
+</li>
+</ul>
+</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="systemd-config-template"><a class="header" href="#systemd-config-template">systemd config template</a></h1>
+<p>root location: <code>/etc/systemd/system/&lt;YOUR_SERVICE&gt;.service</code></p>
+<p>template</p>
+<pre><code class="language-txt">[Unit]
+Description=Random service
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=root
+ExecStart=/usr/bin/randomprogram -c /etc/randomprogram/other.toml
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="database"><a class="header" href="#database">Database</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="psql-command"><a class="header" href="#psql-command">psql command</a></h1>
 <h2 id="general"><a class="header" href="#general">General</a></h2>
@@ -3079,6 +3169,306 @@ FROM
 <li><a href="https://www.postgresql.org/docs/current/functions-info.html">https://www.postgresql.org/docs/current/functions-info.html</a></li>
 </ul>
 <h3 id="akan-ada-kelanjutan-disini"><a class="header" href="#akan-ada-kelanjutan-disini">akan ada kelanjutan disini.</a></h3>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="dockerfile-boilerplate"><a class="header" href="#dockerfile-boilerplate">Dockerfile boilerplate</a></h1>
+<p>this folder is a set of dockerfile boilerplate that I used to build something.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="php-83-debian-v11-bullseye-dev-env"><a class="header" href="#php-83-debian-v11-bullseye-dev-env">php-8.3 debian v11 (bullseye) dev-env</a></h1>
+<p>CREATED: <code>Fri Jun  6 06:32:35 PM WIB 2025</code></p>
+<pre><code class="language-docker">FROM debian:bullseye
+
+ENV DEBIAN_FRONTEND=noninteractive
+# initial, refresh repo first
+RUN apt-get update
+
+# this install base package that need in order to download gpg key (curl, and gnupg)
+RUN apt-get install -y ca-certificates
+RUN apt-get install -y apt-transport-https
+RUN apt-get install -y lsb-release
+RUN apt-get install -y gnupg
+RUN apt-get install -y curl
+RUN apt-get install -y git
+RUN apt-get install -y unzip
+
+# add ondrej\PPA
+RUN curl -fsSL https://packages.sury.org/php/apt.gpg | gpg --dearmor -o /etc/apt/trusted.gpg.d/php.gpg
+RUN echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | tee /etc/apt/sources.list.d/php.list
+
+# install actual package, php-xml &amp; php-mbstring is needed by composer. 
+RUN apt-get update
+RUN apt-get install -y nginx
+RUN apt-get install -y php8.3
+RUN apt-get install -y php8.3-curl
+RUN apt-get install -y php8.3-xml
+RUN apt-get install -y php8.3-mbstring
+
+# download composer
+RUN curl -sS https://getcomposer.org/installer -o composer-setup.php \
+        &amp;&amp; php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
+        &amp;&amp; rm composer-setup.php
+
+COPY . /app
+WORKDIR /app
+
+EXPOSE 4444
+
+# install composer
+RUN composer install
+CMD [ "php", "-S", "0.0.0.0:4444", "-t", "public" ]
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="php8320-fpm-bullseye--nginx"><a class="header" href="#php8320-fpm-bullseye--nginx">php:8.3.20-fpm-bullseye + nginx</a></h1>
+<pre><code class="language-dockerfile">FROM php:8.3.20-fpm-bullseye 
+
+RUN apt-get update &amp;&amp; apt-get install -y libpq-dev
+RUN docker-php-ext-install pdo pdo_pgsql
+
+COPY . /app
+WORKDIR /app
+
+COPY ./docker/fpm/www.conf /usr/local/etc/php-fpm.d/www.conf
+# karna php-fpm running pakai user www-data
+RUN chown -R www-data:www-data /app/storage
+
+
+CMD [ "php-fpm" ]
+</code></pre>
+<p>default.conf (nginx)</p>
+<pre><code class="language-dockerfile">server {
+    listen       80;
+    server_name  localhost;
+
+    access_log  off;
+    root /app/public;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   /usr/share/nginx/html;
+    }
+
+
+    location ~ \.php$ {
+
+        fastcgi_pass   php:9000; 
+        fastcgi_param  SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param  DOCUMENT_ROOT $document_root;
+        include        fastcgi_params;
+    }
+}
+
+</code></pre>
+<p>www.conf</p>
+<pre><code class="language-conf">
+[www]
+access.log = /dev/null
+
+user = www-data
+group = www-data
+
+listen = 0.0.0.0:9000
+
+pm = dynamic
+pm.max_children = 5
+pm.start_servers = 2
+pm.min_spare_servers = 1
+pm.max_spare_servers = 3
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="php8320-bullseye-dev-env"><a class="header" href="#php8320-bullseye-dev-env">php:8.3.20-bullseye dev env</a></h1>
+<p>this is also works for laravel</p>
+<pre><code class="language-php">FROM php:8.3.20-bullseye
+
+RUN apt-get update &amp;&amp; apt-get install -y \
+        curl \ 
+        libpq-dev \
+        git \
+        unzip
+RUN docker-php-ext-install pdo pdo_pgsql
+
+COPY . /app
+WORKDIR /app
+
+RUN curl -sS https://getcomposer.org/installer -o composer-setup.php \
+        &amp;&amp; php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
+        &amp;&amp; rm composer-setup.php
+
+RUN composer install
+
+CMD [ "php", "-S", "0.0.0.0:10302", "-t", "public" ]
+</code></pre>
+<p>compose.yml</p>
+<pre><code class="language-yml">volumes:
+  storage:
+  db_data:
+
+networks:
+  veth_network:
+    driver: bridge
+
+services:
+  google_sso:
+    image: php:8.3.20-bullseye
+    build:
+      context: .
+      dockerfile: dev.backend.Dockerfile
+    environment:
+      - docker=true
+      - DB_HOST=pgsql_db
+      - DB_PORT=5432
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=&lt;PASSWD&gt;
+      - DB_DATABASE=google_sso_dev
+      - G_SSO_NAME=google-sso-login
+      - G_SSO_CLIENT_ID=ABC
+      - G_SSO_CLIENT_SECRET=DEF
+      - G_SSO_REDIRECT_URI=http://localhost:10302/auth/callback
+    ports:
+      - "10302:10302"
+    networks:
+      - veth_network
+    volumes:
+      - .:/app
+      - storage:/app/storage
+    depends_on:
+      - pgsql_db
+
+  pgsql_db:
+    image: postgres:17.5-bullseye
+    restart: always
+    shm_size: 128mb
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=&lt;PASSWD&gt;
+      - POSTGRES_DB=google_sso_dev
+    networks:
+      - veth_network
+    volumes:
+      - db_data:/var/lib/postgresql/data
+  
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    networks:
+      - veth_network
+    depends_on:
+      - pgsql_db
+</code></pre>
+<p>CATATAN unik: ketika ping <code>pgsql_db</code> dari xxx container, ia otomatis resolve dns nya.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="php-web"><a class="header" href="#php-web">PHP (web)</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="laravel-service-container"><a class="header" href="#laravel-service-container">laravel service container</a></h1>
+<p>date: Sun Jun  8 11:47:02 PM WIB 2025</p>
+<p>links</p>
+<ul>
+<li><a href="https://laravel.com/docs/12.x/container#introduction">https://laravel.com/docs/12.x/container#introduction</a></li>
+</ul>
+<h2 id="making"><a class="header" href="#making">making</a></h2>
+<p>untuk membuat service container, katakanlah isi class ctx yang namanya Google\Client. dia mereturn $client. maka kita harus bikin</p>
+<pre><code class="language-sh">php artisan make:provider GoogleApis
+</code></pre>
+<p>nama GoogleApis bebas. lalu cek di folder <code>./app/Providers/GoogleApis.php</code> harusnya ada, dan di file <code>./bootstrap/providers.php</code> akan ada</p>
+<pre><code class="language-php">&lt;?php
+
+return [
+    App\Providers\AppServiceProvider::class,
+    App\Providers\GoogleApis::class,
+];
+
+</code></pre>
+<p>ada <code>App\Providers\GoogleApis::class</code> maksudnya.</p>
+<h2 id="registering"><a class="header" href="#registering">registering</a></h2>
+<p>dari service provider yang baru saja dibuat, akan ada 2 method, yaitu</p>
+<ul>
+<li><code>public function register(): void</code>: boot ini entry dari service, nilai ctx ctx dsb biasanya diload disini</li>
+<li><code>public function boot(): void</code>: func ini dipanggil kalau semua service sudah jalan, misal service route di register, tapi method untuk nambahin route routenya. ada di boot</li>
+</ul>
+<p>general structure nya (file <code>./app/Providers/AppServiceProvider.php</code>)</p>
+<pre><code class="language-php">&lt;?php
+
+namespace App\Providers;
+
+use Illuminate\Support\ServiceProvider;
+
+class AppServiceProvider extends ServiceProvider
+{
+    /**
+     * Register any application services.
+     */
+    public function register(): void
+    {
+        //
+    }
+
+    /**
+     * Bootstrap any application services.
+     */
+    public function boot(): void
+    {
+        //
+    }
+}
+
+</code></pre>
+<h2 id="the-inside-of-register-function"><a class="header" href="#the-inside-of-register-function">the inside of register function</a></h2>
+<p>docs tentang</p>
+<ul>
+<li>binding -&gt; <a href="https://laravel.com/docs/12.x/container#simple-bindings">https://laravel.com/docs/12.x/container#simple-bindings</a></li>
+<li>singleton -&gt; <a href="https://laravel.com/docs/12.x/container#binding-a-singleton">https://laravel.com/docs/12.x/container#binding-a-singleton</a></li>
+</ul>
+<p>perbedaanya, <code>bind</code> auto buat fresh ctx tiap kali request datang, sedangkan <code>singleton</code> hanya buat sekali, contoh konkret <code>singleton</code> adalah ctx koneksi mongodb, kita cukup pakai sekali saja, untuk semua container</p>
+<p>ini contoh googleclient</p>
+<pre><code class="language-php">// this code is inside of register() func
+$this-&gt;app-&gt;singleton(Client::class, function (Application $app) {
+    $client = new Client();
+    $client-&gt;setApplicationName(env("G_SSO_NAME"));
+    $client-&gt;setClientId(env("G_SSO_CLIENT_ID"));
+    $client-&gt;setClientSecret(env("G_SSO_CLIENT_SECRET"));
+    $client-&gt;setRedirectUri(env("G_SSO_REDIRECT_URI"));
+    $client-&gt;addScope([
+        Service\Oauth2::USERINFO_EMAIL,
+        Service\Oauth2::USERINFO_PROFILE
+    ]);
+    $client-&gt;setAccessType('offline');
+    $client-&gt;setLoginHint('your_email@gmail.com');
+
+    return $client;
+});
+</code></pre>
+<p>catatan: <code>use Illuminate\Contracts\Foundation\Application</code> itu ctx bawaan laravel buat ngebind.</p>
+<h2 id="how-to-use"><a class="header" href="#how-to-use">how to use</a></h2>
+<p>lokasi: controller</p>
+<p>kita tinggal panggil saja class (aslinya)</p>
+<p>contoh</p>
+<pre><code class="language-php">use Google\Client;
+
+class Randomclass extends Controller
+
+{
+    /**
+
+     * Create a new controller instance.
+
+     */
+
+    public function __construct(
+
+        protected Client $client,
+
+    ) {}
+
+    public function use_it() {
+    	$this-&gt;client-&gt;some_google_method();
+    }
+}
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="laravel-12-custom-auth-guard--tables"><a class="header" href="#laravel-12-custom-auth-guard--tables">laravel 12 custom auth guard + tables</a></h1>
+<p>WIP, Mon Jun  9 12:08:34 AM WIB 2025</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="laravel-socialite-setup"><a class="header" href="#laravel-socialite-setup">laravel Socialite setup</a></h1>
+<p>WIP</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="laravel-pgsql-migration-setup"><a class="header" href="#laravel-pgsql-migration-setup">laravel pgsql migration setup</a></h1>
+<p>wip</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="php-password_hash"><a class="header" href="#php-password_hash">php password_hash()</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="other"><a class="header" href="#other">Other</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="bookmarks-highly-useful-link"><a class="header" href="#bookmarks-highly-useful-link">bookmarks highly useful link</a></h1>
 <h2 id="this-section-is-derived-from-my-original-channel-xorriso"><a class="header" href="#this-section-is-derived-from-my-original-channel-xorriso">this section is derived from my original channel <a href="https://t.me/xorriso">@xorriso</a></a></h2>
@@ -3919,111 +4309,6 @@ max int int 24 bit: 16777216</p>
 </ul>
 <p>add this line before <code>if status is-interactive</code>
 <code>set -gx PATH /new/path $PATH</code></p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="dockerfile-boilerplate"><a class="header" href="#dockerfile-boilerplate">Dockerfile boilerplate</a></h1>
-<p>this folder is a set of dockerfile boilerplate that I used to build something.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="php-83-debian-v11-bullseye-dev-env"><a class="header" href="#php-83-debian-v11-bullseye-dev-env">php-8.3 debian v11 (bullseye) dev-env</a></h1>
-<p>CREATED: <code>Fri Jun  6 06:32:35 PM WIB 2025</code></p>
-<pre><code class="language-docker">FROM debian:bullseye
-
-ENV DEBIAN_FRONTEND=noninteractive
-# initial, refresh repo first
-RUN apt-get update
-
-# this install base package that need in order to download gpg key (curl, and gnupg)
-RUN apt-get install -y ca-certificates
-RUN apt-get install -y apt-transport-https
-RUN apt-get install -y lsb-release
-RUN apt-get install -y gnupg
-RUN apt-get install -y curl
-RUN apt-get install -y git
-RUN apt-get install -y unzip
-
-# add ondrej\PPA
-RUN curl -fsSL https://packages.sury.org/php/apt.gpg | gpg --dearmor -o /etc/apt/trusted.gpg.d/php.gpg
-RUN echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | tee /etc/apt/sources.list.d/php.list
-
-# install actual package, php-xml &amp; php-mbstring is needed by composer. 
-RUN apt-get update
-RUN apt-get install -y nginx
-RUN apt-get install -y php8.3
-RUN apt-get install -y php8.3-curl
-RUN apt-get install -y php8.3-xml
-RUN apt-get install -y php8.3-mbstring
-
-# download composer
-RUN curl -sS https://getcomposer.org/installer -o composer-setup.php \
-        &amp;&amp; php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
-        &amp;&amp; rm composer-setup.php
-
-COPY . /app
-WORKDIR /app
-
-EXPOSE 4444
-
-# install composer
-RUN composer install
-CMD [ "php", "-S", "0.0.0.0:4444", "-t", "public" ]
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="php8320-fpm-bullseye--nginx"><a class="header" href="#php8320-fpm-bullseye--nginx">php:8.3.20-fpm-bullseye + nginx</a></h1>
-<pre><code class="language-dockerfile">FROM php:8.3.20-fpm-bullseye 
-
-RUN apt-get update &amp;&amp; apt-get install -y libpq-dev
-RUN docker-php-ext-install pdo pdo_pgsql
-
-COPY . /app
-WORKDIR /app
-
-COPY ./docker/fpm/www.conf /usr/local/etc/php-fpm.d/www.conf
-# karna php-fpm running pakai user www-data
-RUN chown -R www-data:www-data /app/storage
-
-
-CMD [ "php-fpm" ]
-</code></pre>
-<p>default.conf (nginx)</p>
-<pre><code class="language-dockerfile">server {
-    listen       80;
-    server_name  localhost;
-
-    access_log  off;
-    root /app/public;
-
-    location / {
-        try_files $uri $uri/ /index.php?$query_string;
-    }
-
-    error_page   500 502 503 504  /50x.html;
-    location = /50x.html {
-        root   /usr/share/nginx/html;
-    }
-
-
-    location ~ \.php$ {
-
-        fastcgi_pass   php:9000; 
-        fastcgi_param  SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        fastcgi_param  DOCUMENT_ROOT $document_root;
-        include        fastcgi_params;
-    }
-}
-
-</code></pre>
-<p>www.conf</p>
-<pre><code class="language-conf">
-[www]
-access.log = /dev/null
-
-user = www-data
-group = www-data
-
-listen = 0.0.0.0:9000
-
-pm = dynamic
-pm.max_children = 5
-pm.start_servers = 2
-pm.min_spare_servers = 1
-pm.max_spare_servers = 3
-</code></pre>
 
                     </main>
 

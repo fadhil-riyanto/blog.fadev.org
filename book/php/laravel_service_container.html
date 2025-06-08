@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Dockerfile boilerplate - Fadhil Books &amp; Notes</title>
+        <title>laravel 12 service container - Fadhil Books &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -160,18 +160,121 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="dockerfile-boilerplate"><a class="header" href="#dockerfile-boilerplate">Dockerfile boilerplate</a></h1>
-<p>this folder is a set of dockerfile boilerplate that I used to build something.</p>
+                        <h1 id="laravel-service-container"><a class="header" href="#laravel-service-container">laravel service container</a></h1>
+<p>date: Sun Jun  8 11:47:02 PM WIB 2025</p>
+<p>links</p>
+<ul>
+<li><a href="https://laravel.com/docs/12.x/container#introduction">https://laravel.com/docs/12.x/container#introduction</a></li>
+</ul>
+<h2 id="making"><a class="header" href="#making">making</a></h2>
+<p>untuk membuat service container, katakanlah isi class ctx yang namanya Google\Client. dia mereturn $client. maka kita harus bikin</p>
+<pre><code class="language-sh">php artisan make:provider GoogleApis
+</code></pre>
+<p>nama GoogleApis bebas. lalu cek di folder <code>./app/Providers/GoogleApis.php</code> harusnya ada, dan di file <code>./bootstrap/providers.php</code> akan ada</p>
+<pre><code class="language-php">&lt;?php
+
+return [
+    App\Providers\AppServiceProvider::class,
+    App\Providers\GoogleApis::class,
+];
+
+</code></pre>
+<p>ada <code>App\Providers\GoogleApis::class</code> maksudnya.</p>
+<h2 id="registering"><a class="header" href="#registering">registering</a></h2>
+<p>dari service provider yang baru saja dibuat, akan ada 2 method, yaitu</p>
+<ul>
+<li><code>public function register(): void</code>: boot ini entry dari service, nilai ctx ctx dsb biasanya diload disini</li>
+<li><code>public function boot(): void</code>: func ini dipanggil kalau semua service sudah jalan, misal service route di register, tapi method untuk nambahin route routenya. ada di boot</li>
+</ul>
+<p>general structure nya (file <code>./app/Providers/AppServiceProvider.php</code>)</p>
+<pre><code class="language-php">&lt;?php
+
+namespace App\Providers;
+
+use Illuminate\Support\ServiceProvider;
+
+class AppServiceProvider extends ServiceProvider
+{
+    /**
+     * Register any application services.
+     */
+    public function register(): void
+    {
+        //
+    }
+
+    /**
+     * Bootstrap any application services.
+     */
+    public function boot(): void
+    {
+        //
+    }
+}
+
+</code></pre>
+<h2 id="the-inside-of-register-function"><a class="header" href="#the-inside-of-register-function">the inside of register function</a></h2>
+<p>docs tentang</p>
+<ul>
+<li>binding -&gt; <a href="https://laravel.com/docs/12.x/container#simple-bindings">https://laravel.com/docs/12.x/container#simple-bindings</a></li>
+<li>singleton -&gt; <a href="https://laravel.com/docs/12.x/container#binding-a-singleton">https://laravel.com/docs/12.x/container#binding-a-singleton</a></li>
+</ul>
+<p>perbedaanya, <code>bind</code> auto buat fresh ctx tiap kali request datang, sedangkan <code>singleton</code> hanya buat sekali, contoh konkret <code>singleton</code> adalah ctx koneksi mongodb, kita cukup pakai sekali saja, untuk semua container</p>
+<p>ini contoh googleclient</p>
+<pre><code class="language-php">// this code is inside of register() func
+$this-&gt;app-&gt;singleton(Client::class, function (Application $app) {
+    $client = new Client();
+    $client-&gt;setApplicationName(env("G_SSO_NAME"));
+    $client-&gt;setClientId(env("G_SSO_CLIENT_ID"));
+    $client-&gt;setClientSecret(env("G_SSO_CLIENT_SECRET"));
+    $client-&gt;setRedirectUri(env("G_SSO_REDIRECT_URI"));
+    $client-&gt;addScope([
+        Service\Oauth2::USERINFO_EMAIL,
+        Service\Oauth2::USERINFO_PROFILE
+    ]);
+    $client-&gt;setAccessType('offline');
+    $client-&gt;setLoginHint('your_email@gmail.com');
+
+    return $client;
+});
+</code></pre>
+<p>catatan: <code>use Illuminate\Contracts\Foundation\Application</code> itu ctx bawaan laravel buat ngebind.</p>
+<h2 id="how-to-use"><a class="header" href="#how-to-use">how to use</a></h2>
+<p>lokasi: controller</p>
+<p>kita tinggal panggil saja class (aslinya)</p>
+<p>contoh</p>
+<pre><code class="language-php">use Google\Client;
+
+class Randomclass extends Controller
+
+{
+    /**
+
+     * Create a new controller instance.
+
+     */
+
+    public function __construct(
+
+        protected Client $client,
+
+    ) {}
+
+    public function use_it() {
+    	$this-&gt;client-&gt;some_google_method();
+    }
+}
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../database/postgresql_functions.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../php/php-readme.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../dockerfile/php-8.3_debian_v11_(bullseye)_dev-env.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../php/custom_auth_guard_w_tables.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -181,11 +284,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../database/postgresql_functions.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../php/php-readme.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../dockerfile/php-8.3_debian_v11_(bullseye)_dev-env.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../php/custom_auth_guard_w_tables.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

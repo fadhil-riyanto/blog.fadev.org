@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Dockerfile boilerplate - Fadhil Books &amp; Notes</title>
+        <title>php:8.3.20-bullseye dev env - Fadhil Books &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -160,18 +160,98 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="dockerfile-boilerplate"><a class="header" href="#dockerfile-boilerplate">Dockerfile boilerplate</a></h1>
-<p>this folder is a set of dockerfile boilerplate that I used to build something.</p>
+                        <h1 id="php8320-bullseye-dev-env"><a class="header" href="#php8320-bullseye-dev-env">php:8.3.20-bullseye dev env</a></h1>
+<p>this is also works for laravel</p>
+<pre><code class="language-php">FROM php:8.3.20-bullseye
+
+RUN apt-get update &amp;&amp; apt-get install -y \
+        curl \ 
+        libpq-dev \
+        git \
+        unzip
+RUN docker-php-ext-install pdo pdo_pgsql
+
+COPY . /app
+WORKDIR /app
+
+RUN curl -sS https://getcomposer.org/installer -o composer-setup.php \
+        &amp;&amp; php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
+        &amp;&amp; rm composer-setup.php
+
+RUN composer install
+
+CMD [ "php", "-S", "0.0.0.0:10302", "-t", "public" ]
+</code></pre>
+<p>compose.yml</p>
+<pre><code class="language-yml">volumes:
+  storage:
+  db_data:
+
+networks:
+  veth_network:
+    driver: bridge
+
+services:
+  google_sso:
+    image: php:8.3.20-bullseye
+    build:
+      context: .
+      dockerfile: dev.backend.Dockerfile
+    environment:
+      - docker=true
+      - DB_HOST=pgsql_db
+      - DB_PORT=5432
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=&lt;PASSWD&gt;
+      - DB_DATABASE=google_sso_dev
+      - G_SSO_NAME=google-sso-login
+      - G_SSO_CLIENT_ID=ABC
+      - G_SSO_CLIENT_SECRET=DEF
+      - G_SSO_REDIRECT_URI=http://localhost:10302/auth/callback
+    ports:
+      - "10302:10302"
+    networks:
+      - veth_network
+    volumes:
+      - .:/app
+      - storage:/app/storage
+    depends_on:
+      - pgsql_db
+
+  pgsql_db:
+    image: postgres:17.5-bullseye
+    restart: always
+    shm_size: 128mb
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=&lt;PASSWD&gt;
+      - POSTGRES_DB=google_sso_dev
+    networks:
+      - veth_network
+    volumes:
+      - db_data:/var/lib/postgresql/data
+  
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    networks:
+      - veth_network
+    depends_on:
+      - pgsql_db
+</code></pre>
+<p>CATATAN unik: ketika ping <code>pgsql_db</code> dari xxx container, ia otomatis resolve dns nya.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../database/postgresql_functions.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../dockerfile/php-8.3.20-fpm-bullseye.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../dockerfile/php-8.3_debian_v11_(bullseye)_dev-env.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../php/php-readme.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -181,11 +261,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../database/postgresql_functions.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../dockerfile/php-8.3.20-fpm-bullseye.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../dockerfile/php-8.3_debian_v11_(bullseye)_dev-env.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../php/php-readme.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

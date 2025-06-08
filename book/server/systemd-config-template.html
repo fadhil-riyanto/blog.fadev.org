@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Dockerfile boilerplate - Fadhil Books &amp; Notes</title>
+        <title>systemd config template - Fadhil Books &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -160,18 +160,34 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="dockerfile-boilerplate"><a class="header" href="#dockerfile-boilerplate">Dockerfile boilerplate</a></h1>
-<p>this folder is a set of dockerfile boilerplate that I used to build something.</p>
+                        <h1 id="systemd-config-template"><a class="header" href="#systemd-config-template">systemd config template</a></h1>
+<p>root location: <code>/etc/systemd/system/&lt;YOUR_SERVICE&gt;.service</code></p>
+<p>template</p>
+<pre><code class="language-txt">[Unit]
+Description=Random service
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=root
+ExecStart=/usr/bin/randomprogram -c /etc/randomprogram/other.toml
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../database/postgresql_functions.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../server/php-fpm-config.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../dockerfile/php-8.3_debian_v11_(bullseye)_dev-env.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../database/readme-database.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -181,11 +197,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../database/postgresql_functions.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../server/php-fpm-config.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../dockerfile/php-8.3_debian_v11_(bullseye)_dev-env.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../database/readme-database.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

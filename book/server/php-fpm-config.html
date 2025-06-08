@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Dockerfile boilerplate - Fadhil Books &amp; Notes</title>
+        <title>php-fpm config - Fadhil Books &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -160,18 +160,88 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="dockerfile-boilerplate"><a class="header" href="#dockerfile-boilerplate">Dockerfile boilerplate</a></h1>
-<p>this folder is a set of dockerfile boilerplate that I used to build something.</p>
+                        <h1 id="php-fpm-config"><a class="header" href="#php-fpm-config">php-fpm config</a></h1>
+<p>file ini biasanya ada di</p>
+<ul>
+<li><code>/usr/local/etc/php-fpm.d/www.conf</code> (di docker php-fpm)</li>
+<li><code>/etc/php/8.3/fpm/pool.d/www.conf</code> (di debian bullseye)</li>
+</ul>
+<p>intinya, tidak pasti haha.</p>
+<h2 id="config-structure"><a class="header" href="#config-structure">config structure</a></h2>
+<p>general structure nya seperti ini kalau ';' dihilangkan</p>
+<pre><code class="language-ini">[www]
+user = www-data
+group = www-data
+listen = /run/php/php8.3-fpm.sock
+listen.owner = www-data
+listen.group = www-data
+pm = dynamic
+pm.max_children = 5
+pm.start_servers = 2
+pm.min_spare_servers = 1
+pm.max_spare_servers = 3
+</code></pre>
+<h2 id="config-global-wip"><a class="header" href="#config-global-wip">config global (WIP)</a></h2>
+<h2 id="config-untuk-pool-each"><a class="header" href="#config-untuk-pool-each">config untuk pool (each)</a></h2>
+<p>best read <a href="https://www.php.net/manual/en/install.fpm.configuration.php">https://www.php.net/manual/en/install.fpm.configuration.php</a></p>
+<ul>
+<li><b>[pool_name]</b>
+intinya ini unique, tidak ada yang sama</li>
+<li><b>user / group</b>
+<ul>
+<li><code>user</code>: dimana child process akan di run (as user?)</li>
+<li><code>group</code>: liat /etc/passwd</li>
+</ul>
+</li>
+<li><b>listen</b>
+<ul>
+<li>
+<p><code>listen</code>: dimana daemon akan listen yg nanti akan di reverse proxy oleh nginx,
+nilai defaultnya biasanya <code>/run/php/php8.3-fpm.sock</code> atau <code>127.0.0.1:9000</code>, contoh:</p>
+<ul>
+<li><code>ip.add.re.ss:port</code></li>
+<li><code>[ip:6:addr:ess]:port</code></li>
+<li><code>port</code></li>
+<li>/path/to/unix/socket</li>
+</ul>
+</li>
+<li>
+<p><code>listen.backlog</code>: jumlah queue pending connection yang bisa di hold</p>
+</li>
+<li>
+<p><code>listen.owner</code>: configure ke mana kah <code>/run/php/php8.3-fpm.sock</code> itu ownernya</p>
+</li>
+<li>
+<p><code>listen.group</code>: same as <code>listen.owner</code></p>
+</li>
+<li>
+<p><code>listen.mode</code>: nomor permission si <code>/run/php/php8.3-fpm.sock</code> listen</p>
+</li>
+<li>
+<p><code>listen.acl_users</code>: WIP</p>
+</li>
+<li>
+<p><code>listen.acl_groups</code>: WIP</p>
+</li>
+<li>
+<p><code>listen.allowed_clients</code>: set dari mana FCGI boleh diakses, di kasus nginx, mostly 127.0.0.1, except docker, dia pakai br-xxxxxx yang ip nya pasti bukan 127.0.0.1</p>
+</li>
+<li>
+<p><code>listen.setfib</code>: WIP</p>
+</li>
+</ul>
+</li>
+</ul>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../database/postgresql_functions.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../server/fix_vethxxxx_not_connected_to_docker0.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../dockerfile/php-8.3_debian_v11_(bullseye)_dev-env.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../server/systemd-config-template.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -181,11 +251,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../database/postgresql_functions.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../server/fix_vethxxxx_not_connected_to_docker0.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../dockerfile/php-8.3_debian_v11_(bullseye)_dev-env.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../server/systemd-config-template.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

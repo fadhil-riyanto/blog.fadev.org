@@ -68,6 +68,8 @@
 	- [network namespace + NAT notes](./server/netns_nat_notes.md)
 	- [deploy Docmost on server](./server/docmost_deploy.md)
 	- [fix vthxxxxxxxx is not connected to docker0](./server/fix_vethxxxx_not_connected_to_docker0.md)
+	- [php-fpm config](./server/php-fpm-config.md)
+	- [systemd config template](./server/systemd-config-template.md)
 
 - [Database](./database/readme-database.md)
 	- [psql command](./database/psql_command.md)
@@ -79,6 +81,18 @@
 	- [system table in pgsql (catalog)](./database/postgresql_system_table.md)
 	- [pgsql functions()](./database/postgresql_functions.md)
 
+- [Dockerfile boilerplate](./dockerfile/dockerfile-readme.md)
+	- [php-8.3 debian:bullseye](./dockerfile/php-8.3_debian_v11_(bullseye)_dev-env.md)
+	- [php:8.3.20-fpm-bullseye + nginx](./dockerfile/php-8.3.20-fpm-bullseye.md)
+	- [php:8.3.20-bullseye dev env](./dockerfile/php-8.3.20-bullseye-dev-env.md)
+
+- [PHP (web)](./php/php-readme.md)
+	- [laravel 12 service container](./php/laravel_service_container.md)
+	- [laravel 12 custom auth guard + tables](./php/custom_auth_guard_w_tables.md)
+	- [laravel Socialite setup](./php/laravel_socialite_setup.md)
+	- [laravel pgsql migration setup](./php/laravel_pgsql_migration_setup.md)
+	- [php password_hash()](./php/password_hash.md)
+	
 - [Other](./other/other-readme.md)
 	- [bookmarks highly useful link](./other/bookmarks_useful_links.md)
 	- [Resume alpro](./other/resume-alpro.md)
@@ -93,7 +107,3 @@
 	- [binary operation](./other/binary_operation.md)
 	- [catatan subnetting from scratch](./other/subnetting_from_scratch.md)
 	- [set PATH fish shell](./other/set_path_fish_shell.md)
-
-- [Dockerfile boilerplate](./dockerfile/dockerfile-readme.md)
-	- [php-8.3 debian:bullseye](./dockerfile/php-8.3_debian_v11_(bullseye)_dev-env.md)
-	- [php:8.3.20-fpm-bullseye + nginx](./dockerfile/php-8.3.20-fpm-bullseye.md)

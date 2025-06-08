@@ -23,4 +23,4 @@ line-numbers = false     # displays line numbers for editable code
 runnable = false          # displays a run button for rust code
 
 [output.html.fold]
-enable = true
+enable = false
