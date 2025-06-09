@@ -2763,6 +2763,7 @@ ExecStart=/usr/bin/randomprogram -c /etc/randomprogram/other.toml
 [Install]
 WantedBy=multi-user.target
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="setting-up-ubuntu-server-with-qemu--custom-bridge"><a class="header" href="#setting-up-ubuntu-server-with-qemu--custom-bridge">setting up ubuntu server with qemu + custom bridge</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="database"><a class="header" href="#database">Database</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="psql-command"><a class="header" href="#psql-command">psql command</a></h1>
 <h2 id="general"><a class="header" href="#general">General</a></h2>
@@ -4367,6 +4368,49 @@ Switch&gt;
 <p>imagine you need to forward another port, not only ssh, the correct command is
 <code>-net user,hostfwd=tcp::10022-:22,hostfwd=tcp::8080-:8080,hostfwd=tcp::5173-:5173</code></p>
 <p>5173 is our port.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="tealinux-qemu-promp--testing-2"><a class="header" href="#tealinux-qemu-promp--testing-2">Tealinux qemu promp &amp; testing 2</a></h1>
+<h2 id="windows-10-section"><a class="header" href="#windows-10-section">Windows 10 section</a></h2>
+<p>this section show various command that windows related</p>
+<h3 id="running-on-gpt"><a class="header" href="#running-on-gpt">running on GPT</a></h3>
+<ul>
+<li>live</li>
+</ul>
+<pre><code class="language-bash"># clone uefi vars
+cp /usr/share/edk2/x64/OVMF_VARS.4m.fd .
+mv OVMF_VARS.4m.fd OVMF_VARS_windows_gpt.4m.fd
+
+# create image
+qemu-img create -f qcow2 windows-gpt.img 50G
+
+# run iso
+qemu-system-x86_64 \
+	-enable-kvm \
+	-cdrom Win10_22H2_English_x64v1.iso \
+	-drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
+	-drive if=pflash,format=raw,file=OVMF_VARS_windows_gpt.4m.fd \
+	-drive file=windows-gpt.img,format=qcow2 \
+	-m 4G \
+	-smp 4
+
+</code></pre>
+<ul>
+<li>non live</li>
+</ul>
+<pre><code class="language-bash"># run iso
+qemu-system-x86_64 \
+	-enable-kvm \
+	-drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
+	-drive if=pflash,format=raw,file=OVMF_VARS.4m.fd \
+	-drive file=windows-gpt.img,format=qcow2 \
+	-m 4G \
+	-smp 4
+
+</code></pre>
+<p>notes:
+run with vga</p>
+<ul>
+<li><code>-vga virtio</code></li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="binary-operation"><a class="header" href="#binary-operation">binary operation</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="catatan-subnetting-from-scratch"><a class="header" href="#catatan-subnetting-from-scratch">catatan subnetting from scratch</a></h1>
 <p>origin: pakai acuan ip kelas c</p>

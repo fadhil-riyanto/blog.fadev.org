@@ -71,6 +71,7 @@
 	- [fix vthxxxxxxxx is not connected to docker0](./server/fix_vethxxxx_not_connected_to_docker0.md)
 	- [php-fpm config](./server/php-fpm-config.md)
 	- [systemd config template](./server/systemd-config-template.md)
+	- [setting up ubuntu server with qemu + custom bridge](./server/setting-up-ubuntu-server-w-qemu-bridge.md)
 
 - [Database](./database/readme-database.md)
 	- [psql command](./database/psql_command.md)
@@ -104,6 +105,7 @@
 	- [Subnetting](./other/subnetting.md)
 	- [Inter-VLAN routing](./other/intervlan-routing.md)
 	- [Tealinux qemu promp & testing](./other/tealinux-promp-testing.md)
+	- [Tealinux qemu promp & testing 2](./other/tealinux-promp-testing2.md)
 	- [binary operation](./other/binary_operation.md)
 	- [catatan subnetting from scratch](./other/subnetting_from_scratch.md)
 	- [set PATH fish shell](./other/set_path_fish_shell.md)
