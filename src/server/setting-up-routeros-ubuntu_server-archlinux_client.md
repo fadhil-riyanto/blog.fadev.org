@@ -20,7 +20,7 @@ setup configurasi ip hingga seperti ini
     link/ether c6:c7:1c:7c:67:8a brd ff:ff:ff:ff:ff:ff
 ```
 
-jalankan skrip command command ini:
+untuk membuatnya, jalankan skrip command command ini:
 - `sudo ip link add br0-lan type bridge` <- buat switch virtual
 - `sudo ip tuntap add tap0 mode tap` <- buat colokan virtual
 - `sudo ip tuntap add tap1 mode tap`

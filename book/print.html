@@ -2814,7 +2814,7 @@ qemu-system-x86_64 \
 55: tap2: &lt;BROADCAST,MULTICAST&gt; mtu 1500 qdisc noop master br0-lan state DOWN group default qlen 1000
     link/ether c6:c7:1c:7c:67:8a brd ff:ff:ff:ff:ff:ff
 </code></pre>
-<p>jalankan skrip command command ini:</p>
+<p>untuk membuatnya, jalankan skrip command command ini:</p>
 <ul>
 <li><code>sudo ip link add br0-lan type bridge</code> &lt;- buat switch virtual</li>
 <li><code>sudo ip tuntap add tap0 mode tap</code> &lt;- buat colokan virtual</li>
