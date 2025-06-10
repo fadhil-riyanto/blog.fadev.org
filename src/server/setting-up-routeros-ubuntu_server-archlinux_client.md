@@ -214,3 +214,34 @@ next next saja, kecuali dns nanti diisi 1.1.1.1, dan dns-name diisi nama domain 
 
 # test
 ![image](/assets/a402fb33b60465533c6e5bdc6762359c82f692492362ec74d96e8c440c90fba385489ba574cdfe6ed8254d4852e8ea55b368a4f5ab98d74ca75d5e30.png)
+
+## karna `192.168.1.254` ip freeradius (static ip soon)
+maka kita ignore pakai 
+
+![image](/assets/000cd141407bb54adf25c3c11ceefa575a528165b64a30e3eb444b8620b926e094dd5ef3841ff0c082def4c08b13fdf29bf9f9e1e8e1760ef739fcaf.png)
+
+ip binding
+
+# freeradius
+
+ubah `/etc/freeradius/3.0/clients.conf`, tambah
+
+```txt
+client private-network-1 {
+    ipaddr      = 192.192.1.1/24
+    secret      = testing123
+}
+
+
+```
+
+lalu `/etc/freeradius/3.0/users`
+```txt
+bob Cleartext-Password := "password"
+```
+
+## winbox
+![image](/assets/50f3df1d429445c00433163d8e1c79a253f2cef67178d21c5a811f8bd23350d9c557ba0b174c7fddcb7bbed88e3261c8ed3beb84f01932a8e3ae73fc.png)
+
+system -> AAA
+![image](/assets/cee05007032ea0004685a07cffdffcfb957095daae4524a931d8a374c06a6ab190ce8ca75a394f33e42e58c6af012761539621bbb28e2dc1214860b6.png)

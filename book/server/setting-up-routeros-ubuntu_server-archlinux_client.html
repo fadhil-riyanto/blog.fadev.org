@@ -318,6 +318,26 @@ jalankan <code>sudo dhclient enp4</code> (karna interface tun1 dia dibaca sebaga
 <img src="/assets/988a96f698f5bdbd154f04c7523e1dd24d88853b451c6e887122bbf82c54d00f86ab0f688d3303e478e9cc1c016272d84e1937049e5e454119939477.png" alt="image" /></p>
 <h1 id="test"><a class="header" href="#test">test</a></h1>
 <p><img src="/assets/a402fb33b60465533c6e5bdc6762359c82f692492362ec74d96e8c440c90fba385489ba574cdfe6ed8254d4852e8ea55b368a4f5ab98d74ca75d5e30.png" alt="image" /></p>
+<h2 id="karna-1921681254-ip-freeradius-static-ip-soon"><a class="header" href="#karna-1921681254-ip-freeradius-static-ip-soon">karna <code>192.168.1.254</code> ip freeradius (static ip soon)</a></h2>
+<p>maka kita ignore pakai</p>
+<p><img src="/assets/000cd141407bb54adf25c3c11ceefa575a528165b64a30e3eb444b8620b926e094dd5ef3841ff0c082def4c08b13fdf29bf9f9e1e8e1760ef739fcaf.png" alt="image" /></p>
+<p>ip binding</p>
+<h1 id="freeradius-1"><a class="header" href="#freeradius-1">freeradius</a></h1>
+<p>ubah <code>/etc/freeradius/3.0/clients.conf</code>, tambah</p>
+<pre><code class="language-txt">client private-network-1 {
+    ipaddr      = 192.192.1.1/24
+    secret      = testing123
+}
+
+
+</code></pre>
+<p>lalu <code>/etc/freeradius/3.0/users</code></p>
+<pre><code class="language-txt">bob Cleartext-Password := "password"
+</code></pre>
+<h2 id="winbox-1"><a class="header" href="#winbox-1">winbox</a></h2>
+<p><img src="/assets/50f3df1d429445c00433163d8e1c79a253f2cef67178d21c5a811f8bd23350d9c557ba0b174c7fddcb7bbed88e3261c8ed3beb84f01932a8e3ae73fc.png" alt="image" /></p>
+<p>system -&gt; AAA
+<img src="/assets/cee05007032ea0004685a07cffdffcfb957095daae4524a931d8a374c06a6ab190ce8ca75a394f33e42e58c6af012761539621bbb28e2dc1214860b6.png" alt="image" /></p>
 
                     </main>
 
