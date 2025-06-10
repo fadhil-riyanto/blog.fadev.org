@@ -72,6 +72,7 @@
 	- [php-fpm config](./server/php-fpm-config.md)
 	- [systemd config template](./server/systemd-config-template.md)
 	- [setting up ubuntu server with qemu + custom bridge](./server/setting-up-ubuntu-server-w-qemu-bridge.md)
+	- [setting up routeros + ubuntu server + archlinux client](./server/setting-up-routeros-ubuntu_server-archlinux_client.md)
 
 - [Database](./database/readme-database.md)
 	- [psql command](./database/psql_command.md)

@@ -1,0 +1,377 @@
+<!DOCTYPE HTML>
+<html lang="en" class="coal sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>setting up routeros + ubuntu server + archlinux client - Fadhil Books &amp; Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "coal";
+            const default_dark_theme = "coal";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('coal')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Fadhil Books &amp; Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/fadhil-riyanto" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="setting-up-routeros--ubuntu-server-freeradius--and-archlinux-client"><a class="header" href="#setting-up-routeros--ubuntu-server-freeradius--and-archlinux-client">setting up routeros + ubuntu server (freeradius) + and archlinux client</a></h1>
+<h2 id="first-setup-virtual-lan"><a class="header" href="#first-setup-virtual-lan">first, setup virtual lan</a></h2>
+<p>setup configurasi ip hingga seperti ini</p>
+<pre><code class="language-sh">51: br0-lan: &lt;NO-CARRIER,BROADCAST,MULTICAST,UP&gt; mtu 1500 qdisc noqueue state DOWN group default qlen 1000
+    link/ether 8a:b9:27:b3:c7:a5 brd ff:ff:ff:ff:ff:ff
+    inet6 fe80::88b9:27ff:feb3:c7a5/64 scope link proto kernel_ll 
+       valid_lft forever preferred_lft forever
+53: tap0: &lt;NO-CARRIER,BROADCAST,MULTICAST,UP&gt; mtu 1500 qdisc fq_codel master br0-lan state DOWN group default qlen 1000
+    link/ether c6:33:f3:fe:d3:ba brd ff:ff:ff:ff:ff:ff
+    inet6 fe80::c433:f3ff:fefe:d3ba/64 scope link proto kernel_ll 
+       valid_lft forever preferred_lft forever
+54: tap1: &lt;NO-CARRIER,BROADCAST,MULTICAST,UP&gt; mtu 1500 qdisc fq_codel master br0-lan state DOWN group default qlen 1000
+    link/ether a2:eb:ee:56:8a:90 brd ff:ff:ff:ff:ff:ff
+    inet6 fe80::a0eb:eeff:fe56:8a90/64 scope link proto kernel_ll 
+       valid_lft forever preferred_lft forever
+55: tap2: &lt;BROADCAST,MULTICAST&gt; mtu 1500 qdisc noop master br0-lan state DOWN group default qlen 1000
+    link/ether c6:c7:1c:7c:67:8a brd ff:ff:ff:ff:ff:ff
+</code></pre>
+<p>jalankan skrip command command ini:</p>
+<ul>
+<li><code>sudo ip link add br0-lan type bridge</code> &lt;- buat switch virtual</li>
+<li><code>sudo ip tuntap add tap0 mode tap</code> &lt;- buat colokan virtual</li>
+<li><code>sudo ip tuntap add tap1 mode tap</code></li>
+<li><code>sudo ip tuntap add tap2 mode tap</code></li>
+<li><code>sudo ip link set tap0 master br0-lan</code> &lt;- set semua colokan punya induk ke switch br0-lan, intinya harus satu switch</li>
+<li><code>sudo ip link set tap1 master br0-lan</code></li>
+<li><code>sudo ip link set tap2 master br0-lan</code></li>
+<li><code>sudo ip link set br0-lan up</code> &lt;- nyalakan semua interface nya</li>
+<li><code>sudo ip link set tap0 up</code></li>
+<li><code>sudo ip link set tap1 up</code></li>
+<li><code>sudo ip link set tap2 up</code></li>
+</ul>
+<h2 id="alokasi-interface"><a class="header" href="#alokasi-interface">alokasi interface</a></h2>
+<ul>
+<li><code>br0-lan</code> --&gt; switch utama</li>
+<li><code>tap0</code> --&gt; interface untuk routerOS</li>
+<li><code>tap1</code> --&gt; interface untuk freeradius (running di ubuntu server)</li>
+<li><code>tap2</code> --&gt; interface test client (bisa alpineLinux, archlinux, bebas)</li>
+</ul>
+<h2 id="run-routeros"><a class="header" href="#run-routeros">run routeros</a></h2>
+<p>download links: https://download.mikrotik.com/routeros/6.49.18/chr-6.49.18.img.zip</p>
+<pre><code class="language-sh"># convert first
+qemu-img convert -f raw -O qcow2 chr-6.49.18.img chr.qcow2
+
+# then run
+qemu-system-x86_64 \
+      -enable-kvm \
+      -smp 4 \
+      -m 256M \
+      -drive file=chr.qcow2,format=qcow2 \
+      -boot order=d \
+      -net user,hostfwd=tcp::8291-:8291 \
+      -net nic \
+      -nographic \
+      -netdev tap,id=net0,ifname=tap0,script=no,downscript=no \
+      -device virtio-net-pci,netdev=net0,mac=02:11:2a:3b:ff:c3
+</code></pre>
+<p><img src="/assets/5f64d4f9b4ff9ec75cdb5641d5ccc8e63e796e7e736d3b66f0523fdbb984f651e399a2fa28fd943cfc1272db3b1330dddf56b5ca9100e9316e8c31a5.png" alt="image" />
+setidaknya, mac-addr nya sama. yaitu ether3</p>
+<h2 id="run-ubuntu-server"><a class="header" href="#run-ubuntu-server">run ubuntu server</a></h2>
+<p>command ini hanya dirun run sekali (ketika instalasi)</p>
+<pre><code class="language-sh"># copy firmware uefi vars
+cp /usr/share/edk2/x64/OVMF_VARS.4m.fd .
+mv OVMF_VARS.4m.fd OVMF_VARS_ubuntu_server_gpt.4m.fd
+
+# run qemu
+qemu-system-x86_64 \
+    -enable-kvm \
+    -boot order=d \
+    -cdrom ubuntu-24.04.2-live-server-amd64.iso \
+    -drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
+    -drive if=pflash,format=raw,file=OVMF_VARS_ubuntu_server_gpt.4m.fd \
+    -drive file=ubuntu-server.img,format=qcow2 \
+    -m 4G \
+    -smp 4 \
+    -net user,hostfwd=tcp::20022-:22 \
+    -net nic
+</code></pre>
+<p>proses instalasi ubuntu server cari di internet xixi.</p>
+<p>setelah installed, kita install beberapa base package dahulu. base package yg akan diinstall adalah</p>
+<pre><code class="language-sh">sudo apt-get update &amp;&amp; \
+sudo apt-get upgrade &amp;&amp; \
+sudo apt-get install \
+    openssh-server freeradius isc-dhcp-client
+</code></pre>
+<p>lalu setelah installed, kita tidak butuh iso lagi, kita bisa buang saja parameter <code>-cdrom ubuntu-24.04.2-live-server-amd64.iso</code> karna unused. dan untuk konfigurasi tambahan, saya buat pakai vga virtio (agar text nya smooth), dan juga netdev untuk colokan <code>tap1</code> yang nyambung ke bridge</p>
+<pre><code class="language-sh">qemu-system-x86_64 \
+    -enable-kvm \
+    -boot order=d \
+    -drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
+    -drive if=pflash,format=raw,file=OVMF_VARS_ubuntu_server_gpt.4m.fd \
+    -drive file=ubuntu-server.img,format=qcow2 \
+    -m 4G \
+    -smp 4 \
+    -netdev user,id=net0,hostfwd=tcp::20022-:22 \
+    -device e1000,netdev=net0 \
+    -netdev tap,id=net1,ifname=tap1,script=no,downscript=no \
+    -device virtio-net-pci,netdev=net1,mac=02:11:2a:3b:aa:c4 \
+    -vga virtio
+</code></pre>
+<p>nb: jangan lupa <code>sudo apt-get update &amp;&amp; sudo apt-get upgrade &amp;&amp; sudo apt-get install openssh-server</code>, karna di vm tidak bisa copy paste (mau dari dalam ataupun keluar), dan juga tidak bisa scroll atas bawah. maka proses me-config nya akan pakai ssh saja</p>
+<p><img src="/assets/6216af66c741aa5c444f4e3f3c92f5cd5cff2b16d84e1ce7959fb3022404de548d8e3d12b5792f871bc5d68599a8ff141d866ec9af17bdf15822e380.png" alt="image" /></p>
+<p>intinya biarkan vm nya jalan begitu saja, bisa di minimize atau dipindah ke tab lain yang tidak menganggu. selanjutnya remote vm nya pakai</p>
+<pre><code class="language-sh">ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null  fadhil_riyanto@127.0.0.1 -p 20022
+</code></pre>
+<p>nb: ganti <code>fadhil_riyanto</code> dengan username yang sudah diset tadi</p>
+<p><img src="/assets/e1b3a2a87f2147be937d1c1604519f52d7979acf87d6ed653f1319393fa3d9099b1562a1b6d1bef94c0b907c5c142fd2f00428ddd5b6266bc854c826.png" alt="image" /></p>
+<p>setidaknya seperti itu remote-an nya</p>
+<h2 id="freeradius"><a class="header" href="#freeradius">freeradius</a></h2>
+<p>jalankan <code>sudo apt-get install freeradius</code>, lalu test dengan <code>sudo freeradius -X</code></p>
+<p><img src="/assets/c94a211608a1db50024e52889c911f4ba6d5b894301a6c0676ce0d0529b7830a4dd824567d341d9f82c91165bcf77b1b5dfcb914183c5e466c150fa9.png" alt="image" /></p>
+<p>pastikan ada tulisan ready to process request</p>
+<h2 id="winbox"><a class="header" href="#winbox">winbox</a></h2>
+<p>karna winbox pakai port 8291 untuk merepote mikrotik, maka kita konek dengan host 127.0.0.1:8291, password sesuai config awal mikrotik ketika awal tadi</p>
+<p>winbox localhost</p>
+<p><img src="/assets/5c2d5ee56f841a1c270df51d085e5506a2582a05610927ddcd84820cd3002f689dcc4170ec3fe3af3b77ecf3e1e61d98ea2e7ca6cc5f51b3d8b9e770.png" alt="image" /></p>
+<h3 id="setup-mikrotik-dhcp-server"><a class="header" href="#setup-mikrotik-dhcp-server">setup mikrotik dhcp server</a></h3>
+<p>ip -&gt; address
+<img src="/assets/cdc8c75a5259e1dd336291a4d4991eb1301e32f68b5f1ac46f12d27a33c6b7716b3ef0cb260d58477d1b8d054ee449f378aeeb1e1331b5ec84b45569.png" alt="image" /></p>
+<p>ip -&gt; dhcp server</p>
+<p><img src="/assets/6133719edf4cf0c1e46b9284e559fa88868cf8a60d103446d3f1d522f5754df314c82cab832272a9b683b823750ff3470e005c49780858db86e16ebc.png" alt="image" /></p>
+<p><img src="/assets/1429917ae1cc7caa5b655d3b3dc59264012d026ed3c20e1ec825d5719d6e22e81bf686ba3b9013b9a00050b6a4da887d1d9d418ddfa025c7e4e1162e.png" alt="image" /></p>
+<p><img src="/assets/321b4b134b67a9be0c091c9ae2093bbca9edb62df2799cc3b4339665e178102b8afc4e09d7125d01665356e77c2b2f9b938e3fded7bcb192445ec3ff.png" alt="image" /></p>
+<p><img src="/assets/76a1f9eae8f7a57a5d426ce2a9e5562d69d4d71237c707bb6af5cd8483dddb3fe227a9ffa0b127a91ee85b4ea4a20813b53c11f78033e5c9ba75f77d.png" alt="image" /></p>
+<p><img src="/assets/425c569d1b6df4dee6f4e64925263eda657131e8b70af0f8248a330aef0a92f514b5ae6cbcb2b5e8266ad0520b83a44ef20536490d66323dd6c80767.png" alt="image" /></p>
+<p>dns server kita biarkan dahulu</p>
+<p><img src="/assets/8380a0b6d16f00b1d879e38b6bd10c71142750ae6c1df4325f6176b255f1e1e89845912464c7c3f7ee27a63bf44886982f0312807e3e038d4122c2ad.png" alt="image" /></p>
+<p>pembuktian:
+jalankan <code>sudo dhclient enp4</code> (karna interface tun1 dia dibaca sebagai enp4 di ubuntu server)
+<img src="/assets/2025-06-10_13-20.png" alt="image" /></p>
+<p>ping ke router</p>
+<p><img src="/assets/e44475652a0685c34088f0709bbce20eb1c8e14e3ef28fdb0df1d8f8fcfaf57af06cc14d7fd57c2db2937f2969c538fb1eb922f0a3ca490246bf2744.png" alt="image" /></p>
+<p>router ke ubuntu server
+<img src="/assets/cb465e579a0eb33086d6a74da97b51470a70d2d114ec5fe7c00c155c95590524e81d0eaf9036a7e973aaf58c909174d5eae9387b59e324efde5f6f47.png" alt="image" /></p>
+<h2 id="setting-up-archlinux-gui"><a class="header" href="#setting-up-archlinux-gui">setting up Archlinux (GUI)</a></h2>
+<p>download dahulu bahan nya di <a href="https://sourceforge.net/projects/arch-linux-gui/">https://sourceforge.net/projects/arch-linux-gui/</a>, pakai xfce (paling ringan)</p>
+<p>run archlinux gui sebagai <code>tap2</code></p>
+<pre><code class="language-sh">qemu-system-x86_64 \
+    -enable-kvm \
+    -boot order=d \
+    -cdrom archlinux-gui-xfce-2022.07-x86_64.iso \
+    -m 4G \
+    -smp 4 \
+    -netdev tap,id=net1,ifname=tap2,script=no,downscript=no \
+    -device virtio-net-pci,netdev=net1,mac=02:11:5c:1b:aa:c9 \
+    -vga virtio
+</code></pre>
+<p>catatan: macnya dikarang lagi, agar tidak sama. jika sama ternyata bakal dapat ip yang sama</p>
+<p><img src="/assets/6dbca4ece71a387364fe6d5368d8b1c6431c3d3ab2f9f366f9d34c07aa81327e44fb8b757e6ae98906cf4ae440ca26c020a249db84c78060abb37442.png" alt="image" /></p>
+<p><img src="/assets/dbadc00c801066a13f108acff5eb48186a0931e7f6071f3f8a7733406b357e6d8c9a8453fe03f60d13e85a3fa2b547591029535ce3b727720902a3a3.png" alt="image" /></p>
+<p>nb: archlinux makan 2 ip karna NetworkManager dan systemd-resolved bentrok (bawaannta sepertinya). tapi harusnya no problem at all</p>
+<h2 id="setup-hotspot-winbox"><a class="header" href="#setup-hotspot-winbox">setup hotspot winbox</a></h2>
+<p>ip -&gt; hotspot</p>
+<p><img src="/assets/320a0dc0cd86c6f47ad63480a9570276e208c48b60099f3a320ef890aa3bb7c06604c32b157531104b5f5edc51853d2732c25403a84f737406780e31.png" alt="image" /></p>
+<p>next next saja, kecuali dns nanti diisi 1.1.1.1, dan dns-name diisi nama domain untuk captive portalnya
+<img src="/assets/988a96f698f5bdbd154f04c7523e1dd24d88853b451c6e887122bbf82c54d00f86ab0f688d3303e478e9cc1c016272d84e1937049e5e454119939477.png" alt="image" /></p>
+<h1 id="test"><a class="header" href="#test">test</a></h1>
+<p><img src="/assets/a402fb33b60465533c6e5bdc6762359c82f692492362ec74d96e8c440c90fba385489ba574cdfe6ed8254d4852e8ea55b368a4f5ab98d74ca75d5e30.png" alt="image" /></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../server/setting-up-ubuntu-server-w-qemu-bridge.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../database/readme-database.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../server/setting-up-ubuntu-server-w-qemu-bridge.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../database/readme-database.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../ace.js"></script>
+        <script src="../editor.js"></script>
+        <script src="../mode-rust.js"></script>
+        <script src="../theme-dawn.js"></script>
+        <script src="../theme-tomorrow_night.js"></script>
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

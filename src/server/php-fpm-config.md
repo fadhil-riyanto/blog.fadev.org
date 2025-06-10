@@ -25,6 +25,9 @@ pm.max_spare_servers = 3
 ```
 
 ## config global (WIP)
+lokasi config ini ada di 
+
+`/etc/php/php-fpm.conf`
 
 ## config untuk pool (each)
 

@@ -2695,6 +2695,8 @@ pm.min_spare_servers = 1
 pm.max_spare_servers = 3
 </code></pre>
 <h2 id="config-global-wip"><a class="header" href="#config-global-wip">config global (WIP)</a></h2>
+<p>lokasi config ini ada di</p>
+<p><code>/etc/php/php-fpm.conf</code></p>
 <h2 id="config-untuk-pool-each"><a class="header" href="#config-untuk-pool-each">config untuk pool (each)</a></h2>
 <p>best read <a href="https://www.php.net/manual/en/install.fpm.configuration.php">https://www.php.net/manual/en/install.fpm.configuration.php</a></p>
 <ul>
@@ -2764,6 +2766,194 @@ ExecStart=/usr/bin/randomprogram -c /etc/randomprogram/other.toml
 WantedBy=multi-user.target
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="setting-up-ubuntu-server-with-qemu--custom-bridge"><a class="header" href="#setting-up-ubuntu-server-with-qemu--custom-bridge">setting up ubuntu server with qemu + custom bridge</a></h1>
+<h2 id="qemu-section"><a class="header" href="#qemu-section">qemu section</a></h2>
+<pre><code class="language-sh"># create image first
+qemu-img create -f qcow2 ubuntu-server.img 10G
+
+# run the iso
+qemu-system-x86_64 \
+      -enable-kvm \
+      -boot order=d \
+      -cdrom ubuntu-24.04.2-live-server-amd64.iso \
+      -drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
+      -drive if=pflash,format=raw,file=OVMF_VARS_ubuntu_server_gpt.4m.fd \
+      -drive file=ubuntu-server.img,format=qcow2 \
+      -m 4G \
+      -smp 4 \
+      -net user,hostfwd=tcp::20022-:22 \
+      -net nic
+
+# run iso
+qemu-system-x86_64 \
+	-enable-kvm \
+	-boot order=d \
+	-drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
+	-drive if=pflash,format=raw,file=OVMF_VARS_ubuntu_server_gpt.4m.fd \
+	-drive file=ubuntu-server.img,format=qcow2 \
+	-m 4G \
+	-smp 4 \
+	-net user,hostfwd=tcp::20022-:22 \
+	-net nic \
+	-vga virtio
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="setting-up-routeros--ubuntu-server-freeradius--and-archlinux-client"><a class="header" href="#setting-up-routeros--ubuntu-server-freeradius--and-archlinux-client">setting up routeros + ubuntu server (freeradius) + and archlinux client</a></h1>
+<h2 id="first-setup-virtual-lan"><a class="header" href="#first-setup-virtual-lan">first, setup virtual lan</a></h2>
+<p>setup configurasi ip hingga seperti ini</p>
+<pre><code class="language-sh">51: br0-lan: &lt;NO-CARRIER,BROADCAST,MULTICAST,UP&gt; mtu 1500 qdisc noqueue state DOWN group default qlen 1000
+    link/ether 8a:b9:27:b3:c7:a5 brd ff:ff:ff:ff:ff:ff
+    inet6 fe80::88b9:27ff:feb3:c7a5/64 scope link proto kernel_ll 
+       valid_lft forever preferred_lft forever
+53: tap0: &lt;NO-CARRIER,BROADCAST,MULTICAST,UP&gt; mtu 1500 qdisc fq_codel master br0-lan state DOWN group default qlen 1000
+    link/ether c6:33:f3:fe:d3:ba brd ff:ff:ff:ff:ff:ff
+    inet6 fe80::c433:f3ff:fefe:d3ba/64 scope link proto kernel_ll 
+       valid_lft forever preferred_lft forever
+54: tap1: &lt;NO-CARRIER,BROADCAST,MULTICAST,UP&gt; mtu 1500 qdisc fq_codel master br0-lan state DOWN group default qlen 1000
+    link/ether a2:eb:ee:56:8a:90 brd ff:ff:ff:ff:ff:ff
+    inet6 fe80::a0eb:eeff:fe56:8a90/64 scope link proto kernel_ll 
+       valid_lft forever preferred_lft forever
+55: tap2: &lt;BROADCAST,MULTICAST&gt; mtu 1500 qdisc noop master br0-lan state DOWN group default qlen 1000
+    link/ether c6:c7:1c:7c:67:8a brd ff:ff:ff:ff:ff:ff
+</code></pre>
+<p>jalankan skrip command command ini:</p>
+<ul>
+<li><code>sudo ip link add br0-lan type bridge</code> &lt;- buat switch virtual</li>
+<li><code>sudo ip tuntap add tap0 mode tap</code> &lt;- buat colokan virtual</li>
+<li><code>sudo ip tuntap add tap1 mode tap</code></li>
+<li><code>sudo ip tuntap add tap2 mode tap</code></li>
+<li><code>sudo ip link set tap0 master br0-lan</code> &lt;- set semua colokan punya induk ke switch br0-lan, intinya harus satu switch</li>
+<li><code>sudo ip link set tap1 master br0-lan</code></li>
+<li><code>sudo ip link set tap2 master br0-lan</code></li>
+<li><code>sudo ip link set br0-lan up</code> &lt;- nyalakan semua interface nya</li>
+<li><code>sudo ip link set tap0 up</code></li>
+<li><code>sudo ip link set tap1 up</code></li>
+<li><code>sudo ip link set tap2 up</code></li>
+</ul>
+<h2 id="alokasi-interface"><a class="header" href="#alokasi-interface">alokasi interface</a></h2>
+<ul>
+<li><code>br0-lan</code> --&gt; switch utama</li>
+<li><code>tap0</code> --&gt; interface untuk routerOS</li>
+<li><code>tap1</code> --&gt; interface untuk freeradius (running di ubuntu server)</li>
+<li><code>tap2</code> --&gt; interface test client (bisa alpineLinux, archlinux, bebas)</li>
+</ul>
+<h2 id="run-routeros"><a class="header" href="#run-routeros">run routeros</a></h2>
+<p>download links: https://download.mikrotik.com/routeros/6.49.18/chr-6.49.18.img.zip</p>
+<pre><code class="language-sh"># convert first
+qemu-img convert -f raw -O qcow2 chr-6.49.18.img chr.qcow2
+
+# then run
+qemu-system-x86_64 \
+      -enable-kvm \
+      -smp 4 \
+      -m 256M \
+      -drive file=chr.qcow2,format=qcow2 \
+      -boot order=d \
+      -net user,hostfwd=tcp::8291-:8291 \
+      -net nic \
+      -nographic \
+      -netdev tap,id=net0,ifname=tap0,script=no,downscript=no \
+      -device virtio-net-pci,netdev=net0,mac=02:11:2a:3b:ff:c3
+</code></pre>
+<p><img src="server//assets/5f64d4f9b4ff9ec75cdb5641d5ccc8e63e796e7e736d3b66f0523fdbb984f651e399a2fa28fd943cfc1272db3b1330dddf56b5ca9100e9316e8c31a5.png" alt="image" />
+setidaknya, mac-addr nya sama. yaitu ether3</p>
+<h2 id="run-ubuntu-server"><a class="header" href="#run-ubuntu-server">run ubuntu server</a></h2>
+<p>command ini hanya dirun run sekali (ketika instalasi)</p>
+<pre><code class="language-sh"># copy firmware uefi vars
+cp /usr/share/edk2/x64/OVMF_VARS.4m.fd .
+mv OVMF_VARS.4m.fd OVMF_VARS_ubuntu_server_gpt.4m.fd
+
+# run qemu
+qemu-system-x86_64 \
+    -enable-kvm \
+    -boot order=d \
+    -cdrom ubuntu-24.04.2-live-server-amd64.iso \
+    -drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
+    -drive if=pflash,format=raw,file=OVMF_VARS_ubuntu_server_gpt.4m.fd \
+    -drive file=ubuntu-server.img,format=qcow2 \
+    -m 4G \
+    -smp 4 \
+    -net user,hostfwd=tcp::20022-:22 \
+    -net nic
+</code></pre>
+<p>proses instalasi ubuntu server cari di internet xixi.</p>
+<p>setelah installed, kita install beberapa base package dahulu. base package yg akan diinstall adalah</p>
+<pre><code class="language-sh">sudo apt-get update &amp;&amp; \
+sudo apt-get upgrade &amp;&amp; \
+sudo apt-get install \
+    openssh-server freeradius isc-dhcp-client
+</code></pre>
+<p>lalu setelah installed, kita tidak butuh iso lagi, kita bisa buang saja parameter <code>-cdrom ubuntu-24.04.2-live-server-amd64.iso</code> karna unused. dan untuk konfigurasi tambahan, saya buat pakai vga virtio (agar text nya smooth), dan juga netdev untuk colokan <code>tap1</code> yang nyambung ke bridge</p>
+<pre><code class="language-sh">qemu-system-x86_64 \
+    -enable-kvm \
+    -boot order=d \
+    -drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
+    -drive if=pflash,format=raw,file=OVMF_VARS_ubuntu_server_gpt.4m.fd \
+    -drive file=ubuntu-server.img,format=qcow2 \
+    -m 4G \
+    -smp 4 \
+    -netdev user,id=net0,hostfwd=tcp::20022-:22 \
+    -device e1000,netdev=net0 \
+    -netdev tap,id=net1,ifname=tap1,script=no,downscript=no \
+    -device virtio-net-pci,netdev=net1,mac=02:11:2a:3b:aa:c4 \
+    -vga virtio
+</code></pre>
+<p>nb: jangan lupa <code>sudo apt-get update &amp;&amp; sudo apt-get upgrade &amp;&amp; sudo apt-get install openssh-server</code>, karna di vm tidak bisa copy paste (mau dari dalam ataupun keluar), dan juga tidak bisa scroll atas bawah. maka proses me-config nya akan pakai ssh saja</p>
+<p><img src="server//assets/6216af66c741aa5c444f4e3f3c92f5cd5cff2b16d84e1ce7959fb3022404de548d8e3d12b5792f871bc5d68599a8ff141d866ec9af17bdf15822e380.png" alt="image" /></p>
+<p>intinya biarkan vm nya jalan begitu saja, bisa di minimize atau dipindah ke tab lain yang tidak menganggu. selanjutnya remote vm nya pakai</p>
+<pre><code class="language-sh">ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null  fadhil_riyanto@127.0.0.1 -p 20022
+</code></pre>
+<p>nb: ganti <code>fadhil_riyanto</code> dengan username yang sudah diset tadi</p>
+<p><img src="server//assets/e1b3a2a87f2147be937d1c1604519f52d7979acf87d6ed653f1319393fa3d9099b1562a1b6d1bef94c0b907c5c142fd2f00428ddd5b6266bc854c826.png" alt="image" /></p>
+<p>setidaknya seperti itu remote-an nya</p>
+<h2 id="freeradius"><a class="header" href="#freeradius">freeradius</a></h2>
+<p>jalankan <code>sudo apt-get install freeradius</code>, lalu test dengan <code>sudo freeradius -X</code></p>
+<p><img src="server//assets/c94a211608a1db50024e52889c911f4ba6d5b894301a6c0676ce0d0529b7830a4dd824567d341d9f82c91165bcf77b1b5dfcb914183c5e466c150fa9.png" alt="image" /></p>
+<p>pastikan ada tulisan ready to process request</p>
+<h2 id="winbox"><a class="header" href="#winbox">winbox</a></h2>
+<p>karna winbox pakai port 8291 untuk merepote mikrotik, maka kita konek dengan host 127.0.0.1:8291, password sesuai config awal mikrotik ketika awal tadi</p>
+<p>winbox localhost</p>
+<p><img src="server//assets/5c2d5ee56f841a1c270df51d085e5506a2582a05610927ddcd84820cd3002f689dcc4170ec3fe3af3b77ecf3e1e61d98ea2e7ca6cc5f51b3d8b9e770.png" alt="image" /></p>
+<h3 id="setup-mikrotik-dhcp-server"><a class="header" href="#setup-mikrotik-dhcp-server">setup mikrotik dhcp server</a></h3>
+<p>ip -&gt; address
+<img src="server//assets/cdc8c75a5259e1dd336291a4d4991eb1301e32f68b5f1ac46f12d27a33c6b7716b3ef0cb260d58477d1b8d054ee449f378aeeb1e1331b5ec84b45569.png" alt="image" /></p>
+<p>ip -&gt; dhcp server</p>
+<p><img src="server//assets/6133719edf4cf0c1e46b9284e559fa88868cf8a60d103446d3f1d522f5754df314c82cab832272a9b683b823750ff3470e005c49780858db86e16ebc.png" alt="image" /></p>
+<p><img src="server//assets/1429917ae1cc7caa5b655d3b3dc59264012d026ed3c20e1ec825d5719d6e22e81bf686ba3b9013b9a00050b6a4da887d1d9d418ddfa025c7e4e1162e.png" alt="image" /></p>
+<p><img src="server//assets/321b4b134b67a9be0c091c9ae2093bbca9edb62df2799cc3b4339665e178102b8afc4e09d7125d01665356e77c2b2f9b938e3fded7bcb192445ec3ff.png" alt="image" /></p>
+<p><img src="server//assets/76a1f9eae8f7a57a5d426ce2a9e5562d69d4d71237c707bb6af5cd8483dddb3fe227a9ffa0b127a91ee85b4ea4a20813b53c11f78033e5c9ba75f77d.png" alt="image" /></p>
+<p><img src="server//assets/425c569d1b6df4dee6f4e64925263eda657131e8b70af0f8248a330aef0a92f514b5ae6cbcb2b5e8266ad0520b83a44ef20536490d66323dd6c80767.png" alt="image" /></p>
+<p>dns server kita biarkan dahulu</p>
+<p><img src="server//assets/8380a0b6d16f00b1d879e38b6bd10c71142750ae6c1df4325f6176b255f1e1e89845912464c7c3f7ee27a63bf44886982f0312807e3e038d4122c2ad.png" alt="image" /></p>
+<p>pembuktian:
+jalankan <code>sudo dhclient enp4</code> (karna interface tun1 dia dibaca sebagai enp4 di ubuntu server)
+<img src="server//assets/2025-06-10_13-20.png" alt="image" /></p>
+<p>ping ke router</p>
+<p><img src="server//assets/e44475652a0685c34088f0709bbce20eb1c8e14e3ef28fdb0df1d8f8fcfaf57af06cc14d7fd57c2db2937f2969c538fb1eb922f0a3ca490246bf2744.png" alt="image" /></p>
+<p>router ke ubuntu server
+<img src="server//assets/cb465e579a0eb33086d6a74da97b51470a70d2d114ec5fe7c00c155c95590524e81d0eaf9036a7e973aaf58c909174d5eae9387b59e324efde5f6f47.png" alt="image" /></p>
+<h2 id="setting-up-archlinux-gui"><a class="header" href="#setting-up-archlinux-gui">setting up Archlinux (GUI)</a></h2>
+<p>download dahulu bahan nya di <a href="https://sourceforge.net/projects/arch-linux-gui/">https://sourceforge.net/projects/arch-linux-gui/</a>, pakai xfce (paling ringan)</p>
+<p>run archlinux gui sebagai <code>tap2</code></p>
+<pre><code class="language-sh">qemu-system-x86_64 \
+    -enable-kvm \
+    -boot order=d \
+    -cdrom archlinux-gui-xfce-2022.07-x86_64.iso \
+    -m 4G \
+    -smp 4 \
+    -netdev tap,id=net1,ifname=tap2,script=no,downscript=no \
+    -device virtio-net-pci,netdev=net1,mac=02:11:5c:1b:aa:c9 \
+    -vga virtio
+</code></pre>
+<p>catatan: macnya dikarang lagi, agar tidak sama. jika sama ternyata bakal dapat ip yang sama</p>
+<p><img src="server//assets/6dbca4ece71a387364fe6d5368d8b1c6431c3d3ab2f9f366f9d34c07aa81327e44fb8b757e6ae98906cf4ae440ca26c020a249db84c78060abb37442.png" alt="image" /></p>
+<p><img src="server//assets/dbadc00c801066a13f108acff5eb48186a0931e7f6071f3f8a7733406b357e6d8c9a8453fe03f60d13e85a3fa2b547591029535ce3b727720902a3a3.png" alt="image" /></p>
+<p>nb: archlinux makan 2 ip karna NetworkManager dan systemd-resolved bentrok (bawaannta sepertinya). tapi harusnya no problem at all</p>
+<h2 id="setup-hotspot-winbox"><a class="header" href="#setup-hotspot-winbox">setup hotspot winbox</a></h2>
+<p>ip -&gt; hotspot</p>
+<p><img src="server//assets/320a0dc0cd86c6f47ad63480a9570276e208c48b60099f3a320ef890aa3bb7c06604c32b157531104b5f5edc51853d2732c25403a84f737406780e31.png" alt="image" /></p>
+<p>next next saja, kecuali dns nanti diisi 1.1.1.1, dan dns-name diisi nama domain untuk captive portalnya
+<img src="server//assets/988a96f698f5bdbd154f04c7523e1dd24d88853b451c6e887122bbf82c54d00f86ab0f688d3303e478e9cc1c016272d84e1937049e5e454119939477.png" alt="image" /></p>
+<h1 id="test-1"><a class="header" href="#test-1">test</a></h1>
+<p><img src="server//assets/a402fb33b60465533c6e5bdc6762359c82f692492362ec74d96e8c440c90fba385489ba574cdfe6ed8254d4852e8ea55b368a4f5ab98d74ca75d5e30.png" alt="image" /></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="database"><a class="header" href="#database">Database</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="psql-command"><a class="header" href="#psql-command">psql command</a></h1>
 <h2 id="general"><a class="header" href="#general">General</a></h2>
@@ -4380,7 +4570,7 @@ cp /usr/share/edk2/x64/OVMF_VARS.4m.fd .
 mv OVMF_VARS.4m.fd OVMF_VARS_windows_gpt.4m.fd
 
 # create image
-qemu-img create -f qcow2 windows-gpt.img 50G
+qemu-img create -f qcow2 windows_10_gpt_no_fb.img 50G
 
 # run iso
 qemu-system-x86_64 \
@@ -4388,7 +4578,7 @@ qemu-system-x86_64 \
 	-cdrom Win10_22H2_English_x64v1.iso \
 	-drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
 	-drive if=pflash,format=raw,file=OVMF_VARS_windows_gpt.4m.fd \
-	-drive file=windows-gpt.img,format=qcow2 \
+	-drive file=windows_10_gpt_no_fb.img,format=qcow2 \
 	-m 4G \
 	-smp 4
 
@@ -4401,7 +4591,7 @@ qemu-system-x86_64 \
 	-enable-kvm \
 	-drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
 	-drive if=pflash,format=raw,file=OVMF_VARS.4m.fd \
-	-drive file=windows-gpt.img,format=qcow2 \
+	-drive file=windows_10_gpt_no_fb.img,format=qcow2 \
 	-m 4G \
 	-smp 4
 
@@ -4411,6 +4601,16 @@ run with vga</p>
 <ul>
 <li><code>-vga virtio</code></li>
 </ul>
+<h3 id="running-tealinux-alongside-windows"><a class="header" href="#running-tealinux-alongside-windows">running tealinux (alongside windows)</a></h3>
+<pre><code class="language-bash">qemu-system-x86_64 \
+	-enable-kvm \
+	-cdrom tealinux-2025.02.16-x86_64.iso \
+	-drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
+	-drive if=pflash,format=raw,file=OVMF_VARS_windows_gpt.4m.fd \
+	-drive file=windows_10_gpt_no_fb.img,format=qcow2 \
+	-m 4G \
+	-smp 4
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="binary-operation"><a class="header" href="#binary-operation">binary operation</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="catatan-subnetting-from-scratch"><a class="header" href="#catatan-subnetting-from-scratch">catatan subnetting from scratch</a></h1>
 <p>origin: pakai acuan ip kelas c</p>
