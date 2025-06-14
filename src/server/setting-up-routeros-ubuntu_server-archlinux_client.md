@@ -215,12 +215,18 @@ next next saja, kecuali dns nanti diisi 1.1.1.1, dan dns-name diisi nama domain 
 # test
 ![image](/assets/a402fb33b60465533c6e5bdc6762359c82f692492362ec74d96e8c440c90fba385489ba574cdfe6ed8254d4852e8ea55b368a4f5ab98d74ca75d5e30.png)
 
-## karna `192.168.1.254` ip freeradius (static ip soon)
+## karna `192.168.1.254` ip freeradius
 maka kita ignore pakai 
 
 ![image](/assets/000cd141407bb54adf25c3c11ceefa575a528165b64a30e3eb444b8620b926e094dd5ef3841ff0c082def4c08b13fdf29bf9f9e1e8e1760ef739fcaf.png)
 
 ip binding
+
+## static ip versions
+
+- `sudo ip addr add 192.168.1.2/24 dev ens4`
+- `sudo ip link set dev ens4 up`
+- `sudo ip route append default via 192.168.1.1`
 
 # freeradius
 

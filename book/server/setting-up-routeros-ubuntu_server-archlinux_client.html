@@ -318,10 +318,16 @@ jalankan <code>sudo dhclient enp4</code> (karna interface tun1 dia dibaca sebaga
 <img src="/assets/988a96f698f5bdbd154f04c7523e1dd24d88853b451c6e887122bbf82c54d00f86ab0f688d3303e478e9cc1c016272d84e1937049e5e454119939477.png" alt="image" /></p>
 <h1 id="test"><a class="header" href="#test">test</a></h1>
 <p><img src="/assets/a402fb33b60465533c6e5bdc6762359c82f692492362ec74d96e8c440c90fba385489ba574cdfe6ed8254d4852e8ea55b368a4f5ab98d74ca75d5e30.png" alt="image" /></p>
-<h2 id="karna-1921681254-ip-freeradius-static-ip-soon"><a class="header" href="#karna-1921681254-ip-freeradius-static-ip-soon">karna <code>192.168.1.254</code> ip freeradius (static ip soon)</a></h2>
+<h2 id="karna-1921681254-ip-freeradius"><a class="header" href="#karna-1921681254-ip-freeradius">karna <code>192.168.1.254</code> ip freeradius</a></h2>
 <p>maka kita ignore pakai</p>
 <p><img src="/assets/000cd141407bb54adf25c3c11ceefa575a528165b64a30e3eb444b8620b926e094dd5ef3841ff0c082def4c08b13fdf29bf9f9e1e8e1760ef739fcaf.png" alt="image" /></p>
 <p>ip binding</p>
+<h2 id="static-ip-versions"><a class="header" href="#static-ip-versions">static ip versions</a></h2>
+<ul>
+<li><code>sudo ip addr add 192.168.1.2/24 dev ens4</code></li>
+<li><code>sudo ip link set dev ens4 up</code></li>
+<li><code>sudo ip route append default via 192.168.1.1</code></li>
+</ul>
 <h1 id="freeradius-1"><a class="header" href="#freeradius-1">freeradius</a></h1>
 <p>ubah <code>/etc/freeradius/3.0/clients.conf</code>, tambah</p>
 <pre><code class="language-txt">client private-network-1 {
@@ -347,7 +353,7 @@ jalankan <code>sudo dhclient enp4</code> (karna interface tun1 dia dibaca sebaga
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../database/readme-database.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../server/sql_auth_freeradius_server.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -361,13 +367,29 @@ jalankan <code>sudo dhclient enp4</code> (karna interface tun1 dia dibaca sebaga
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../database/readme-database.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../server/sql_auth_freeradius_server.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
 
         </div>
 
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
 
 
 

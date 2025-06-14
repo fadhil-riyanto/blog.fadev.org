@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>mikrotik firewall - Fadhil Books &amp; Notes</title>
+        <title>Mikrotik firewall - Fadhil Books &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -252,6 +252,22 @@ dipakai sebelum data dilihat oleh conntrack, NAT, masuk routing, dll. intinya di
 
         </div>
 
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
 
 
 

@@ -178,6 +178,42 @@
 <pre><code class="language-sql">ALTER DATABASE my_database OWNER TO my_database_user;
 </code></pre>
 <p>notes: <a href="https://stackoverflow.com/questions/67276391/why-am-i-getting-a-permission-denied-error-for-schema-public-on-pgadmin-4">https://stackoverflow.com/questions/67276391/why-am-i-getting-a-permission-denied-error-for-schema-public-on-pgadmin-4</a></p>
+<h1 id="reverse"><a class="header" href="#reverse">reverse</a></h1>
+<p>first, we change to postgres account</p>
+<pre><code class="language-sh">su postgres
+</code></pre>
+<p>list database: \l</p>
+<p>remove:</p>
+<pre><code class="language-sql">DROP DATABASE abc;
+</code></pre>
+<p>drop user, first list users first: <code>\du+</code></p>
+<p>drop:</p>
+<pre><code class="language-sql">DROP USER IF EXISTS foobar;
+</code></pre>
+<p>revoking access:</p>
+<pre><code class="language-sql">REVOKE ALL PRIVILEGES ON SCHEMA public FROM foobar;
+
+-- for tables, seq, and func
+REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM foobar;
+REVOKE ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public FROM foobar;
+REVOKE ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public FROM foobar;
+</code></pre>
+<p>check object ownership</p>
+<pre><code class="language-sql">SELECT 
+    n.nspname AS schema,
+    c.relname AS object,
+    c.relkind AS type
+FROM 
+    pg_class c
+JOIN 
+    pg_roles r ON c.relowner = r.oid
+JOIN 
+    pg_namespace n ON n.oid = c.relnamespace
+WHERE 
+    r.rolname = 'foobar';
+</code></pre>
+<p>or <code>\ddp  -- in psql</code></p>
+<p><img src="/assets/08cc43216f16468ffcbee888ebce378d43f37d2274255cbb1703717d8ed8d60e25cd23eacb92df00cc8b837a72d9949d4a78e490133b31616819c7e1.png" alt="image" /></p>
 
                     </main>
 
@@ -208,6 +244,22 @@
 
         </div>
 
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
 
 
 

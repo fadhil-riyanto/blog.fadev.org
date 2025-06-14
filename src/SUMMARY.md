@@ -45,7 +45,7 @@
 - [Cryptography](./crypto/readme-crypto.md)
 	- [Alur koneksi ke RPC server telegram](./crypto/alur_koneksi_RPC_telegram.md)
 	- [ca-certificates](./crypto/ca-certificates.md)
-
+GRANT
 - [Server](./server/readme-server.md)
 	- [Cgit setup](./server/cgit-setup.md)
 	- [config HTTPS nginx](./server/config_https_nginx.md)
@@ -59,12 +59,11 @@
 	- [Linux iptables preview (try making a nat)](./server/iptables_nat.md)
 	- [Linux QEMU network address translation](./server/qemu_nat.md)
 	- [QEMU block 8.8.8.8 from host](./server/qemu_block_8888_from_host.md)
-	- [two alpine guest VM, block custom ports](./server/alpine_vm_block_custom_ports.md)
 	- [logic netfilter linux kernel](./server/logic_netfilter_linux_kernel.md)
 	- [resep nginx oleh pak hanif](./server/resep_nginx.md)
 	- [ip command](./server/ip_command.md)
-	- [qemu default network](./server/qemu_default_network.md)
-	- [mikrotik firewall](./server/mikrotik_firewall.md)
+	- [QEMU default network](./server/qemu_default_network.md)
+	- [Mikrotik firewall](./server/mikrotik_firewall.md)
 	- [bring wlan0 connectivity to the network namespace linux & test routerOS](./server/bring_wlan0_conn_to_netns.md)
 	- [network namespace + NAT notes](./server/netns_nat_notes.md)
 	- [deploy Docmost on server](./server/docmost_deploy.md)
@@ -73,6 +72,8 @@
 	- [systemd config template](./server/systemd-config-template.md)
 	- [setting up ubuntu server with qemu + custom bridge](./server/setting-up-ubuntu-server-w-qemu-bridge.md)
 	- [setting up routeros + ubuntu server + archlinux client](./server/setting-up-routeros-ubuntu_server-archlinux_client.md)
+	- [SQL authentication freeradius server](./server/sql_auth_freeradius_server.md)
+	- [Linux netplan](./server/netplan.md)
 
 - [Database](./database/readme-database.md)
 	- [psql command](./database/psql_command.md)
@@ -83,6 +84,8 @@
 	- [Postgresql II SQL language docs summary](./database/postgresql_ii_sql_summary.md)
 	- [system table in pgsql (catalog)](./database/postgresql_system_table.md)
 	- [pgsql functions()](./database/postgresql_functions.md)
+	- [postgresql database HBA](./database/postgresql_HBA.md)
+	- [PostgreSQL grant](./database/postgresql_grant.md)
 
 - [Dockerfile boilerplate](./dockerfile/dockerfile-readme.md)
 	- [debian:bullseye php-8.3 dev env](./dockerfile/php-8.3_debian_v11_(bullseye)_dev-env.md)
