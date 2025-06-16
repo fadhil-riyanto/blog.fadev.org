@@ -22,6 +22,10 @@
 	- [gcc compiler visibility](./sysprog/gcc_visibility.md)
 	- [load effective address](./sysprog/lea.md)
 	- [AT&T asm prelude](./sysprog/asm_prelude.md)
+	- [printf format specifier](./sysprog/printf_format_specifiers.md)
+	- [predefined macros](./sysprog/predefined_macros.md)
+	- [vt-hexdump](./sysprog/vt_hexdump.md)
+	- [ELF64](./sysprog/elf64.md)
 
 - [Rust stuff](./rust/readme-rust-stuff.md)
 	- [Rust Cursor & fseek concept](./rust/cursor_1.md)

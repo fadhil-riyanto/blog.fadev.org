@@ -546,6 +546,158 @@ get values out of stack
 equal with</p>
 <p>add rsp, 4
 mov eax, [esp]</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="printf-format-specifier"><a class="header" href="#printf-format-specifier">printf format specifier</a></h1>
+<p>general</p>
+<pre><code class="language-txt">%[flags][width][.precision][length]specifier
+</code></pre>
+<h2 id="flag"><a class="header" href="#flag">flag</a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Flag</th><th style="text-align: left">Description</th></tr></thead><tbody>
+<tr><td style="text-align: left"><code>-</code></td><td style="text-align: left"><strong>Left-justify</strong>: The result is left-aligned within the specified field width. By default, it is right-aligned.</td></tr>
+<tr><td style="text-align: left"><code>+</code></td><td style="text-align: left"><strong>Sign</strong>: The result of a signed conversion will always begin with a sign (<code>+</code> or <code>-</code>). By default, only negative values have a sign.</td></tr>
+<tr><td style="text-align: left"><code> </code> (space)</td><td style="text-align: left"><strong>Space</strong>: If the first character of a signed conversion is not a sign, a space is prepended. This is ignored if the <code>+</code> flag is present.</td></tr>
+<tr><td style="text-align: left"><code>#</code></td><td style="text-align: left"><strong>Alternate Form</strong>: For <code>o</code>, the output is prefixed with <code>0</code>. For <code>x</code> and <code>X</code>, it's prefixed with <code>0x</code> and <code>0X</code> respectively. For <code>a</code>, <code>A</code>, <code>e</code>, <code>E</code>, <code>f</code>, <code>F</code>, <code>g</code>, and <code>G</code>, the output will always contain a decimal point.</td></tr>
+<tr><td style="text-align: left"><code>0</code></td><td style="text-align: left"><strong>Zero-padding</strong>: For numeric types, the output is padded with leading zeros instead of spaces to fill the field width. This is ignored if the <code>-</code> flag is present.</td></tr>
+</tbody></table>
+</div>
+<h2 id="width"><a class="header" href="#width">width</a></h2>
+<p>The width sub-specifier sets the minimum number of characters to be printed.</p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Width</th><th style="text-align: left">Description</th></tr></thead><tbody>
+<tr><td style="text-align: left"><code>number</code></td><td style="text-align: left">A non-negative integer specifying the minimum number of characters to print. If the printed value is shorter, it is padded with spaces (or zeros if the <code>0</code> flag is used).</td></tr>
+<tr><td style="text-align: left"><code>*</code></td><td style="text-align: left">The width is not specified in the format string itself, but as an additional integer argument preceding the argument to be formatted.</td></tr>
+</tbody></table>
+</div>
+<h2 id="precision"><a class="header" href="#precision">precision</a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Precision</th><th style="text-align: left">Description</th></tr></thead><tbody>
+<tr><td style="text-align: left"><code>.number</code></td><td style="text-align: left">For integer specifiers (<code>d</code>, <code>i</code>, <code>u</code>, <code>o</code>, <code>x</code>, <code>X</code>), it specifies the minimum number of digits to be written. For <code>e</code>, <code>E</code>, and <code>f</code>, it is the number of digits to appear after the decimal point. For <code>g</code> and <code>G</code>, it's the maximum number of significant digits. For <code>s</code>, it's the maximum number of characters to be printed.</td></tr>
+<tr><td style="text-align: left"><code>.*</code></td><td style="text-align: left">The precision is not specified in the format string itself, but as an additional integer argument preceding the argument to be formatted.</td></tr>
+</tbody></table>
+</div>
+<h2 id="length"><a class="header" href="#length">length</a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Modifier</th><th style="text-align: left">For Integer Specifiers (<code>d</code>, <code>i</code>, <code>u</code>, <code>o</code>, <code>x</code>, <code>X</code>)</th><th style="text-align: left">For Floating-Point Specifiers (<code>f</code>, <code>e</code>, <code>g</code>, <code>a</code>)</th></tr></thead><tbody>
+<tr><td style="text-align: left"><code>h</code></td><td style="text-align: left"><code>short int</code> or <code>unsigned short int</code></td><td style="text-align: left">-</td></tr>
+<tr><td style="text-align: left"><code>hh</code></td><td style="text-align: left"><code>signed char</code> or <code>unsigned char</code></td><td style="text-align: left">-</td></tr>
+<tr><td style="text-align: left"><code>l</code></td><td style="text-align: left"><code>long int</code> or <code>unsigned long int</code></td><td style="text-align: left">-</td></tr>
+<tr><td style="text-align: left"><code>ll</code></td><td style="text-align: left"><code>long long int</code> or <code>unsigned long long int</code></td><td style="text-align: left">-</td></tr>
+<tr><td style="text-align: left"><code>L</code></td><td style="text-align: left">-</td><td style="text-align: left"><code>long double</code></td></tr>
+<tr><td style="text-align: left"><code>j</code></td><td style="text-align: left"><code>intmax_t</code> or <code>uintmax_t</code></td><td style="text-align: left">-</td></tr>
+<tr><td style="text-align: left"><code>z</code></td><td style="text-align: left"><code>size_t</code> or the corresponding signed type</td><td style="text-align: left">-</td></tr>
+<tr><td style="text-align: left"><code>t</code></td><td style="text-align: left"><code>ptrdiff_t</code> or the corresponding unsigned type</td><td style="text-align: left">-</td></tr>
+</tbody></table>
+</div>
+<h2 id="specifier"><a class="header" href="#specifier">specifier</a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Specifier</th><th style="text-align: left">Data Type</th><th style="text-align: left">Output Format</th></tr></thead><tbody>
+<tr><td style="text-align: left"><code>%c</code></td><td style="text-align: left"><code>char</code></td><td style="text-align: left">A single character.</td></tr>
+<tr><td style="text-align: left"><code>%s</code></td><td style="text-align: left"><code>char*</code></td><td style="text-align: left">A string of characters.</td></tr>
+<tr><td style="text-align: left"><code>%d</code> or <code>%i</code></td><td style="text-align: left"><code>int</code></td><td style="text-align: left">Signed decimal integer.</td></tr>
+<tr><td style="text-align: left"><code>%u</code></td><td style="text-align: left"><code>unsigned int</code></td><td style="text-align: left">Unsigned decimal integer.</td></tr>
+<tr><td style="text-align: left"><code>%o</code></td><td style="text-align: left"><code>unsigned int</code></td><td style="text-align: left">Unsigned octal integer.</td></tr>
+<tr><td style="text-align: left"><code>%x</code></td><td style="text-align: left"><code>unsigned int</code></td><td style="text-align: left">Unsigned hexadecimal integer (lowercase letters).</td></tr>
+<tr><td style="text-align: left"><code>%X</code></td><td style="text-align: left"><code>unsigned int</code></td><td style="text-align: left">Unsigned hexadecimal integer (uppercase letters).</td></tr>
+<tr><td style="text-align: left"><code>%f</code></td><td style="text-align: left"><code>double</code></td><td style="text-align: left">Decimal floating-point number.</td></tr>
+<tr><td style="text-align: left"><code>%F</code></td><td style="text-align: left"><code>double</code></td><td style="text-align: left">Decimal floating-point number (uppercase 'INF' and 'NAN').</td></tr>
+<tr><td style="text-align: left"><code>%e</code></td><td style="text-align: left"><code>double</code></td><td style="text-align: left">Scientific notation (lowercase 'e').</td></tr>
+<tr><td style="text-align: left"><code>%E</code></td><td style="text-align: left"><code>double</code></td><td style="text-align: left">Scientific notation (uppercase 'E').</td></tr>
+<tr><td style="text-align: left"><code>%g</code></td><td style="text-align: left"><code>double</code></td><td style="text-align: left">Uses the shorter of <code>%f</code> or <code>%e</code>.</td></tr>
+<tr><td style="text-align: left"><code>%G</code></td><td style="text-align: left"><code>double</code></td><td style="text-align: left">Uses the shorter of <code>%F</code> or <code>%E</code>.</td></tr>
+<tr><td style="text-align: left"><code>%a</code></td><td style="text-align: left"><code>double</code></td><td style="text-align: left">Hexadecimal floating-point number (lowercase 'p').</td></tr>
+<tr><td style="text-align: left"><code>%A</code></td><td style="text-align: left"><code>double</code></td><td style="text-align: left">Hexadecimal floating-point number (uppercase 'P').</td></tr>
+<tr><td style="text-align: left"><code>%p</code></td><td style="text-align: left"><code>void*</code></td><td style="text-align: left">Pointer address.</td></tr>
+<tr><td style="text-align: left"><code>%n</code></td><td style="text-align: left"><code>int*</code></td><td style="text-align: left">The number of characters written so far is stored in the integer pointed to by the argument. Nothing is printed.</td></tr>
+<tr><td style="text-align: left"><code>%%</code></td><td style="text-align: left"><em>None</em></td><td style="text-align: left">A literal '%' character is printed.</td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="predefined-macros"><a class="header" href="#predefined-macros">predefined macros</a></h1>
+<p>links: <a href="https://gcc.gnu.org/onlinedocs/cpp/Standard-Predefined-Macros.html">https://gcc.gnu.org/onlinedocs/cpp/Standard-Predefined-Macros.html</a>
+clang spesific: <a href="https://clang.llvm.org/docs/LanguageExtensions.html">https://clang.llvm.org/docs/LanguageExtensions.html</a></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="vt-hexdump"><a class="header" href="#vt-hexdump">vt-hexdump</a></h1>
+<pre><code class="language-c">/* SPDX-License-Identifier: GPL-2.0-only */
+/*
+ * Copyright (C) Fadhil Riyanto &lt;fadhil.riyanto@gnuweeb.org&gt;
+ *
+ * this version is inspired by Ammar Faizi's versions
+ * ref: https://gist.githubusercontent.com/ammarfaizi2/e88a21171358b5092a3df412eeb80b2f/raw/59141b48f59b70b1e96208716c45b1703c56daa7/vt_hexdump.h
+ */
+
+#include &lt;complex.h&gt;
+#include &lt;stddef.h&gt;
+#include &lt;stdint.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+
+#ifndef VT_HEXDUMP
+#define VT_HEXDUMP(PTR, SIZE)                                           \
+        size_t ptr_size = SIZE;                                         \
+        unsigned char *realptr = (unsigned char*)PTR;                   \
+        unsigned int initial_counter = 0;                               \
+        printf("================= VT_HEXDUMP =================\n");     \
+        printf("file\t\t: %s:%d\n", __FILE__, __LINE__);                \
+        printf("func\t\t: %s\n", __FUNCTION__);                         \
+        printf("addr\t\t: 0x%016lx\n", realptr);                        \
+        printf("dump_size\t: %ld\n\n", ptr_size);                       \
+                                                                        \
+        for (int i = 0; i &lt; (ptr_size / 16) + 1; i++) {                 \
+                printf("|0x%016lx|", (uintptr_t)(realptr));             \
+                                                                        \
+                for (int i = 0; i &lt; 16; i++) {                          \
+                        if (i % 4 == 0 &amp;&amp; i != 0) {                     \
+                                printf("  ");                           \
+                        }                                               \
+                        if (i != 15) {                                  \
+                                if (initial_counter &lt;= ptr_size) {      \
+                                        printf(" %2x", realptr[i]);     \
+                                }                                       \
+                        } else {                                        \
+                                printf(" %2x ", realptr[i]);            \
+                        }                                               \
+                }                                                       \
+                                                                        \
+                printf(" | ");                                          \
+                for (int i = 0; i &lt; 16; i++) {                          \
+                        if (initial_counter &lt;= ptr_size - 1) {          \
+                                printf("%c", realptr[i]);               \
+                        } else {                                        \
+                                printf(".");                            \
+                        }                                               \
+                        initial_counter = initial_counter + 1;          \
+                }                                                       \
+                printf(" | ");                                          \
+                                                                        \
+                printf("\n");                                           \
+                realptr = realptr + 16;                                 \
+        }
+#endif                                                               
+
+int main() {
+        static const char *vt_data_test = "abcefghijklmnopqrstuvwzyz1234567890asdfgqrty1";
+        VT_HEXDUMP(vt_data_test, strlen(vt_data_test));
+}
+</code></pre>
+<p><img src="sysprog//assets/2e0d05f56b4a4f0b05644cc5131dea93b7872d5aad8bbbbc620012ff9b6968397c14e033bf0cb74a6f81770103004317212fef38f098700671d182b1.png" alt="image" /></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="elf64"><a class="header" href="#elf64">ELF64</a></h1>
+<p>what is ELF64? ELF64 is Executable and Linkable Format for unix system (mostly), lets look the structure of elf64_hdr</p>
+<p>this struct located at beginning of object file, the main usage is locate all other parts of object file. the header (such *.o file contains this header)</p>
+<h2 id="preface"><a class="header" href="#preface">preface</a></h2>
+<pre><code class="language-c">typedef struct elf64_hdr {
+  unsigned char	e_ident[EI_NIDENT];	/* ELF "magic number" */
+  Elf64_Half e_type;
+  Elf64_Half e_machine;
+  Elf64_Word e_version;
+  Elf64_Addr e_entry;		/* Entry point virtual address */
+  Elf64_Off e_phoff;		/* Program header table file offset */
+  Elf64_Off e_shoff;		/* Section header table file offset */
+  Elf64_Word e_flags;
+  Elf64_Half e_ehsize;
+  Elf64_Half e_phentsize;
+  Elf64_Half e_phnum;
+  Elf64_Half e_shentsize;
+  Elf64_Half e_shnum;
+  Elf64_Half e_shstrndx;
+} Elf64_Ehdr;
+
+</code></pre>
+<p>code: <a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/uapi/linux/elf.h#n234">https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/uapi/linux/elf.h#n234</a></p>
+<p>the ELF file is always start by this bytes <code>7f 45 4c 46</code>, which <code>DEL E L F</code></p>
+<p><img src="sysprog//assets/b89533896a5f2d38cf09f1354e807b4f6276057affaf8fafe54372090ba70e9fae73f4e83a156800ff863c7a4196e99a73b8ffed8a0717b694c00ad3.png" alt="image" /></p>
+<p>The first 16 bytes <a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/uapi/linux/elf.h#n215">link</a> is a magic number, <code>7f</code> make sure the text editor, this is not a normal file, this is binary, preventing to open the file. <code>45 4c 46</code> is a ELF signature</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-stuff"><a class="header" href="#rust-stuff">Rust stuff</a></h1>
 <p>Welcome in this rust stuff section.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-cursor-how-it-works"><a class="header" href="#rust-cursor-how-it-works">Rust cursor, How it works</a></h1>

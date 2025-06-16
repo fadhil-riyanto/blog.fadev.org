@@ -80,3 +80,9 @@ WHERE
 or `\ddp  -- in psql`
 
 ![image](/assets/08cc43216f16468ffcbee888ebce378d43f37d2274255cbb1703717d8ed8d60e25cd23eacb92df00cc8b837a72d9949d4a78e490133b31616819c7e1.png)
+
+## granting
+granting all sequences
+```sql
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO radius;
+```
