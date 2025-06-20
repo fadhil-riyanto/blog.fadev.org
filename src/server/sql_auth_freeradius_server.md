@@ -82,3 +82,16 @@ import it with:
 ```sql
 psql -U radius -d radius -f /etc/freeradius/3.0/mods-config/sql/main/postgresql/schema.sql
 ```
+
+# configuration
+lets look at `sites-available/default`
+
+![image](/assets/b609f49cbcdf2c21d6291c8b173e74b9b8ff663c18c5bd1314fd3ec7eae39ec65ef238a89d9522f8ded12b3bd6ff1a0bcb2b6ce5fc5bc70146bb82f3.png)
+
+this configuration only allow authorize users that come from NAS-Port-Type == "Wireless-802.11", this is the difference
+
+footage 1: from winbox request
+![image](/assets/599e5f76e91856db04f9d4cbdadd0d4c4384d7e073c91fa187c4754eefc83424ec9ecb304d5f166ae2204b4b6c471aa531e2b41045cb487d17e7440d.png)
+
+this one come from captive portal
+![image](/assets/b3d083c9d4dd4f95275e637bbf7a9a401086cd7bce221b536e1c500bf734d96647b0171dbca68e2d0e69fa23855bde1d9c4336f32c95289db615dcc3.png)

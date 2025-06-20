@@ -26,6 +26,7 @@
 	- [predefined macros](./sysprog/predefined_macros.md)
 	- [vt-hexdump](./sysprog/vt_hexdump.md)
 	- [ELF64](./sysprog/elf64.md)
+	- [POSIX getopt_long](./sysprog/posix_getopt_long.md)
 
 - [Rust stuff](./rust/readme-rust-stuff.md)
 	- [Rust Cursor & fseek concept](./rust/cursor_1.md)
@@ -49,7 +50,8 @@
 - [Cryptography](./crypto/readme-crypto.md)
 	- [Alur koneksi ke RPC server telegram](./crypto/alur_koneksi_RPC_telegram.md)
 	- [ca-certificates](./crypto/ca-certificates.md)
-GRANT
+	- [PAP, CHAP, EAP](./crypto/pap_chap_eap.md)
+
 - [Server](./server/readme-server.md)
 	- [Cgit setup](./server/cgit-setup.md)
 	- [config HTTPS nginx](./server/config_https_nginx.md)
@@ -78,6 +80,7 @@ GRANT
 	- [setting up routeros + ubuntu server + archlinux client](./server/setting-up-routeros-ubuntu_server-archlinux_client.md)
 	- [SQL authentication freeradius server](./server/sql_auth_freeradius_server.md)
 	- [Linux netplan](./server/netplan.md)
+	- [sshfs](./server/sshfs.md)
 
 - [Database](./database/readme-database.md)
 	- [psql command](./database/psql_command.md)

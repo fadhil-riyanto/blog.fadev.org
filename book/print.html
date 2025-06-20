@@ -698,6 +698,113 @@ int main() {
 <p>the ELF file is always start by this bytes <code>7f 45 4c 46</code>, which <code>DEL E L F</code></p>
 <p><img src="sysprog//assets/b89533896a5f2d38cf09f1354e807b4f6276057affaf8fafe54372090ba70e9fae73f4e83a156800ff863c7a4196e99a73b8ffed8a0717b694c00ad3.png" alt="image" /></p>
 <p>The first 16 bytes <a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/uapi/linux/elf.h#n215">link</a> is a magic number, <code>7f</code> make sure the text editor, this is not a normal file, this is binary, preventing to open the file. <code>45 4c 46</code> is a ELF signature</p>
+<h1 id="elfclass"><a class="header" href="#elfclass">ELFCLASS</a></h1>
+<p>This footage shown program compiled by normal gcc (my machine is 64 bit), vs compiled by <code>-m32</code></p>
+<p><img src="sysprog//assets/587e7d3b9bdafd01ed1a1b4cc59a9a11d6e60d773336d7827385aab80b6e453fb1c4ae17ae0f4f5feadef9a8822d51794a8f07f5f7911975eb319853.png" alt="image" /></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="posix-getopt_long"><a class="header" href="#posix-getopt_long">POSIX getopt_long</a></h1>
+<p>optarg</p>
+<ul>
+<li>
+<p><code>:</code> for required arguments, for example</p>
+<ul>
+<li><code>f:</code> expands to <code>-f abc</code></li>
+<li>no <code>:</code> treated only as args, example <code>-v</code></li>
+</ul>
+</li>
+<li>
+<p><code>::</code> treated as optional args</p>
+</li>
+</ul>
+<h1 id="usage"><a class="header" href="#usage">usage</a></h1>
+<p>read <code>man 3 getopt</code></p>
+<p>tldr</p>
+<h2 id="lets-construct-array-of-option-struct"><a class="header" href="#lets-construct-array-of-option-struct">lets construct array of option struct</a></h2>
+<p>definition:</p>
+<pre><code class="language-c">struct option {
+	const char *name;				// param name
+	int         has_arg;			// set 1 or 0 (no)
+	int        *flag;				// always 0
+	int         val;				// whatever, 1 byte, used for switch block identification in future
+};
+</code></pre>
+<p>example:</p>
+<pre><code class="language-c">static struct option long_options[] = {
+    {"file", 1, 0, 'f'},
+    {"elf", 1, 0, 'e'},
+    NULL
+};
+</code></pre>
+<h2 id="example"><a class="header" href="#example">example</a></h2>
+<pre><code class="language-c">static int parse_options(int argc, char *argv[], struct gwdown_ctx *ctx)
+{
+	int ret = 0;
+
+	while (1) {
+		int c;
+
+		c = getopt_long(argc, argv, "hvo:t:rVM", long_options, NULL);
+		if (c == -1)
+			break;
+
+		switch (c) {
+		case 'h':
+			help(argv[0]);
+			ret = 255;
+			goto out;
+		case 'v':
+			printf("gwdown 0.1\n");
+			ret = 255;
+			goto out;
+		case 'o':
+			ctx-&gt;output = optarg;
+			break;
+		case 't':
+			ctx-&gt;num_threads = (uint16_t)atoi(optarg);
+			break;
+		case 'r':
+			ctx-&gt;resume = true;
+			break;
+		case 'V':
+			ctx-&gt;verbose = true;
+			break;
+		case 'M':
+			ctx-&gt;use_mmap = true;
+			break;
+		default:
+			printf("Error: Unknown option '%s'\n\n", argv[optind]);
+			help(argv[0]);
+			ret = -EINVAL;
+			goto out;
+		}
+	}
+
+	if (ctx-&gt;num_threads &gt; 512) {
+		printf("Error: Too many threads, max allowed thread is 512\n\n");
+		ret = -EINVAL;
+		goto out;
+	}
+
+	if (optind &lt; argc) {
+		ctx-&gt;url = strdup(argv[optind]);
+		if (!ctx-&gt;url)
+			ret = -ENOMEM;
+	} else {
+		printf("Error: Missing url argument\n\n");
+		help(argv[0]);
+		ret = -EINVAL;
+	}
+
+	if (ctx-&gt;resume) {
+		printf("Error: The resume feature is currently not supproted\n");
+		printf("       It's still just a draft feature\n\n");
+		ret = -EOPNOTSUPP;
+	}
+
+out:
+	return ret;
+}
+</code></pre>
+<p>as you can see, optarg is magically return current character based on switch case cond</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-stuff"><a class="header" href="#rust-stuff">Rust stuff</a></h1>
 <p>Welcome in this rust stuff section.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-cursor-how-it-works"><a class="header" href="#rust-cursor-how-it-works">Rust cursor, How it works</a></h1>
@@ -1636,6 +1743,7 @@ export function DataCenter(
 <div style="break-before: page; page-break-before: always;"></div><h1 id="ca-certificates"><a class="header" href="#ca-certificates">ca-certificates</a></h1>
 <p>draft: mengoprek kriptografi dibalik HTTPS &amp; konsep public private key pair dan juga peran CA authority, kenapa mereka harus dimasukkan ke package ???</p>
 <p>dan juga kenapa MITM (Man in the Middle) bisa melogging jaringan, ketika certificate telah dipasang. kenapa hanya dengan <code>certificate</code> mitm bisa mendecode data yang lewat.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="pap-chap-eap"><a class="header" href="#pap-chap-eap">PAP, CHAP, EAP</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="server"><a class="header" href="#server">Server</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="cgit-setup"><a class="header" href="#cgit-setup">Cgit setup</a></h1>
 <p>Ku mau share pengalaman bikin self hosting git server, pakai cgit, biar engga kalah aja sama git.kernel.org dan kernel.dk wkwk</p>
@@ -3198,6 +3306,14 @@ GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO radius;
 <p>import it with:</p>
 <pre><code class="language-sql">psql -U radius -d radius -f /etc/freeradius/3.0/mods-config/sql/main/postgresql/schema.sql
 </code></pre>
+<h1 id="configuration"><a class="header" href="#configuration">configuration</a></h1>
+<p>lets look at <code>sites-available/default</code></p>
+<p><img src="server//assets/b609f49cbcdf2c21d6291c8b173e74b9b8ff663c18c5bd1314fd3ec7eae39ec65ef238a89d9522f8ded12b3bd6ff1a0bcb2b6ce5fc5bc70146bb82f3.png" alt="image" /></p>
+<p>this configuration only allow authorize users that come from NAS-Port-Type == "Wireless-802.11", this is the difference</p>
+<p>footage 1: from winbox request
+<img src="server//assets/599e5f76e91856db04f9d4cbdadd0d4c4384d7e073c91fa187c4754eefc83424ec9ecb304d5f166ae2204b4b6c471aa531e2b41045cb487d17e7440d.png" alt="image" /></p>
+<p>this one come from captive portal
+<img src="server//assets/b3d083c9d4dd4f95275e637bbf7a9a401086cd7bce221b536e1c500bf734d96647b0171dbca68e2d0e69fa23855bde1d9c4336f32c95289db615dcc3.png" alt="image" /></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="linux-netplan"><a class="header" href="#linux-netplan">Linux netplan</a></h1>
 <p>ref: <a href="https://documentation.ubuntu.com/server/explanation/networking/configuring-networks/">https://documentation.ubuntu.com/server/explanation/networking/configuring-networks/</a></p>
 <p>example</p>
@@ -3216,6 +3332,15 @@ GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO radius;
 <p>location: <code>/etc/netplan</code>
 note: execution is ordered by file name</p>
 <p>then run <code>sudo netplan generate</code></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="sshfs"><a class="header" href="#sshfs">sshfs</a></h1>
+<p>the setup is very easy</p>
+<ul>
+<li>in your home, run <code>mkdir mount</code></li>
+<li><code>mkdir vm_001_ubuntu</code> or whatever</li>
+<li>mount it <code>sshfs root@127.0.0.1:/ -p 20022 ./vm_001_ubuntu</code></li>
+<li>verify with <code>findmnt</code></li>
+</ul>
+<p>enjoy</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="database"><a class="header" href="#database">Database</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="psql-command"><a class="header" href="#psql-command">psql command</a></h1>
 <h2 id="general"><a class="header" href="#general">General</a></h2>
@@ -3437,6 +3562,10 @@ WHERE
 </code></pre>
 <p>or <code>\ddp  -- in psql</code></p>
 <p><img src="database//assets/08cc43216f16468ffcbee888ebce378d43f37d2274255cbb1703717d8ed8d60e25cd23eacb92df00cc8b837a72d9949d4a78e490133b31616819c7e1.png" alt="image" /></p>
+<h2 id="granting"><a class="header" href="#granting">granting</a></h2>
+<p>granting all sequences</p>
+<pre><code class="language-sql">GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO radius;
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="how-to-use-sqlx-cli-tools-for-db-migration-such-laravel-migrations"><a class="header" href="#how-to-use-sqlx-cli-tools-for-db-migration-such-laravel-migrations">how to use SQLX cli tools for db migration such laravel migrations</a></h1>
 <p>let's meet with this crate, <a href="https://crates.io/crates/sqlx-cli">https://crates.io/crates/sqlx-cli</a>, this tools allow you to use db migration such as laravel migration tools;</p>
 <p>first, let's create env variable</p>
@@ -4103,7 +4232,7 @@ class GuestUser extends Authenticatable
         'name' =&gt; env('G_SSO_NAME'),
     ],
 </code></pre>
-<h2 id="usage"><a class="header" href="#usage">usage</a></h2>
+<h2 id="usage-1"><a class="header" href="#usage-1">usage</a></h2>
 <p>dapatkan link permintaan akses, pakai</p>
 <pre><code class="language-php">return Socialite::driver('google')-&gt;redirect();
 </code></pre>
@@ -5034,22 +5163,6 @@ max int int 24 bit: 16777216</p>
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

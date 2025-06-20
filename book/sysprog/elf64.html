@@ -186,6 +186,9 @@
 <p>the ELF file is always start by this bytes <code>7f 45 4c 46</code>, which <code>DEL E L F</code></p>
 <p><img src="/assets/b89533896a5f2d38cf09f1354e807b4f6276057affaf8fafe54372090ba70e9fae73f4e83a156800ff863c7a4196e99a73b8ffed8a0717b694c00ad3.png" alt="image" /></p>
 <p>The first 16 bytes <a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/uapi/linux/elf.h#n215">link</a> is a magic number, <code>7f</code> make sure the text editor, this is not a normal file, this is binary, preventing to open the file. <code>45 4c 46</code> is a ELF signature</p>
+<h1 id="elfclass"><a class="header" href="#elfclass">ELFCLASS</a></h1>
+<p>This footage shown program compiled by normal gcc (my machine is 64 bit), vs compiled by <code>-m32</code></p>
+<p><img src="/assets/587e7d3b9bdafd01ed1a1b4cc59a9a11d6e60d773336d7827385aab80b6e453fb1c4ae17ae0f4f5feadef9a8822d51794a8f07f5f7911975eb319853.png" alt="image" /></p>
 
                     </main>
 
@@ -195,7 +198,7 @@
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../rust/readme-rust-stuff.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../sysprog/posix_getopt_long.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -209,29 +212,13 @@
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../rust/readme-rust-stuff.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../sysprog/posix_getopt_long.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

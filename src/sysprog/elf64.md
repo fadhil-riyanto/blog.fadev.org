@@ -34,3 +34,9 @@ the ELF file is always start by this bytes `7f 45 4c 46`, which `DEL E L F`
 ![image](/assets/b89533896a5f2d38cf09f1354e807b4f6276057affaf8fafe54372090ba70e9fae73f4e83a156800ff863c7a4196e99a73b8ffed8a0717b694c00ad3.png)
 
 The first 16 bytes [link](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/uapi/linux/elf.h#n215) is a magic number, `7f` make sure the text editor, this is not a normal file, this is binary, preventing to open the file. `45 4c 46` is a ELF signature
+
+# ELFCLASS
+
+This footage shown program compiled by normal gcc (my machine is 64 bit), vs compiled by `-m32`
+
+![image](/assets/587e7d3b9bdafd01ed1a1b4cc59a9a11d6e60d773336d7827385aab80b6e453fb1c4ae17ae0f4f5feadef9a8822d51794a8f07f5f7911975eb319853.png)
