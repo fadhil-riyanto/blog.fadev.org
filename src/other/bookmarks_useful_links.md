@@ -80,3 +80,27 @@ movabs is used for absolute data moves, to either load an arbitrary 64-bit const
 - [https://www.kernel.org/doc/html/v5.8/x86/x86_64/mm.html](https://www.kernel.org/doc/html/v5.8/x86/x86_64/mm.html)
 
 ## this section is pure form, created when I use mdbook
+
+### getopt example
+- [https://www.gnu.org/software/libc/manual/html_node/Example-of-Getopt.html](https://www.gnu.org/software/libc/manual/html_node/Example-of-Getopt.html)
+
+### manage email using LEI
+- [https://people.kernel.org/monsieuricon/lore-lei-part-1-getting-started](https://people.kernel.org/monsieuricon/lore-lei-part-1-getting-started)
+
+- [https://docs.kernel.org/maintainer/feature-and-driver-maintainers.html](https://docs.kernel.org/maintainer/feature-and-driver-maintainers.html)
+
+### intel SGX
+[https://docs.kernel.org/arch/x86/sgx.html](https://docs.kernel.org/arch/x86/sgx.html)
+
+### system V abi
+- [https://refspecs.linuxfoundation.org/LSB_2.1.0/LSB-Core-generic/LSB-Core-generic/normativerefs.html#STD.ABIUPDATE](https://refspecs.linuxfoundation.org/LSB_2.1.0/LSB-Core-generic/LSB-Core-generic/normativerefs.html#STD.ABIUPDATE)
+
+### ELF Structure types
+- [https://refspecs.linuxfoundation.org/LSB_2.1.0/LSB-Core-generic/LSB-Core-generic/elftypes.html](https://refspecs.linuxfoundation.org/LSB_2.1.0/LSB-Core-generic/LSB-Core-generic/elftypes.html)
+
+### ELF cheatsheet
+- [https://gist.github.com/x0nu11byt3/bcb35c3de461e5fb66173071a2379779](https://gist.github.com/x0nu11byt3/bcb35c3de461e5fb66173071a2379779)
+- [https://www.uclibc.org/docs/elf-64-gen.pdf](https://www.uclibc.org/docs/elf-64-gen.pdf)
+
+### AMD & clang
+- [https://rocm.docs.amd.com/projects/llvm-project/en/latest/LLVM/clang/html/ClangFormatStyleOptions.html](https://rocm.docs.amd.com/projects/llvm-project/en/latest/LLVM/clang/html/ClangFormatStyleOptions.html)

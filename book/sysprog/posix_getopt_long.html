@@ -174,7 +174,7 @@
 <p><code>::</code> treated as optional args</p>
 </li>
 </ul>
-<h1 id="usage"><a class="header" href="#usage">usage</a></h1>
+<h2 id="usage"><a class="header" href="#usage">usage</a></h2>
 <p>read <code>man 3 getopt</code></p>
 <p>tldr</p>
 <h2 id="lets-construct-array-of-option-struct"><a class="header" href="#lets-construct-array-of-option-struct">lets construct array of option struct</a></h2>
@@ -264,6 +264,27 @@ out:
 }
 </code></pre>
 <p>as you can see, optarg is magically return current character based on switch case cond</p>
+<h1 id="posix-getopt-only"><a class="header" href="#posix-getopt-only">POSIX getopt (only)</a></h1>
+<p>its parse command line like this</p>
+<h3 id="no-args-params"><a class="header" href="#no-args-params">no args params</a></h3>
+<p>this option did not receive any arguments, so the optarg value is will be null
+<code>./prog -v</code>, use optstring something like this <code>v</code></p>
+<p><img src="/assets/9eac7b897acc6be415fa552aa839ddffd1211ab703f63a4357c9979cd29d97083d16453b9763bba1a0026989f6beefe7c4c88d768bb011588864ca63.png" alt="image" /></p>
+<h3 id="optional-params"><a class="header" href="#optional-params">optional params</a></h3>
+<p><code>./prog -p=8000 -l=127.0.0.1</code>, use optsting <code>p::l::</code></p>
+<p>this is wrong example
+<img src="/assets/c20aec4c2f351e63fc14bb0afc6ae79e8b17216de4505eeeadb82dfb7703468fcbd6ecdd1213bfce627cb1a353a8cf448c42862e1fb016d9f26ed05e.png" alt="image" /></p>
+<p>this is good example
+<img src="/assets/c5fb359b67e4b223d8a8bc1d738e163e391f5acee7d03d608369451b340bf1e10d79c2b8dd6a9cbcf29950be36dd45fbaabeffc35774edc461c838f8.png" alt="image" /></p>
+<h2 id="required-params"><a class="header" href="#required-params">required params</a></h2>
+<p><code>./prog -p 8000 -l 0.0.0.0</code> use optstring <code>p:l:</code></p>
+<p><img src="/assets/c5fb359b67e4b223d8a8bc1d738e163e391f5acee7d03d608369451b340bf1e10d79c2b8dd6a9cbcf29950be36dd45fbaabeffc35774edc461c838f8.png" alt="image" /></p>
+<h1 id="unknown-option-handling"><a class="header" href="#unknown-option-handling">unknown option handling</a></h1>
+<p>the handling is very easy, <code>getopt()</code> return <code>?</code> when undefined rule is provided, then you can use <code>optopt</code> as a handler</p>
+<h1 id="useful-links"><a class="header" href="#useful-links">useful links</a></h1>
+<ul>
+<li><a href="https://www.gnu.org/software/libc/manual/html_node/Example-of-Getopt.html">https://www.gnu.org/software/libc/manual/html_node/Example-of-Getopt.html</a></li>
+</ul>
 
                     </main>
 
@@ -273,7 +294,7 @@ out:
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../rust/readme-rust-stuff.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../sysprog/linux-vmm.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -287,13 +308,29 @@ out:
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../rust/readme-rust-stuff.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../sysprog/linux-vmm.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
 
         </div>
 
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
 
 
 

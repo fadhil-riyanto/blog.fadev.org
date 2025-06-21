@@ -764,7 +764,7 @@ clang spesific: <a href="https://clang.llvm.org/docs/LanguageExtensions.html">ht
 <p><code>::</code> treated as optional args</p>
 </li>
 </ul>
-<h1 id="usage"><a class="header" href="#usage">usage</a></h1>
+<h2 id="usage"><a class="header" href="#usage">usage</a></h2>
 <p>read <code>man 3 getopt</code></p>
 <p>tldr</p>
 <h2 id="lets-construct-array-of-option-struct"><a class="header" href="#lets-construct-array-of-option-struct">lets construct array of option struct</a></h2>
@@ -854,6 +854,105 @@ out:
 }
 </code></pre>
 <p>as you can see, optarg is magically return current character based on switch case cond</p>
+<h1 id="posix-getopt-only"><a class="header" href="#posix-getopt-only">POSIX getopt (only)</a></h1>
+<p>its parse command line like this</p>
+<h3 id="no-args-params"><a class="header" href="#no-args-params">no args params</a></h3>
+<p>this option did not receive any arguments, so the optarg value is will be null
+<code>./prog -v</code>, use optstring something like this <code>v</code></p>
+<p><img src="sysprog//assets/9eac7b897acc6be415fa552aa839ddffd1211ab703f63a4357c9979cd29d97083d16453b9763bba1a0026989f6beefe7c4c88d768bb011588864ca63.png" alt="image" /></p>
+<h3 id="optional-params"><a class="header" href="#optional-params">optional params</a></h3>
+<p><code>./prog -p=8000 -l=127.0.0.1</code>, use optsting <code>p::l::</code></p>
+<p>this is wrong example
+<img src="sysprog//assets/c20aec4c2f351e63fc14bb0afc6ae79e8b17216de4505eeeadb82dfb7703468fcbd6ecdd1213bfce627cb1a353a8cf448c42862e1fb016d9f26ed05e.png" alt="image" /></p>
+<p>this is good example
+<img src="sysprog//assets/c5fb359b67e4b223d8a8bc1d738e163e391f5acee7d03d608369451b340bf1e10d79c2b8dd6a9cbcf29950be36dd45fbaabeffc35774edc461c838f8.png" alt="image" /></p>
+<h2 id="required-params"><a class="header" href="#required-params">required params</a></h2>
+<p><code>./prog -p 8000 -l 0.0.0.0</code> use optstring <code>p:l:</code></p>
+<p><img src="sysprog//assets/c5fb359b67e4b223d8a8bc1d738e163e391f5acee7d03d608369451b340bf1e10d79c2b8dd6a9cbcf29950be36dd45fbaabeffc35774edc461c838f8.png" alt="image" /></p>
+<h1 id="unknown-option-handling"><a class="header" href="#unknown-option-handling">unknown option handling</a></h1>
+<p>the handling is very easy, <code>getopt()</code> return <code>?</code> when undefined rule is provided, then you can use <code>optopt</code> as a handler</p>
+<h1 id="useful-links"><a class="header" href="#useful-links">useful links</a></h1>
+<ul>
+<li><a href="https://www.gnu.org/software/libc/manual/html_node/Example-of-Getopt.html">https://www.gnu.org/software/libc/manual/html_node/Example-of-Getopt.html</a></li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="linux-virtual-memory-map"><a class="header" href="#linux-virtual-memory-map">linux virtual memory map</a></h1>
+<p>Documentation/x86/x86_64/mm.txt</p>
+<pre><code class="language-txt">
+&lt;previous description obsolete, deleted&gt;
+
+Virtual memory map with 4 level page tables:
+
+0000000000000000 - 00007fffffffffff (=47 bits) user space, different per mm
+hole caused by [47:63] sign extension
+ffff800000000000 - ffff87ffffffffff (=43 bits) guard hole, reserved for hypervisor
+ffff880000000000 - ffffc7ffffffffff (=64 TB) direct mapping of all phys. memory
+ffffc80000000000 - ffffc8ffffffffff (=40 bits) hole
+ffffc90000000000 - ffffe8ffffffffff (=45 bits) vmalloc/ioremap space
+ffffe90000000000 - ffffe9ffffffffff (=40 bits) hole
+ffffea0000000000 - ffffeaffffffffff (=40 bits) virtual memory map (1TB)
+... unused hole ...
+ffffec0000000000 - fffffbffffffffff (=44 bits) kasan shadow memory (16TB)
+... unused hole ...
+ffffff0000000000 - ffffff7fffffffff (=39 bits) %esp fixup stacks
+... unused hole ...
+ffffffef00000000 - fffffffeffffffff (=64 GB) EFI region mapping space
+... unused hole ...
+ffffffff80000000 - ffffffff9fffffff (=512 MB)  kernel text mapping, from phys 0
+ffffffffa0000000 - ffffffffff5fffff (=1526 MB) module mapping space (variable)
+ffffffffff600000 - ffffffffffdfffff (=8 MB) vsyscalls
+ffffffffffe00000 - ffffffffffffffff (=2 MB) unused hole
+
+Virtual memory map with 5 level page tables:
+
+0000000000000000 - 00ffffffffffffff (=56 bits) user space, different per mm
+hole caused by [56:63] sign extension
+ff00000000000000 - ff0fffffffffffff (=52 bits) guard hole, reserved for hypervisor
+ff10000000000000 - ff8fffffffffffff (=55 bits) direct mapping of all phys. memory
+ff90000000000000 - ff91ffffffffffff (=49 bits) hole
+ff92000000000000 - ffd1ffffffffffff (=54 bits) vmalloc/ioremap space
+ffd2000000000000 - ffd3ffffffffffff (=49 bits) hole
+ffd4000000000000 - ffd5ffffffffffff (=49 bits) virtual memory map (512TB)
+... unused hole ...
+ffd8000000000000 - fff7ffffffffffff (=53 bits) kasan shadow memory (8PB)
+... unused hole ...
+ffffff0000000000 - ffffff7fffffffff (=39 bits) %esp fixup stacks
+... unused hole ...
+ffffffef00000000 - fffffffeffffffff (=64 GB) EFI region mapping space
+... unused hole ...
+ffffffff80000000 - ffffffff9fffffff (=512 MB)  kernel text mapping, from phys 0
+ffffffffa0000000 - ffffffffff5fffff (=1526 MB) module mapping space
+ffffffffff600000 - ffffffffffdfffff (=8 MB) vsyscalls
+ffffffffffe00000 - ffffffffffffffff (=2 MB) unused hole
+
+Architecture defines a 64-bit virtual address. Implementations can support
+less. Currently supported are 48- and 57-bit virtual addresses. Bits 63
+through to the most-significant implemented bit are set to either all ones
+or all zero. This causes hole between user space and kernel addresses.
+
+The direct mapping covers all memory in the system up to the highest
+memory address (this means in some cases it can also include PCI memory
+holes).
+
+vmalloc space is lazily synchronized into the different PML4/PML5 pages of
+the processes using the page fault handler, with init_top_pgt as
+reference.
+
+Current X86-64 implementations support up to 46 bits of address space (64 TB),
+which is our current limit. This expands into MBZ space in the page tables.
+
+We map EFI runtime services in the 'efi_pgd' PGD in a 64Gb large virtual
+memory window (this size is arbitrary, it can be raised later if needed).
+The mappings are not part of any other kernel PGD and are only available
+during EFI runtime calls.
+
+The module mapping space size changes based on the CONFIG requirements for the
+following fixmap section.
+
+Note that if CONFIG_RANDOMIZE_MEMORY is enabled, the direct mapping of all
+physical memory, vmalloc/ioremap space and virtual memory map are randomized.
+Their order is preserved but their base will be offset early at boot time.
+
+-Andi Kleen, Jul 2004</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-stuff"><a class="header" href="#rust-stuff">Rust stuff</a></h1>
 <p>Welcome in this rust stuff section.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-cursor-how-it-works"><a class="header" href="#rust-cursor-how-it-works">Rust cursor, How it works</a></h1>
@@ -4356,6 +4455,38 @@ movabs is used for absolute data moves, to either load an arbitrary 64-bit const
 <li><a href="https://www.kernel.org/doc/html/v5.8/x86/x86_64/mm.html">https://www.kernel.org/doc/html/v5.8/x86/x86_64/mm.html</a></li>
 </ul>
 <h2 id="this-section-is-pure-form-created-when-i-use-mdbook"><a class="header" href="#this-section-is-pure-form-created-when-i-use-mdbook">this section is pure form, created when I use mdbook</a></h2>
+<h3 id="getopt-example"><a class="header" href="#getopt-example">getopt example</a></h3>
+<ul>
+<li><a href="https://www.gnu.org/software/libc/manual/html_node/Example-of-Getopt.html">https://www.gnu.org/software/libc/manual/html_node/Example-of-Getopt.html</a></li>
+</ul>
+<h3 id="manage-email-using-lei"><a class="header" href="#manage-email-using-lei">manage email using LEI</a></h3>
+<ul>
+<li>
+<p><a href="https://people.kernel.org/monsieuricon/lore-lei-part-1-getting-started">https://people.kernel.org/monsieuricon/lore-lei-part-1-getting-started</a></p>
+</li>
+<li>
+<p><a href="https://docs.kernel.org/maintainer/feature-and-driver-maintainers.html">https://docs.kernel.org/maintainer/feature-and-driver-maintainers.html</a></p>
+</li>
+</ul>
+<h3 id="intel-sgx"><a class="header" href="#intel-sgx">intel SGX</a></h3>
+<p><a href="https://docs.kernel.org/arch/x86/sgx.html">https://docs.kernel.org/arch/x86/sgx.html</a></p>
+<h3 id="system-v-abi"><a class="header" href="#system-v-abi">system V abi</a></h3>
+<ul>
+<li><a href="https://refspecs.linuxfoundation.org/LSB_2.1.0/LSB-Core-generic/LSB-Core-generic/normativerefs.html#STD.ABIUPDATE">https://refspecs.linuxfoundation.org/LSB_2.1.0/LSB-Core-generic/LSB-Core-generic/normativerefs.html#STD.ABIUPDATE</a></li>
+</ul>
+<h3 id="elf-structure-types"><a class="header" href="#elf-structure-types">ELF Structure types</a></h3>
+<ul>
+<li><a href="https://refspecs.linuxfoundation.org/LSB_2.1.0/LSB-Core-generic/LSB-Core-generic/elftypes.html">https://refspecs.linuxfoundation.org/LSB_2.1.0/LSB-Core-generic/LSB-Core-generic/elftypes.html</a></li>
+</ul>
+<h3 id="elf-cheatsheet"><a class="header" href="#elf-cheatsheet">ELF cheatsheet</a></h3>
+<ul>
+<li><a href="https://gist.github.com/x0nu11byt3/bcb35c3de461e5fb66173071a2379779">https://gist.github.com/x0nu11byt3/bcb35c3de461e5fb66173071a2379779</a></li>
+<li><a href="https://www.uclibc.org/docs/elf-64-gen.pdf">https://www.uclibc.org/docs/elf-64-gen.pdf</a></li>
+</ul>
+<h3 id="amd--clang"><a class="header" href="#amd--clang">AMD &amp; clang</a></h3>
+<ul>
+<li><a href="https://rocm.docs.amd.com/projects/llvm-project/en/latest/LLVM/clang/html/ClangFormatStyleOptions.html">https://rocm.docs.amd.com/projects/llvm-project/en/latest/LLVM/clang/html/ClangFormatStyleOptions.html</a></li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="resume-alpro"><a class="header" href="#resume-alpro">Resume alpro</a></h1>
 <h2 id="flowchart"><a class="header" href="#flowchart">flowchart</a></h2>
 <p>Apa itu flowchart? simplenya, flowchat itu semacam bentuk gambar atau visual dari suatu langkah langkah algoritma. dan tentunya karna ini algoritma, maka ada step step seperti jika x maka y, lalu panah panah dari atas ke bawah, lalu input, dll. contoh flowchart cara memperbiaki lampu</p>
@@ -5194,6 +5325,89 @@ max int int 24 bit: 16777216</p>
 </ul>
 <p>add this line before <code>if status is-interactive</code>
 <code>set -gx PATH /new/path $PATH</code></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="tree"><a class="header" href="#tree">Tree</a></h1>
+<p>Apa itu tree? tree adalah struktur data, dimana bentuknya menyerupai tree (perumpamaan saja), aslinya structur data ini berbentuk mirip linkedlists-double hanya saja, perumpamaan cabang kiri (diganti dgn nama prev), cabang kanan (diganti dgn nama next)</p>
+<h2 id="perbedaan"><a class="header" href="#perbedaan">Perbedaan</a></h2>
+<ul>
+<li>Linkedlists itu monoton, alias saling sambung menyambung dan flat.</li>
+<li>sedangkan tree tidak ada aturan harus saling menyambung, bisa saja linkedlists nya seperti ini</li>
+</ul>
+<p><code>root -&gt; next -&gt; next -&gt; next</code> (dimana ini nanti akan membuat tree yang gambar visualnya bakal menjorok kekanan)</p>
+<h2 id="jenis-jenis-transversal"><a class="header" href="#jenis-jenis-transversal">jenis jenis transversal</a></h2>
+<ul>
+<li>preorder (root, kiri, lalu ke-kanan)</li>
+<li>inorder (kiri, root, lalu ke-kanan)</li>
+<li>postorder (kiri, kanan, lalu ke-root)</li>
+</ul>
+<p>nb: tranversal adalah cara mengunjungi simpul (tepat satu kali saja)</p>
+<h2 id="coding"><a class="header" href="#coding">coding</a></h2>
+<p>sudah cukup hal non teknisnya, bagian ini akan membahas bagian koding</p>
+<h2 id="struct"><a class="header" href="#struct">struct</a></h2>
+<p>struct untuk tree sangat mirip dgn struct untuk linked-list-double. di kasus ini struct dibawah hanya bisa hold data char saja. bisa diganti juga dgn int. dan lain lain</p>
+<pre><code class="language-c">struct ListNode {
+        char val;
+        ListNode *prev;
+        ListNode *next;
+
+        ListNode(char x) : val(x), prev(nullptr), next(nullptr) {}
+};
+</code></pre>
+<p>terlihat? selain hold data <code>val</code> yang isinya char, kita ada opsi untuk hold pointer prev dan pointer next. dimana ini adalah kunci dari tree.</p>
+<h2 id="contoh-meng-isinya"><a class="header" href="#contoh-meng-isinya">contoh meng-isinya</a></h2>
+<p>ada tree seperti ini
+<img src="other//assets/44cc7ec324a3454a5419ed656412246ae1548b060c631f05fac4829d3a41d4966443696f0942c5ec088680984a7e60565ebbd45e01d0298a1b7bc6b3.png" alt="image" /></p>
+<p>ini contoh cara mengisinya</p>
+<pre><code class="language-c">ListNode *head = new ListNode('A');
+head-&gt;prev = new ListNode('B');
+head-&gt;prev-&gt;prev = new ListNode('D');
+head-&gt;prev-&gt;prev-&gt;next = new ListNode('G');
+
+head-&gt;next = new ListNode('C');
+head-&gt;next-&gt;next = new ListNode('F');
+head-&gt;next-&gt;prev = new ListNode('E');
+head-&gt;next-&gt;prev-&gt;prev = new ListNode('H');
+head-&gt;next-&gt;prev-&gt;next = new ListNode('I');
+</code></pre>
+<p>kenapa tidak pakai val? karna ketika kita <code>new ListNode('H');</code>, secara otomatis kita mengisi val. val baru dipakai ketika mau diakses.</p>
+<h2 id="contoh-cara-mengaksesnya"><a class="header" href="#contoh-cara-mengaksesnya">contoh cara mengaksesnya</a></h2>
+<p>contoh singkat ada dibawah, contoh (komplit) nya silahkan <a href="https://drive.google.com/drive/folders/1lfvxDxCctEnp2Yg8H0ws7NgH1yMxDEZT?usp=sharing">klik disini</a></p>
+<h3 id="inorder"><a class="header" href="#inorder">inorder</a></h3>
+<pre><code class="language-c">cout &lt;&lt; "step 1: " &lt;&lt; head-&gt;prev-&gt;prev-&gt;next-&gt;val &lt;&lt;
+" " &lt;&lt; head-&gt;prev-&gt;prev-&gt;val &lt;&lt;
+" " &lt;&lt; head-&gt;prev-&gt;val &lt;&lt;
+" " &lt;&lt; head-&gt;val &lt;&lt;
+" " &lt;&lt; head-&gt;next-&gt;prev-&gt;prev-&gt;val &lt;&lt;
+" " &lt;&lt; head-&gt;next-&gt;prev-&gt;val &lt;&lt;
+ " " &lt;&lt; head-&gt;next-&gt;prev-&gt;next-&gt;val &lt;&lt;
+ " " &lt;&lt; head-&gt;next-&gt;val &lt;&lt;
+" " &lt;&lt; head-&gt;next-&gt;next-&gt;val &lt;&lt;
+endl;
+</code></pre>
+<h3 id="postorder"><a class="header" href="#postorder">postorder</a></h3>
+<pre><code class="language-c">cout &lt;&lt; "step 9: " &lt;&lt; head-&gt;prev-&gt;prev-&gt;next-&gt;val &lt;&lt; 
+" " &lt;&lt; head-&gt;prev-&gt;prev-&gt;val &lt;&lt; 
+" " &lt;&lt; head-&gt;prev-&gt;val &lt;&lt; 
+" " &lt;&lt; head-&gt;next-&gt;prev-&gt;prev-&gt;val &lt;&lt; 
+" " &lt;&lt; head-&gt;next-&gt;prev-&gt;next-&gt;val &lt;&lt; 
+" " &lt;&lt; head-&gt;next-&gt;prev-&gt;val &lt;&lt; 
+" " &lt;&lt; head-&gt;next-&gt;next-&gt;val &lt;&lt;
+" " &lt;&lt; head-&gt;next-&gt;val &lt;&lt;
+" " &lt;&lt; head-&gt;val &lt;&lt;
+
+endl;
+</code></pre>
+<h3 id="preorder"><a class="header" href="#preorder">preorder</a></h3>
+<pre><code class="language-c">cout &lt;&lt; "step 8: " &lt;&lt; head-&gt;val &lt;&lt; 
+" " &lt;&lt; head-&gt;prev-&gt;val &lt;&lt; 
+" " &lt;&lt; head-&gt;prev-&gt;prev-&gt;val &lt;&lt;
+" " &lt;&lt; head-&gt;prev-&gt;prev-&gt;next-&gt;val &lt;&lt; 
+" " &lt;&lt; head-&gt;next-&gt;val &lt;&lt; 
+" " &lt;&lt; head-&gt;next-&gt;prev-&gt;val &lt;&lt;
+" " &lt;&lt; head-&gt;next-&gt;prev-&gt;prev-&gt;val &lt;&lt;
+" " &lt;&lt; head-&gt;next-&gt;prev-&gt;next-&gt;val &lt;&lt;
+" " &lt;&lt; head-&gt;next-&gt;next-&gt;val &lt;&lt; endl;
+
+</code></pre>
 
                     </main>
 
@@ -5212,6 +5426,22 @@ max int int 24 bit: 16777216</p>
 
         </div>
 
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
 
 
 

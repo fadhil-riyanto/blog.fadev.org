@@ -214,6 +214,38 @@ movabs is used for absolute data moves, to either load an arbitrary 64-bit const
 <li><a href="https://www.kernel.org/doc/html/v5.8/x86/x86_64/mm.html">https://www.kernel.org/doc/html/v5.8/x86/x86_64/mm.html</a></li>
 </ul>
 <h2 id="this-section-is-pure-form-created-when-i-use-mdbook"><a class="header" href="#this-section-is-pure-form-created-when-i-use-mdbook">this section is pure form, created when I use mdbook</a></h2>
+<h3 id="getopt-example"><a class="header" href="#getopt-example">getopt example</a></h3>
+<ul>
+<li><a href="https://www.gnu.org/software/libc/manual/html_node/Example-of-Getopt.html">https://www.gnu.org/software/libc/manual/html_node/Example-of-Getopt.html</a></li>
+</ul>
+<h3 id="manage-email-using-lei"><a class="header" href="#manage-email-using-lei">manage email using LEI</a></h3>
+<ul>
+<li>
+<p><a href="https://people.kernel.org/monsieuricon/lore-lei-part-1-getting-started">https://people.kernel.org/monsieuricon/lore-lei-part-1-getting-started</a></p>
+</li>
+<li>
+<p><a href="https://docs.kernel.org/maintainer/feature-and-driver-maintainers.html">https://docs.kernel.org/maintainer/feature-and-driver-maintainers.html</a></p>
+</li>
+</ul>
+<h3 id="intel-sgx"><a class="header" href="#intel-sgx">intel SGX</a></h3>
+<p><a href="https://docs.kernel.org/arch/x86/sgx.html">https://docs.kernel.org/arch/x86/sgx.html</a></p>
+<h3 id="system-v-abi"><a class="header" href="#system-v-abi">system V abi</a></h3>
+<ul>
+<li><a href="https://refspecs.linuxfoundation.org/LSB_2.1.0/LSB-Core-generic/LSB-Core-generic/normativerefs.html#STD.ABIUPDATE">https://refspecs.linuxfoundation.org/LSB_2.1.0/LSB-Core-generic/LSB-Core-generic/normativerefs.html#STD.ABIUPDATE</a></li>
+</ul>
+<h3 id="elf-structure-types"><a class="header" href="#elf-structure-types">ELF Structure types</a></h3>
+<ul>
+<li><a href="https://refspecs.linuxfoundation.org/LSB_2.1.0/LSB-Core-generic/LSB-Core-generic/elftypes.html">https://refspecs.linuxfoundation.org/LSB_2.1.0/LSB-Core-generic/LSB-Core-generic/elftypes.html</a></li>
+</ul>
+<h3 id="elf-cheatsheet"><a class="header" href="#elf-cheatsheet">ELF cheatsheet</a></h3>
+<ul>
+<li><a href="https://gist.github.com/x0nu11byt3/bcb35c3de461e5fb66173071a2379779">https://gist.github.com/x0nu11byt3/bcb35c3de461e5fb66173071a2379779</a></li>
+<li><a href="https://www.uclibc.org/docs/elf-64-gen.pdf">https://www.uclibc.org/docs/elf-64-gen.pdf</a></li>
+</ul>
+<h3 id="amd--clang"><a class="header" href="#amd--clang">AMD &amp; clang</a></h3>
+<ul>
+<li><a href="https://rocm.docs.amd.com/projects/llvm-project/en/latest/LLVM/clang/html/ClangFormatStyleOptions.html">https://rocm.docs.amd.com/projects/llvm-project/en/latest/LLVM/clang/html/ClangFormatStyleOptions.html</a></li>
+</ul>
 
                     </main>
 
@@ -244,6 +276,22 @@ movabs is used for absolute data moves, to either load an arbitrary 64-bit const
 
         </div>
 
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
 
 
 

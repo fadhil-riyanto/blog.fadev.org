@@ -27,6 +27,7 @@
 	- [vt-hexdump](./sysprog/vt_hexdump.md)
 	- [ELF64](./sysprog/elf64.md)
 	- [POSIX getopt_long](./sysprog/posix_getopt_long.md)
+	- [linux virtual memory map](./sysprog/linux-vmm.md)
 
 - [Rust stuff](./rust/readme-rust-stuff.md)
 	- [Rust Cursor & fseek concept](./rust/cursor_1.md)
@@ -120,3 +121,4 @@
 	- [binary operation](./other/binary_operation.md)
 	- [catatan subnetting from scratch](./other/subnetting_from_scratch.md)
 	- [set PATH fish shell](./other/set_path_fish_shell.md)
+	- [tree](./other/tree.md)

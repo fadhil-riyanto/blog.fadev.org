@@ -8,7 +8,7 @@ optarg
 
 - `::` treated as optional args
 
-# usage
+## usage
 read `man 3 getopt`
 
 tldr
@@ -109,3 +109,33 @@ out:
 ```
 
 as you can see, optarg is magically return current character based on switch case cond
+
+# POSIX getopt (only)
+its parse command line like this
+
+### no args params
+this option did not receive any arguments, so the optarg value is will be null
+`./prog -v`, use optstring something like this `v`
+
+![image](/assets/9eac7b897acc6be415fa552aa839ddffd1211ab703f63a4357c9979cd29d97083d16453b9763bba1a0026989f6beefe7c4c88d768bb011588864ca63.png)
+
+### optional params
+`./prog -p=8000 -l=127.0.0.1`, use optsting `p::l::`
+
+this is wrong example
+![image](/assets/c20aec4c2f351e63fc14bb0afc6ae79e8b17216de4505eeeadb82dfb7703468fcbd6ecdd1213bfce627cb1a353a8cf448c42862e1fb016d9f26ed05e.png)
+
+this is good example
+![image](/assets/c5fb359b67e4b223d8a8bc1d738e163e391f5acee7d03d608369451b340bf1e10d79c2b8dd6a9cbcf29950be36dd45fbaabeffc35774edc461c838f8.png)
+
+## required params
+`./prog -p 8000 -l 0.0.0.0` use optstring `p:l:`
+
+![image](/assets/c5fb359b67e4b223d8a8bc1d738e163e391f5acee7d03d608369451b340bf1e10d79c2b8dd6a9cbcf29950be36dd45fbaabeffc35774edc461c838f8.png)
+
+# unknown option handling
+the handling is very easy, `getopt()` return `?` when undefined rule is provided, then you can use `optopt` as a handler
+
+# useful links
+
+- [https://www.gnu.org/software/libc/manual/html_node/Example-of-Getopt.html](https://www.gnu.org/software/libc/manual/html_node/Example-of-Getopt.html)
