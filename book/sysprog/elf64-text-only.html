@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Rust stuff - Fadhil Books &amp; Notes</title>
+        <title>ELF64 text only - Fadhil Books &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -160,18 +160,27 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="rust-stuff"><a class="header" href="#rust-stuff">Rust stuff</a></h1>
-<p>Welcome in this rust stuff section.</p>
+                        <h1 id="elf64-text-only"><a class="header" href="#elf64-text-only">ELF64 text only</a></h1>
+<h2 id="elf-types"><a class="header" href="#elf-types">ELF Types</a></h2>
+<p>There are three main types for ELF files.</p>
+<ul>
+<li>An executable file contains code and data suitable for execution. It specifies the memory layout of the process.</li>
+<li>A relocatable file contains code and data suitable for linking with other relocatable and shared object files.</li>
+<li>A shared object file (a.k.a. shared library) contains code and data suitable for the link editor ld at link time and the dynamic linker at run time. The dynamic linker may be called ld.so.1, libc.so.1 or ld-linux.so.1, depending on the implementation.</li>
+</ul>
+<p>The most useful part of ELF lies in its section structure. With the right tools and techniques, programmers can manipulate the execution of executables with great flexibility.</p>
+<p>source: <a href="https://ftp.math.utah.edu/u/ma/hohn/linux/misc/elf/node2.html">https://ftp.math.utah.edu/u/ma/hohn/linux/misc/elf/node2.html</a></p>
+<p>big fat ELF docs: <a href="https://docs.oracle.com/cd/E19683-01/816-1386/6m7qcoblh/index.html">https://docs.oracle.com/cd/E19683-01/816-1386/6m7qcoblh/index.html</a>, big thanks to oracle!</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../sysprog/linux-x86_64-mm.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../sysprog/vt_hexdump.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../rust/cursor_1.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../sysprog/elf64.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -181,11 +190,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../sysprog/linux-x86_64-mm.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../sysprog/vt_hexdump.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../rust/cursor_1.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../sysprog/elf64.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
