@@ -1377,6 +1377,123 @@ ____________________________________________________________|___________________
  ffffffffffe00000 |   -2    MB | ffffffffffffffff |    2 MB | ... unused hole
 __________________|____________|__________________|_________|___________________________________________________________
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="machine-dependent-type"><a class="header" href="#machine-dependent-type">machine dependent type</a></h1>
+<p>this is why dangerous use default C type</p>
+<p><img src="sysprog//assets/ab2fe93379a3a12a1f8c1bbf3d825092e88a5890ad2dffc12826ef5953bf82b5c028c0539985a2eb08fb222e33fb46bf9c96fa3e014d498f77c976c1.png" alt="image" /></p>
+<p><code>unsigned long</code> is 8 byte wide (on x64), but 32 bit wide (on x86 arch).</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="io-format-of-integer-types"><a class="header" href="#io-format-of-integer-types">I/O format of integer types</a></h1>
+<p>The following macros are defined in <code>inttypes.h</code>. Each expands to a character string literal containing a conversion specifier which can be modified by a length modifier that can be used in the format argument of a formatted input/output function when converting the corresponding integer type. These macros have the general form of PRI (character string literals for the <code>fprintf()</code> and <code>fwprintf()</code> family of functions) or SCN (character string literals for the fscanf() and fwscanf() family of functions), followed by the conversion specifier, followed by a name corresponding to a similar type name in <code>&lt;inttypes.h&gt;</code>. In these names, the suffix number represents the width of the type. For example, <code>PRIdFAST32</code> can be used in a format string to print the value of an integer of type <code>int_fast32_t</code>.</p>
+<h1 id="decimal-notation"><a class="header" href="#decimal-notation">Decimal notation</a></h1>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">PRId8</th><th style="text-align: left">PRId16</th><th style="text-align: left">PRId32</th><th style="text-align: left">PRId64</th></tr></thead><tbody>
+<tr><td style="text-align: left">PRIdLEAST8</td><td style="text-align: left">PRIdLEAST16</td><td style="text-align: left">PRIdLEAST32</td><td style="text-align: left">PRIdLEAST64</td></tr>
+<tr><td style="text-align: left">PRIdFAST8</td><td style="text-align: left">PRIdFAST16</td><td style="text-align: left">PRIdFAST32</td><td style="text-align: left">PRIdFAST64</td></tr>
+<tr><td style="text-align: left">PRIdMAX</td><td style="text-align: left"></td><td style="text-align: left"></td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left">PRIdPTR</td><td style="text-align: left"></td><td style="text-align: left"></td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left">PRIi8</td><td style="text-align: left">PRIi16</td><td style="text-align: left">PRIi32</td><td style="text-align: left">PRIi64</td></tr>
+<tr><td style="text-align: left">PRIiLEAST8</td><td style="text-align: left">PRIiLEAST16</td><td style="text-align: left">PRIiLEAST32</td><td style="text-align: left">PRIiLEAST64</td></tr>
+<tr><td style="text-align: left">PRIiFAST8</td><td style="text-align: left">PRIiFAST16</td><td style="text-align: left">PRIiFAST32</td><td style="text-align: left">PRIiFAST64</td></tr>
+<tr><td style="text-align: left">PRIiMAX</td><td style="text-align: left"></td><td style="text-align: left"></td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left">PRIiPTR</td><td style="text-align: left"></td><td style="text-align: left"></td><td style="text-align: left"></td></tr>
+</tbody></table>
+</div>
+<p>example:</p>
+<pre><code class="language-c">#define _ISOC99_SOURCE
+#include &lt;inttypes.h&gt;      
+#include &lt;stdio.h&gt; 
+int main(void)                                             
+{                                                          
+
+int8_t i =  40; 
+printf("Demonstrating the use of the following macros:\n");
+printf("Using PRId8, the printed value of 40 "                  
+"is  %" PRId8"\n", i);                                    
+printf("Using PRIiFAST8, the printed value of 40 "               
+"is  %" PRIiFAST8"\n", i);                                 
+printf("Using PRIoLEAST8, the printed value of 40 "              
+"is  %" PRIoLEAST8 "\n", i);                               
+return 0;                                                  
+}                          
+
+
+Output:
+
+Demonstrating the use of the following macros:  
+Using PRId8, the printed value of 40 is  40     
+Using PRIiFAST8, the printed value of 40 is  40 
+Using PRIoLEAST8, the printed value of 40 is  50
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="types-war"><a class="header" href="#types-war">types war</a></h1>
+<p>recently, I face a spesific issue in order choosing best types for my program. my goal is choose best need for my C datatype</p>
+<p>there has some header exists</p>
+<ul>
+<li><code>stdint.h</code></li>
+<li><code>sys/types.h</code></li>
+</ul>
+<p>difference from location presefective</p>
+<ul>
+<li><code>/usr/lib/clang/20/include/stdint.h</code></li>
+<li><code>/usr/include/sys/types.h</code></li>
+</ul>
+<p>see? <code>stdint.h</code> is more compiler oriented, and <code>sys/types.h</code> is more system oriented, that right, <code>sys/types.h</code> is POSIX. It's fundamentally about defining types used by system calls and other OS-level interfaces.</p>
+<h1 id="systypesh"><a class="header" href="#systypesh"><code>sys/types.h</code></a></h1>
+<p>Purpose: To define data types used in system-level programming. These types are often opaque and their actual size can vary between different systems (e.g., a 32-bit vs. a 64-bit system), but they provide a portable way to interface with the OS kernel.</p>
+<p>Origin: System V and BSD systems, later standardized by POSIX.</p>
+<p>Use sys/types.h when you are writing code that makes POSIX-compliant system calls (open, read, fork, stat, etc.).</p>
+<div class="warning">
+<p>Note</p>
+<p>there is no format specifier header.</p>
+</div>
+<h1 id="stdinth"><a class="header" href="#stdinth"><code>stdint.h</code></a></h1>
+<p>This header is part of the ISO C99 standard and later. It is focused on providing programmers with explicit control over the size of integer data types.</p>
+<p>Purpose: To define integer types of a specific, fixed width and to provide macros for printing and scanning these types with the printf and scanf family of functions.</p>
+<div class="warning">
+<p>Note</p>
+<p>use <code>inttypes.h</code> for formatting, see spesific topic about it <a href="sysprog//sysprog/inttypes.html">here</a></p>
+</div>
+<h1 id="conlusion"><a class="header" href="#conlusion">conlusion</a></h1>
+<p>Default to <code>&lt;stdint.h&gt;</code> for all your data definitions. Only use types from <code>&lt;sys/types.h&gt;</code> when you are calling an OS/POSIX function that requires them.</p>
+<p>normal struct? use stdint.h</p>
+<p>interacting with os APIs, such read(), return pid, etc. use <code>&lt;sys/types.h&gt;</code></p>
+<h1 id="another-types-wars"><a class="header" href="#another-types-wars">another types wars</a></h1>
+<ul>
+<li><code>uint_least8_t</code> vs <code>uint8_t</code>, imagine, you on very old board, where 8 bit int is not available, this <code>uint_least8_t</code> will be taken as 16 bit int. meanwhile, <code>uint8_t</code> give you exactly 8 bit wide variable.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="bits-data-models"><a class="header" href="#bits-data-models">bits data models</a></h1>
+<p>this section will talk about data models.</p>
+<p><img src="sysprog//assets/49ca87fe9c4f571a24bb33cdb4e0345559bca935f4e3e6401897f8516f9f55a23b9f7517138bedb84c4354529e14ac2cc97471c67338f96512458472.png" alt="image" /></p>
+<p>that footage, show us what <code>__ILP32__</code> is, also what is ILP32?</p>
+<p>There has some nice websites</p>
+<ul>
+<li><a href="https://duetorun.com/blog/20211008/data-model/#concept">https://duetorun.com/blog/20211008/data-model/#concept</a></li>
+<li><a href="https://gcc.gnu.org/onlinedocs/gccint/Effective-Target-Keywords.html#Data-type-sizes">https://gcc.gnu.org/onlinedocs/gccint/Effective-Target-Keywords.html#Data-type-sizes</a></li>
+</ul>
+<p><img src="sysprog//assets/dd5c48b5d5ce4dad3f26ac9d50a73238005154b08f1951a96eb6cb7e1256f4d63cc44d21f104adb9f47e8f553780f701248b6e183316a3277a3b65df.png" alt="image" /></p>
+<p>for example, most linux system uses LP64, which long int, and pointer are 64 bit wide. the other example is ILP32, which used by <code>arm64ilp32</code>, but its deprecated <a href="https://gcc.gnu.org/pipermail/gcc-patches/2025-January/673207.html">https://gcc.gnu.org/pipermail/gcc-patches/2025-January/673207.html</a></p>
+<p>LP64 and ILP32 refer to the data model used by the language. "I" is an abbreviation that represents int type, "L" represents long type, and "P" represents the pointer type. 64 and 32 refer to the size of the data types. When the ILP32 option is used, int, long and pointers are 32-bit in size. When LP64 is used, long and pointer are 64-bit in size; int remains 32-bit. The addressing mode used by LP64 is AMODE 64, and by ILP32 is AMODE 31. In the latter case, only 31 bits within the pointer are taken to form the address. For the sake of conciseness, the terms 31-bit mode and ILP32, will be used interchangeably in this document when there is no ambiguity. The same applies to 64-bit mode and LP64. <a href="https://www.ibm.com/docs/en/zos/2.4.0?topic=options-lp64-ilp32#d41843e90">see here</a></p>
+<h1 id="common-data-models"><a class="header" href="#common-data-models">Common data models</a></h1>
+<div class="table-wrapper"><table><thead><tr><th>Model</th><th><code>int</code></th><th><code>long</code></th><th><code>pointer</code></th><th>Common in</th></tr></thead><tbody>
+<tr><td><strong>ILP32</strong></td><td>32-bit</td><td>32-bit</td><td>32-bit</td><td>x86 (32-bit), ARM32, MIPS32</td></tr>
+<tr><td><strong>LP64</strong></td><td>32-bit</td><td>64-bit</td><td>64-bit</td><td>x86_64 (Linux, macOS), AArch64</td></tr>
+<tr><td><strong>LLP64</strong></td><td>32-bit</td><td>32-bit</td><td>64-bit</td><td>Windows x64 (MSVC), long long is 64 bit</td></tr>
+<tr><td><strong>ILP64</strong></td><td>64-bit</td><td>64-bit</td><td>64-bit</td><td>Rare: Cray supercomputers, some HPC</td></tr>
+<tr><td><strong>SILP64</strong></td><td>16-bit</td><td>64-bit</td><td>64-bit</td><td>Very rare, some historic systems</td></tr>
+<tr><td><strong>LP32</strong></td><td>16-bit</td><td>32-bit</td><td>32-bit</td><td>Some embedded systems</td></tr>
+</tbody></table>
+</div>
+<h1 id="check"><a class="header" href="#check">check</a></h1>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+
+int main() {
+    printf("sizeof(int): %zu\n", sizeof(int));
+    printf("sizeof(long): %zu\n", sizeof(long));
+    printf("sizeof(void *): %zu\n", sizeof(void *));
+}
+</code></pre>
+<p>intresting topics</p>
+<ul>
+<li>https://www.ibm.com/docs/en/zos/2.4.0?topic=options-lp64-ilp32#d41843e90</li>
+<li>LP64 also predefined, see https://gcc.gnu.org/onlinedocs/cpp/Common-Predefined-Macros.html</li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-stuff"><a class="header" href="#rust-stuff">Rust stuff</a></h1>
 <p>Welcome in this rust stuff section.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-cursor-how-it-works"><a class="header" href="#rust-cursor-how-it-works">Rust cursor, How it works</a></h1>
@@ -3837,7 +3954,7 @@ GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO radius;
 <ul>
 <li><code>/etc/freeradius/3.0/clients.conf</code> &lt;-- specify 'who' can connect, we need define it in this file</li>
 <li><code>/etc/freeradius/3.0/users</code> &lt;-- [manual authentication, using file]</li>
-<li><code>/etc/freeradius/3.0/radiusd.conf</code> &lt;-- this file enable sql module.</li>
+<li><code>/etc/freeradius/3.0/radiusd.conf:986</code> &lt;-- this file enable sql module.</li>
 <li><code>/etc/freeradius/3.0/mods-available/sql</code> &lt;-- this file is where we configure user/pass for sql module</li>
 <li><code>/etc/freeradius/3.0/sites-available/default</code> &lt;-- sequence layer of login,
 <ul>
@@ -3913,6 +4030,59 @@ note: execution is ordered by file name</p>
 <li>verify with <code>findmnt</code></li>
 </ul>
 <p>enjoy</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="tldr-qemu"><a class="header" href="#tldr-qemu">TLDR qemu</a></h1>
+<p>setup-network.sh</p>
+<pre><code class="language-sh">sudo ip link add br0-lan type bridge
+sudo ip tuntap add tap0 mode tap
+sudo ip tuntap add tap1 mode tap
+sudo ip tuntap add tap2 mode tap
+
+sudo ip link set tap0 master br0-lan
+sudo ip link set tap1 master br0-lan
+sudo ip link set tap2 master br0-lan
+
+sudo ip link set br0-lan up
+sudo ip link set tap0 up
+sudo ip link set tap0 up
+sudo ip link set tap0 up
+
+sudo ip a
+
+</code></pre>
+<p>sudo chmod 666 setup-network.sh
+sh ./setup-network.sh</p>
+<h1 id="running-qemu"><a class="header" href="#running-qemu">running qemu</a></h1>
+<p>run routeros</p>
+<pre><code class="language-sh">qemu-img convert -f raw -O qcow2 chr-7.19.1.img chr7.qcow2
+
+qemu-system-x86_64 \
+	-enable-kvm \
+	-smp 4 \
+	-m 256M \
+	-drive file=chr7.qcow2,format=qcow2 \
+	-boot order=d \
+	-net user,hostfwd=tcp::8291-:8291,hostfwd=tcp::30022-:22 \
+	-net nic \
+	-nographic \
+	-netdev tap,id=net0,ifname=tap0,script=no,downscript=no \
+	-device virtio-net-pci,netdev=net0,mac=02:11:2a:3b:ff:c3
+</code></pre>
+<p>run ubuntu server</p>
+<pre><code class="language-sh">qemu-system-x86_64 \
+	-enable-kvm \
+	-boot order=d \
+	-drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
+	-drive if=pflash,format=raw,file=OVMF_VARS_ubuntu_server_gpt.4m.fd \
+	-drive file=ubuntu-server.img,format=qcow2 \
+	-m 4G \
+	-smp 4 \
+	-netdev user,id=net0,hostfwd=tcp::20022-:22,hostfwd=tcp::10000-:5432 \
+	-device e1000,netdev=net0 \
+	-netdev tap,id=net1,ifname=tap1,script=no,downscript=no \
+	-device virtio-net-pci,netdev=net1,mac=02:11:2a:3b:aa:c4 \
+	-vga virtio \
+	-nographic
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="database"><a class="header" href="#database">Database</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="psql-command"><a class="header" href="#psql-command">psql command</a></h1>
 <h2 id="general"><a class="header" href="#general">General</a></h2>
@@ -5850,22 +6020,6 @@ endl;
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

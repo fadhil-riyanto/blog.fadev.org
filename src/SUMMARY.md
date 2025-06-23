@@ -30,6 +30,10 @@
 	- [POSIX getopt_long](./sysprog/posix_getopt_long.md)
 	- [linux virtual memory map (old)](./sysprog/linux-vmm.md)
 	- [linux x86_64 memory map](./sysprog/linux-x86_64-mm.md)
+	- [machine dependent type](./sysprog/machine-dependent-type.md)
+	- [I/O format of integer types](./sysprog/inttypes.md)
+	- [types war](./sysprog/types-war.md)
+	- [bits data models](./sysprog/bits-data-model.md)
 
 - [Rust stuff](./rust/readme-rust-stuff.md)
 	- [Rust Cursor & fseek concept](./rust/cursor_1.md)
@@ -84,6 +88,7 @@
 	- [SQL authentication freeradius server](./server/sql_auth_freeradius_server.md)
 	- [Linux netplan](./server/netplan.md)
 	- [sshfs](./server/sshfs.md)
+	- [TLDR qemu](./server/tldr-qemu.md)
 
 - [Database](./database/readme-database.md)
 	- [psql command](./database/psql_command.md)

@@ -38,7 +38,7 @@ the sequence of config file
 
 - `/etc/freeradius/3.0/clients.conf` <-- specify 'who' can connect, we need define it in this file
 - `/etc/freeradius/3.0/users` <-- [manual authentication, using file]
-- `/etc/freeradius/3.0/radiusd.conf` <-- this file enable sql module.
+- `/etc/freeradius/3.0/radiusd.conf:986` <-- this file enable sql module.
 - `/etc/freeradius/3.0/mods-available/sql` <-- this file is where we configure user/pass for sql module
 - `/etc/freeradius/3.0/sites-available/default` <-- sequence layer of login, 
 	- first, we filter-out all args

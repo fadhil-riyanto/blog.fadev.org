@@ -186,7 +186,7 @@ GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO radius;
 <ul>
 <li><code>/etc/freeradius/3.0/clients.conf</code> &lt;-- specify 'who' can connect, we need define it in this file</li>
 <li><code>/etc/freeradius/3.0/users</code> &lt;-- [manual authentication, using file]</li>
-<li><code>/etc/freeradius/3.0/radiusd.conf</code> &lt;-- this file enable sql module.</li>
+<li><code>/etc/freeradius/3.0/radiusd.conf:986</code> &lt;-- this file enable sql module.</li>
 <li><code>/etc/freeradius/3.0/mods-available/sql</code> &lt;-- this file is where we configure user/pass for sql module</li>
 <li><code>/etc/freeradius/3.0/sites-available/default</code> &lt;-- sequence layer of login,
 <ul>
@@ -265,22 +265,6 @@ GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO radius;
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 
