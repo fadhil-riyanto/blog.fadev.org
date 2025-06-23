@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Rust buffer advance - Fadhil Journal &amp; Notes</title>
+        <title>ELF struct datatype - Fadhil Journal &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -160,32 +160,52 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="rust-buffer-advance"><a class="header" href="#rust-buffer-advance">Rust buffer advance</a></h1>
-<p>this simple article show how buffer advance works</p>
-<pre><code class="language-rust">use bytes::Buf;
+                        <h1 id="elf-struct-datatype"><a class="header" href="#elf-struct-datatype">ELF struct datatype</a></h1>
+<p><img src="/assets/226c75ba603c0f75c0e287cb7cf1502cd4e7857fd7ceba8ef1d60013d08fd225da41b2432866136e0dfbe0152981a49dc106553e664968dade76f92b.png" alt="image" /></p>
+<p>recently, I had confusion about ELF datatype. let's look into elf.h</p>
+<p><img src="/assets/6fd29d1b194c2d80f6924f6326b6876cb023450367b66064c6debcfaffb38c05a83aa30637373852cc25a630d962542c0f47021636c205cf965ad4e6.png" alt="image" /></p>
+<p>see it?</p>
+<pre><code class="language-c">// 32 bit elf
+typedef __u32	Elf32_Word;
 
-fn main() {
-    let mut buf = &amp;b"hello world"[..];
-
-    println!("{}", String::from_utf8_lossy(buf.chunk()));
-
-    buf.advance(6);
-    println!("{}", String::from_utf8_lossy(buf.chunk()));
-}
+// 64 bit elf
+typedef __u32	Elf64_Word;
 </code></pre>
-<p>and the result</p>
-<pre><code class="language-rust">hello world
-world</code></pre>
+<p>why word? even in assembly says</p>
+<ul>
+<li>8 bit -&gt; byte</li>
+<li>16 bit -&gt; word</li>
+<li>32 bit -&gt; dword</li>
+<li>64 -&gt; qword</li>
+</ul>
+<p>why word (that is 16 bit), its uses u32 instead u16?</p>
+<h1 id="answer"><a class="header" href="#answer">answer</a></h1>
+<p>the key is portability. lets look at elf64 and elf32</p>
+<pre><code class="language-c">typedef __u32	Elf32_Word;
+typedef __u32	Elf64_Word;
+</code></pre>
+<p>keep in mind that word (in ELF) is 32 bit int. so we use this convention</p>
+<ul>
+<li>half -&gt; unsigned 16 bit</li>
+<li>word -&gt; unsigned 32 bit</li>
+<li>Xword -&gt; unsigned 64 bit</li>
+</ul>
+<p>also works for</p>
+<ul>
+<li>Shalf -&gt; signed 16 bit</li>
+<li>Sword -&gt; signed 32 bit</li>
+<li>Sxword -&gt; signed 64 bit</li>
+</ul>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../rust/into_box_error_analysis.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../sysprog/bits-data-model.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../rust/rust_RESP_get_line_analysis.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../rust/readme-rust-stuff.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -195,11 +215,11 @@ world</code></pre>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../rust/into_box_error_analysis.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../sysprog/bits-data-model.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../rust/rust_RESP_get_line_analysis.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../rust/readme-rust-stuff.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

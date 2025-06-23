@@ -1,9 +1,9 @@
 <!DOCTYPE HTML>
-<html lang="en" class="coal sidebar-visible" dir="ltr">
+<html lang="en" class="ayu sidebar-visible" dir="ltr">
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Fadhil Books &amp; Notes</title>
+        <title>Fadhil Journal &amp; Notes</title>
         <meta name="robots" content="noindex">
 
 
@@ -37,8 +37,8 @@
         <!-- Provide site root and default themes to javascript -->
         <script>
             const path_to_root = "";
-            const default_light_theme = "coal";
-            const default_dark_theme = "coal";
+            const default_light_theme = "ayu";
+            const default_dark_theme = "ayu";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -68,7 +68,7 @@
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
-            html.classList.remove('coal')
+            html.classList.remove('ayu')
             html.classList.add(theme);
             html.classList.add("js");
         </script>
@@ -126,7 +126,7 @@
                         </button>
                     </div>
 
-                    <h1 class="menu-title">Fadhil Books &amp; Notes</h1>
+                    <h1 class="menu-title">Fadhil Journal &amp; Notes</h1>
 
                     <div class="right-buttons">
                         <a href="print.html" title="Print this book" aria-label="Print this book">
@@ -1493,6 +1493,42 @@ int main() {
 <ul>
 <li>https://www.ibm.com/docs/en/zos/2.4.0?topic=options-lp64-ilp32#d41843e90</li>
 <li>LP64 also predefined, see https://gcc.gnu.org/onlinedocs/cpp/Common-Predefined-Macros.html</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="elf-struct-datatype"><a class="header" href="#elf-struct-datatype">ELF struct datatype</a></h1>
+<p><img src="sysprog//assets/226c75ba603c0f75c0e287cb7cf1502cd4e7857fd7ceba8ef1d60013d08fd225da41b2432866136e0dfbe0152981a49dc106553e664968dade76f92b.png" alt="image" /></p>
+<p>recently, I had confusion about ELF datatype. let's look into elf.h</p>
+<p><img src="sysprog//assets/6fd29d1b194c2d80f6924f6326b6876cb023450367b66064c6debcfaffb38c05a83aa30637373852cc25a630d962542c0f47021636c205cf965ad4e6.png" alt="image" /></p>
+<p>see it?</p>
+<pre><code class="language-c">// 32 bit elf
+typedef __u32	Elf32_Word;
+
+// 64 bit elf
+typedef __u32	Elf64_Word;
+</code></pre>
+<p>why word? even in assembly says</p>
+<ul>
+<li>8 bit -&gt; byte</li>
+<li>16 bit -&gt; word</li>
+<li>32 bit -&gt; dword</li>
+<li>64 -&gt; qword</li>
+</ul>
+<p>why word (that is 16 bit), its uses u32 instead u16?</p>
+<h1 id="answer"><a class="header" href="#answer">answer</a></h1>
+<p>the key is portability. lets look at elf64 and elf32</p>
+<pre><code class="language-c">typedef __u32	Elf32_Word;
+typedef __u32	Elf64_Word;
+</code></pre>
+<p>keep in mind that word (in ELF) is 32 bit int. so we use this convention</p>
+<ul>
+<li>half -&gt; unsigned 16 bit</li>
+<li>word -&gt; unsigned 32 bit</li>
+<li>Xword -&gt; unsigned 64 bit</li>
+</ul>
+<p>also works for</p>
+<ul>
+<li>Shalf -&gt; signed 16 bit</li>
+<li>Sword -&gt; signed 32 bit</li>
+<li>Sxword -&gt; signed 64 bit</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-stuff"><a class="header" href="#rust-stuff">Rust stuff</a></h1>
 <p>Welcome in this rust stuff section.</p>
@@ -4049,8 +4085,8 @@ sudo ip link set tap0 up
 sudo ip a
 
 </code></pre>
-<p>sudo chmod 666 setup-network.sh
-sh ./setup-network.sh</p>
+<p><code>sudo chmod 666 setup-network.sh</code>
+<code>sh ./setup-network.sh</code></p>
 <h1 id="running-qemu"><a class="header" href="#running-qemu">running qemu</a></h1>
 <p>run routeros</p>
 <pre><code class="language-sh">qemu-img convert -f raw -O qcow2 chr-7.19.1.img chr7.qcow2
@@ -4068,6 +4104,23 @@ qemu-system-x86_64 \
 	-device virtio-net-pci,netdev=net0,mac=02:11:2a:3b:ff:c3
 </code></pre>
 <p>run ubuntu server</p>
+<pre><code class="language-sh">qemu-img create -f qcow2 ubuntu-server.img 10G
+</code></pre>
+<p>saat install</p>
+<pre><code class="language-sh">qemu-system-x86_64 \
+	-enable-kvm \
+	-boot order=d \
+	-cdrom GANTI_NAMA_ISO_LOKASI_SAAT_INI.iso \
+	-drive file=ubuntu-server.img.img,format=qcow2 \
+	-m 4G \
+	-smp 4 \
+	-netdev user,id=net0,hostfwd=tcp::20022-:22,hostfwd=tcp::10000-:5432 \
+	-device e1000,netdev=net0 \
+	-netdev tap,id=net1,ifname=tap1,script=no,downscript=no \
+	-device virtio-net-pci,netdev=net1,mac=02:11:2a:3b:aa:c4 \
+	-vga virtio
+</code></pre>
+<p>run hasil image</p>
 <pre><code class="language-sh">qemu-system-x86_64 \
 	-enable-kvm \
 	-boot order=d \
@@ -4082,6 +4135,19 @@ qemu-system-x86_64 \
 	-device virtio-net-pci,netdev=net1,mac=02:11:2a:3b:aa:c4 \
 	-vga virtio \
 	-nographic
+</code></pre>
+<p>run chr</p>
+<pre><code class="language-sh">qemu-system-x86_64 \
+            -enable-kvm \
+            -smp 4 \
+            -m 256M \
+            -drive file=chr7.qcow2,format=qcow2 \
+            -boot order=d \
+            -net user,hostfwd=tcp::8291-:8291,hostfwd=tcp::30022-:22 \
+            -net nic \
+            -nographic \
+            -netdev tap,id=net0,ifname=tap0,script=no,downscript=no \
+            -device virtio-net-pci,netdev=net0,mac=02:11:2a:3b:ff:c3
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="database"><a class="header" href="#database">Database</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="psql-command"><a class="header" href="#psql-command">psql command</a></h1>

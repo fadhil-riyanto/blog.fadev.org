@@ -3,12 +3,12 @@ authors = ["fadhil riyanto"]
 language = "en"
 multilingual = true
 src = "src"
-title = "Fadhil Books & Notes"
+title = "Fadhil Journal & Notes"
 
 [output.html]
 mathjax-support = true
-default-theme = "coal"
-preferred-dark-theme = "coal"
+default-theme = "ayu"
+preferred-dark-theme = "ayu"
 git-repository-url = "https://github.com/fadhil-riyanto"
 
 [output.html.print]

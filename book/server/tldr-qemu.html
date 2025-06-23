@@ -1,9 +1,9 @@
 <!DOCTYPE HTML>
-<html lang="en" class="coal sidebar-visible" dir="ltr">
+<html lang="en" class="ayu sidebar-visible" dir="ltr">
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>TLDR qemu - Fadhil Books &amp; Notes</title>
+        <title>TLDR qemu - Fadhil Journal &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -36,8 +36,8 @@
         <!-- Provide site root and default themes to javascript -->
         <script>
             const path_to_root = "../";
-            const default_light_theme = "coal";
-            const default_dark_theme = "coal";
+            const default_light_theme = "ayu";
+            const default_dark_theme = "ayu";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc.js"></script>
@@ -67,7 +67,7 @@
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
-            html.classList.remove('coal')
+            html.classList.remove('ayu')
             html.classList.add(theme);
             html.classList.add("js");
         </script>
@@ -125,7 +125,7 @@
                         </button>
                     </div>
 
-                    <h1 class="menu-title">Fadhil Books &amp; Notes</h1>
+                    <h1 class="menu-title">Fadhil Journal &amp; Notes</h1>
 
                     <div class="right-buttons">
                         <a href="../print.html" title="Print this book" aria-label="Print this book">
@@ -179,8 +179,8 @@ sudo ip link set tap0 up
 sudo ip a
 
 </code></pre>
-<p>sudo chmod 666 setup-network.sh
-sh ./setup-network.sh</p>
+<p><code>sudo chmod 666 setup-network.sh</code>
+<code>sh ./setup-network.sh</code></p>
 <h1 id="running-qemu"><a class="header" href="#running-qemu">running qemu</a></h1>
 <p>run routeros</p>
 <pre><code class="language-sh">qemu-img convert -f raw -O qcow2 chr-7.19.1.img chr7.qcow2
@@ -198,6 +198,23 @@ qemu-system-x86_64 \
 	-device virtio-net-pci,netdev=net0,mac=02:11:2a:3b:ff:c3
 </code></pre>
 <p>run ubuntu server</p>
+<pre><code class="language-sh">qemu-img create -f qcow2 ubuntu-server.img 10G
+</code></pre>
+<p>saat install</p>
+<pre><code class="language-sh">qemu-system-x86_64 \
+	-enable-kvm \
+	-boot order=d \
+	-cdrom GANTI_NAMA_ISO_LOKASI_SAAT_INI.iso \
+	-drive file=ubuntu-server.img.img,format=qcow2 \
+	-m 4G \
+	-smp 4 \
+	-netdev user,id=net0,hostfwd=tcp::20022-:22,hostfwd=tcp::10000-:5432 \
+	-device e1000,netdev=net0 \
+	-netdev tap,id=net1,ifname=tap1,script=no,downscript=no \
+	-device virtio-net-pci,netdev=net1,mac=02:11:2a:3b:aa:c4 \
+	-vga virtio
+</code></pre>
+<p>run hasil image</p>
 <pre><code class="language-sh">qemu-system-x86_64 \
 	-enable-kvm \
 	-boot order=d \
@@ -212,6 +229,19 @@ qemu-system-x86_64 \
 	-device virtio-net-pci,netdev=net1,mac=02:11:2a:3b:aa:c4 \
 	-vga virtio \
 	-nographic
+</code></pre>
+<p>run chr</p>
+<pre><code class="language-sh">qemu-system-x86_64 \
+            -enable-kvm \
+            -smp 4 \
+            -m 256M \
+            -drive file=chr7.qcow2,format=qcow2 \
+            -boot order=d \
+            -net user,hostfwd=tcp::8291-:8291,hostfwd=tcp::30022-:22 \
+            -net nic \
+            -nographic \
+            -netdev tap,id=net0,ifname=tap0,script=no,downscript=no \
+            -device virtio-net-pci,netdev=net0,mac=02:11:2a:3b:ff:c3
 </code></pre>
 
                     </main>

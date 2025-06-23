@@ -20,9 +20,8 @@ sudo ip a
 
 ```
 
-sudo chmod 666 setup-network.sh
-sh ./setup-network.sh
-
+`sudo chmod 666 setup-network.sh`
+`sh ./setup-network.sh`
 
 # running qemu
 
@@ -45,6 +44,28 @@ qemu-system-x86_64 \
 ```
 
 run ubuntu server
+
+```sh
+qemu-img create -f qcow2 ubuntu-server.img 10G
+```
+
+saat install
+```sh
+qemu-system-x86_64 \
+	-enable-kvm \
+	-boot order=d \
+	-cdrom GANTI_NAMA_ISO_LOKASI_SAAT_INI.iso \
+	-drive file=ubuntu-server.img.img,format=qcow2 \
+	-m 4G \
+	-smp 4 \
+	-netdev user,id=net0,hostfwd=tcp::20022-:22,hostfwd=tcp::10000-:5432 \
+	-device e1000,netdev=net0 \
+	-netdev tap,id=net1,ifname=tap1,script=no,downscript=no \
+	-device virtio-net-pci,netdev=net1,mac=02:11:2a:3b:aa:c4 \
+	-vga virtio
+```
+
+run hasil image
 ```sh
 qemu-system-x86_64 \
 	-enable-kvm \
@@ -60,4 +81,20 @@ qemu-system-x86_64 \
 	-device virtio-net-pci,netdev=net1,mac=02:11:2a:3b:aa:c4 \
 	-vga virtio \
 	-nographic
+```
+
+
+run chr
+```sh
+qemu-system-x86_64 \
+            -enable-kvm \
+            -smp 4 \
+            -m 256M \
+            -drive file=chr7.qcow2,format=qcow2 \
+            -boot order=d \
+            -net user,hostfwd=tcp::8291-:8291,hostfwd=tcp::30022-:22 \
+            -net nic \
+            -nographic \
+            -netdev tap,id=net0,ifname=tap0,script=no,downscript=no \
+            -device virtio-net-pci,netdev=net0,mac=02:11:2a:3b:ff:c3
 ```

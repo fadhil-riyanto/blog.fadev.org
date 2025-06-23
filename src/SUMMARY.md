@@ -34,6 +34,7 @@
 	- [I/O format of integer types](./sysprog/inttypes.md)
 	- [types war](./sysprog/types-war.md)
 	- [bits data models](./sysprog/bits-data-model.md)
+	- [ELF struct datatype](./sysprog/ELF-struct-datatype.md)
 
 - [Rust stuff](./rust/readme-rust-stuff.md)
 	- [Rust Cursor & fseek concept](./rust/cursor_1.md)
