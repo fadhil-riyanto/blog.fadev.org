@@ -1,6 +1,7 @@
 # TLDR qemu
 
-setup-network.sh
+buat file namanya `setup-network.sh`, lalu isi dengan
+
 ```sh
 sudo ip link add br0-lan type bridge
 sudo ip tuntap add tap0 mode tap
@@ -19,6 +20,7 @@ sudo ip link set tap2 up
 sudo ip a
 
 ```
+
 lalu lakukan ini agar bisa di exec via terminal
 - `sudo chmod 666 setup-network.sh`
 - `sh ./setup-network.sh`
@@ -61,7 +63,7 @@ qemu-system-x86_64 \
 	-enable-kvm \
 	-boot order=d \
 	-cdrom GANTI_NAMA_ISO_UBUNTU.iso \
-	-drive file=ubuntu-server.img.img,format=qcow2 \
+	-drive file=ubuntu-server.img,format=qcow2 \
 	-m 4G \
 	-smp 4 \
 	-netdev user,id=net0,hostfwd=tcp::20022-:22,hostfwd=tcp::10000-:5432 \
@@ -84,7 +86,7 @@ port yg di forward:
 qemu-system-x86_64 \
 	-enable-kvm \
 	-boot order=d \
-	-drive file=ubuntu-server.img.img,format=qcow2 \
+	-drive file=ubuntu-server.img,format=qcow2 \
 	-m 4G \
 	-smp 4 \
 	-netdev user,id=net0,hostfwd=tcp::20022-:22,hostfwd=tcp::10302-:10302,hostfwd=tcp::10000-:5432 \

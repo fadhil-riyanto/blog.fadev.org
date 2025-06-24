@@ -4067,7 +4067,7 @@ note: execution is ordered by file name</p>
 </ul>
 <p>enjoy</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="tldr-qemu"><a class="header" href="#tldr-qemu">TLDR qemu</a></h1>
-<p>setup-network.sh</p>
+<p>buat file namanya <code>setup-network.sh</code>, lalu isi dengan</p>
 <pre><code class="language-sh">sudo ip link add br0-lan type bridge
 sudo ip tuntap add tap0 mode tap
 sudo ip tuntap add tap1 mode tap
@@ -4120,7 +4120,7 @@ qemu-system-x86_64 \
 	-enable-kvm \
 	-boot order=d \
 	-cdrom GANTI_NAMA_ISO_UBUNTU.iso \
-	-drive file=ubuntu-server.img.img,format=qcow2 \
+	-drive file=ubuntu-server.img,format=qcow2 \
 	-m 4G \
 	-smp 4 \
 	-netdev user,id=net0,hostfwd=tcp::20022-:22,hostfwd=tcp::10000-:5432 \
@@ -4140,7 +4140,7 @@ qemu-system-x86_64 \
 <pre><code class="language-sh">qemu-system-x86_64 \
 	-enable-kvm \
 	-boot order=d \
-	-drive file=ubuntu-server.img.img,format=qcow2 \
+	-drive file=ubuntu-server.img,format=qcow2 \
 	-m 4G \
 	-smp 4 \
 	-netdev user,id=net0,hostfwd=tcp::20022-:22,hostfwd=tcp::10302-:10302,hostfwd=tcp::10000-:5432 \
