@@ -4085,8 +4085,11 @@ sudo ip link set tap2 up
 sudo ip a
 
 </code></pre>
-<p><code>sudo chmod 666 setup-network.sh</code>
-<code>sh ./setup-network.sh</code></p>
+<p>lalu lakukan ini agar bisa di exec via terminal</p>
+<ul>
+<li><code>sudo chmod 666 setup-network.sh</code></li>
+<li><code>sh ./setup-network.sh</code></li>
+</ul>
 <h1 id="running-qemu"><a class="header" href="#running-qemu">running qemu</a></h1>
 <p>run routerOS</p>
 <pre><code class="language-sh"># download dahulu chr-7.19.1.img dari web resminya
@@ -4109,9 +4112,10 @@ qemu-system-x86_64 \
 	-device virtio-net-pci,netdev=net0,mac=02:11:2a:3b:ff:c3
 </code></pre>
 <h1 id="ubuntu-server"><a class="header" href="#ubuntu-server">ubuntu server</a></h1>
+<p>buat image (HDD virtual untuk os kita nanti)</p>
 <pre><code class="language-sh">qemu-img create -f qcow2 ubuntu-server.img 15G
 </code></pre>
-<p>saat install</p>
+<p>run iso (saat install)</p>
 <pre><code class="language-sh">qemu-system-x86_64 \
 	-enable-kvm \
 	-boot order=d \
@@ -4125,7 +4129,8 @@ qemu-system-x86_64 \
 	-device virtio-net-pci,netdev=net1,mac=02:11:2a:3b:aa:c4 \
 	-vga virtio
 </code></pre>
-<p>run hasil image (Default no graphic, jadi ntar kita ssh pakai <code>ssh -p 20022 root@127.0.0.1</code> biar bisa copas)</p>
+<p>lalu run hasil image (Default no graphic, jadi ntar kita ssh pakai <code>ssh -p 20022 root@127.0.0.1</code> biar bisa copas)</p>
+<p>dan juga kita optimalisasi dengan cara pakai nographic, tanpa cdrom, map port yang dibutuhkan saja</p>
 <p>port yg di forward:</p>
 <ul>
 <li>20022: untuk remote</li>
@@ -4145,6 +4150,7 @@ qemu-system-x86_64 \
 	-vga virtio \
 	-nographic
 </code></pre>
+<p>VPS KVM siap jadi bahan ujicoba, langsung test saja ke <code>ssh -p 20022 root@127.0.0.1</code></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="database"><a class="header" href="#database">Database</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="psql-command"><a class="header" href="#psql-command">psql command</a></h1>
 <h2 id="general"><a class="header" href="#general">General</a></h2>

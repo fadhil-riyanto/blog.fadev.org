@@ -19,9 +19,9 @@ sudo ip link set tap2 up
 sudo ip a
 
 ```
-
-`sudo chmod 666 setup-network.sh`
-`sh ./setup-network.sh`
+lalu lakukan ini agar bisa di exec via terminal
+- `sudo chmod 666 setup-network.sh`
+- `sh ./setup-network.sh`
 
 # running qemu
 
@@ -50,11 +50,12 @@ qemu-system-x86_64 \
 
 # ubuntu server
 
+buat image (HDD virtual untuk os kita nanti)
 ```sh
 qemu-img create -f qcow2 ubuntu-server.img 15G
 ```
 
-saat install
+run iso (saat install)
 ```sh
 qemu-system-x86_64 \
 	-enable-kvm \
@@ -70,7 +71,9 @@ qemu-system-x86_64 \
 	-vga virtio
 ```
 
-run hasil image (Default no graphic, jadi ntar kita ssh pakai `ssh -p 20022 root@127.0.0.1` biar bisa copas)
+lalu run hasil image (Default no graphic, jadi ntar kita ssh pakai `ssh -p 20022 root@127.0.0.1` biar bisa copas)
+
+dan juga kita optimalisasi dengan cara pakai nographic, tanpa cdrom, map port yang dibutuhkan saja
 
 port yg di forward:
 - 20022: untuk remote
@@ -91,3 +94,5 @@ qemu-system-x86_64 \
 	-vga virtio \
 	-nographic
 ```
+
+VPS KVM siap jadi bahan ujicoba, langsung test saja ke `ssh -p 20022 root@127.0.0.1`
