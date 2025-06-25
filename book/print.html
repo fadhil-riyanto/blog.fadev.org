@@ -4151,6 +4151,70 @@ qemu-system-x86_64 \
 	-nographic
 </code></pre>
 <p>VPS KVM siap jadi bahan ujicoba, langsung test saja ke <code>ssh -p 20022 root@127.0.0.1</code></p>
+<h1 id="experimental-jangan-dipakai"><a class="header" href="#experimental-jangan-dipakai">experimental (jangan dipakai)</a></h1>
+<p>untuk catatan bahan experimental UEFI, KVM, sama custom machine q35</p>
+<p>dgn iso</p>
+<pre><code class="language-sh">qemu-system-x86_64 \
+	-name guest=ubuntu22.04,debug-threads=on \
+	-accel kvm \
+	-cpu host \
+	-enable-kvm \
+	-boot order=d \
+	-cdrom a.iso \
+	-drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
+	-drive if=pflash,format=raw,file=OVMF_VARS_ubuntu_server_gpt.4m.fd \
+	-drive file=ubuntu-server.img,format=qcow2 \
+	-m 4G \
+	-smp 4 \
+	-netdev user,id=net0,hostfwd=tcp::20022-:22,hostfwd=tcp::10000-:5432 \
+	-:5432 \
+	-device e1000,netdev=net0 \
+	-netdev tap,id=net1,ifname=tap1,script=no,downscript=no \
+	-device virtio-net-pci,netdev=net1,mac=02:11:2a:3b:aa:c4 \
+	-vga virtio
+</code></pre>
+<p>working (part 2)</p>
+<pre><code class="language-sh">qemu-system-x86_64 \
+          -enable-kvm \
+          -boot order=d \
+          -drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
+          -drive if=pflash,format=raw,file=OVMF_VARS_ubuntu_server_gpt.4m.fd \
+          -drive file=ubuntu-server.img,format=qcow2 \
+          -m 4G \
+          -smp 4 \
+          -netdev user,id=net0,hostfwd=tcp::20022-:22,hostfwd=tcp::10000-:5432 \
+          -device e1000,netdev=net0 \
+          -netdev tap,id=net1,ifname=tap1,script=no,downscript=no \
+          -device virtio-net-pci,netdev=net1,mac=02:11:2a:3b:aa:c4 \
+          -vga virtio
+
+</code></pre>
+<p>no iso (headless)</p>
+<pre><code class="language-sh">qemu-system-x86_64 \
+	-name guest=ubuntu22.04,debug-threads=on \
+	-machine type=q35,accel=kvm \
+	-cpu host \
+	-enable-kvm \
+	-boot order=d \
+	-drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
+	-drive if=pflash,format=raw,file=OVMF_VARS_ubuntu_server_gpt.4m.fd \
+	-drive file=ubuntu-server.img,format=qcow2 \
+	-m 4G \
+	-smp 4 \
+	-netdev user,id=net0,hostfwd=tcp::20022-:22,hostfwd=tcp::10000-:5432 \
+	-device e1000,netdev=net0 \
+	-netdev tap,id=net1,ifname=tap1,script=no,downscript=no \
+	-device virtio-net-pci,netdev=net1,mac=02:11:2a:3b:aa:c4
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="qemu-q35-vs-i440fx"><a class="header" href="#qemu-q35-vs-i440fx">qemu q35 vs i440fx</a></h1>
+<h1 id="q35"><a class="header" href="#q35">q35</a></h1>
+<p>this is lspci output from ubuntu server</p>
+<p><img src="server//assets/8c531e238d5e74cca661ec7c1ce674003edc513ac3918c5a8c51d0630c208ac312febbddcab71736d49725ab0ccec1325a5802a3557607c04704ac4b.png" alt="image" /></p>
+<h1 id="i440fx"><a class="header" href="#i440fx">i440fx</a></h1>
+<p><img src="server//assets/38c547bee31795b4bf3cc8f09e815bfe96c1fe6962b2e9310dd5b001dce4ad4a527603935dde4fa453a218d23e1fa4aa41b97476cb788164f86f2acf.png" alt="image" /></p>
+<p>http://wiki.qemu.org/images/4/4e/Q35.pdf</p>
+<p>http://wiki.qemu.org/images/f/f6/PCIvsPCIe.pdf</p>
+<p>http://git.qemu.org/?p=qemu.git;a=blob;f=docs/pcie.txt</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="database"><a class="header" href="#database">Database</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="psql-command"><a class="header" href="#psql-command">psql command</a></h1>
 <h2 id="general"><a class="header" href="#general">General</a></h2>
@@ -6088,6 +6152,22 @@ endl;
 
         </div>
 
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
 
 
 

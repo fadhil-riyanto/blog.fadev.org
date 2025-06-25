@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Rust tokio-postgres connection config example - Fadhil Journal &amp; Notes</title>
+        <title>qemu q35 vs i440fx - Fadhil Journal &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -160,33 +160,25 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="rust-tokio-postgres-connection-config-example"><a class="header" href="#rust-tokio-postgres-connection-config-example">Rust tokio-postgres connection config example</a></h1>
-<p>first, this is example from the documentation</p>
-<pre><code class="language-rust"> let (client, conn_ctx) = tokio_postgres::connect("host=localhost user=postgres", NoTls);</code></pre>
-<p>then, we want to convert it into config like ctx. <a href="https://docs.rs/postgres/latest/postgres/config/struct.Config.html">see this</a></p>
-<pre><code class="language-rust">use tokio_postgres::{NoTls, Error};
-
-#[tokio::main]
-async fn main() {
-        let mut config = postgres::config::Config::new();
-        config.host("localhost");
-        config.user("fadhil_riyanto");
-        config.password("1921684338");
-
-        let client_ret = config.connect(NoTls);
-
-
-}</code></pre>
+                        <h1 id="qemu-q35-vs-i440fx"><a class="header" href="#qemu-q35-vs-i440fx">qemu q35 vs i440fx</a></h1>
+<h1 id="q35"><a class="header" href="#q35">q35</a></h1>
+<p>this is lspci output from ubuntu server</p>
+<p><img src="/assets/8c531e238d5e74cca661ec7c1ce674003edc513ac3918c5a8c51d0630c208ac312febbddcab71736d49725ab0ccec1325a5802a3557607c04704ac4b.png" alt="image" /></p>
+<h1 id="i440fx"><a class="header" href="#i440fx">i440fx</a></h1>
+<p><img src="/assets/38c547bee31795b4bf3cc8f09e815bfe96c1fe6962b2e9310dd5b001dce4ad4a527603935dde4fa453a218d23e1fa4aa41b97476cb788164f86f2acf.png" alt="image" /></p>
+<p>http://wiki.qemu.org/images/4/4e/Q35.pdf</p>
+<p>http://wiki.qemu.org/images/f/f6/PCIvsPCIe.pdf</p>
+<p>http://git.qemu.org/?p=qemu.git;a=blob;f=docs/pcie.txt</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../rust/rust-tonic-grpc-build.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../server/tldr-qemu.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../math/readme-math.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../database/readme-database.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -196,11 +188,11 @@ async fn main() {
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../rust/rust-tonic-grpc-build.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../server/tldr-qemu.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../math/readme-math.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../database/readme-database.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

@@ -90,6 +90,7 @@
 	- [Linux netplan](./server/netplan.md)
 	- [sshfs](./server/sshfs.md)
 	- [TLDR qemu](./server/tldr-qemu.md)
+	- [qemu q35 vs i440fx](./server/qemu-q35-i440fx.md)
 
 - [Database](./database/readme-database.md)
 	- [psql command](./database/psql_command.md)
