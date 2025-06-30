@@ -246,11 +246,11 @@ qemu-system-x86_64 \
 </code></pre>
 <p>VPS KVM siap jadi bahan ujicoba, langsung test saja ke <code>ssh -p 20022 root@127.0.0.1</code></p>
 <h1 id="experimental-jangan-dipakai"><a class="header" href="#experimental-jangan-dipakai">experimental (jangan dipakai)</a></h1>
-<p>untuk catatan bahan experimental UEFI, KVM, sama custom machine q35</p>
+<p>untuk catatan pribadi bahan experimental UEFI, KVM, sama custom machine q35</p>
 <p>dgn iso</p>
 <pre><code class="language-sh">qemu-system-x86_64 \
 	-name guest=ubuntu22.04,debug-threads=on \
-	-accel kvm \
+	-machine type=pc,accel=kvm \
 	-cpu host \
 	-enable-kvm \
 	-boot order=d \
@@ -260,12 +260,31 @@ qemu-system-x86_64 \
 	-drive file=ubuntu-server.img,format=qcow2 \
 	-m 4G \
 	-smp 4 \
-	-netdev user,id=net0,hostfwd=tcp::20022-:22,hostfwd=tcp::10000-:5432 \
-	-:5432 \
+	-netdev user,id=net0,hostfwd=tcp::20022-:22,hostfwd=tcp::10302-:10302,hostfwd=tcp::10000-:5432 \
 	-device e1000,netdev=net0 \
 	-netdev tap,id=net1,ifname=tap1,script=no,downscript=no \
 	-device virtio-net-pci,netdev=net1,mac=02:11:2a:3b:aa:c4 \
 	-vga virtio
+</code></pre>
+<p>custom machine chipset PC, KVM, UEFI headless</p>
+<pre><code class="language-sh">qemu-system-x86_64 \
+	-name guest=ubuntu22.04,debug-threads=on \
+	-machine type=pc,accel=kvm \
+	-cpu host \
+	-enable-kvm \
+	-boot order=d \
+	-cdrom a.iso \
+	-drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
+	-drive if=pflash,format=raw,file=OVMF_VARS_ubuntu_server_gpt.4m.fd \
+	-drive file=ubuntu-server.img,format=qcow2 \
+	-m 4G \
+	-smp 4 \
+	-netdev user,id=net0,hostfwd=tcp::20022-:22,hostfwd=tcp::10302-:10302,hostfwd=tcp::10000-:5432 \
+	-device e1000,netdev=net0 \
+	-netdev tap,id=net1,ifname=tap1,script=no,downscript=no \
+	-device virtio-net-pci,netdev=net1,mac=02:11:2a:3b:aa:c4 \
+	-vga virtio \
+	-nographic
 </code></pre>
 <p>working (part 2)</p>
 <pre><code class="language-sh">qemu-system-x86_64 \
@@ -330,22 +349,6 @@ qemu-system-x86_64 \
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

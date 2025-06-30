@@ -35,6 +35,7 @@
 	- [types war](./sysprog/types-war.md)
 	- [bits data models](./sysprog/bits-data-model.md)
 	- [ELF struct datatype](./sysprog/ELF-struct-datatype.md)
+	- [finding .shstrtab section](./sysprog/finding-shstrtab.md)
 
 - [Rust stuff](./rust/readme-rust-stuff.md)
 	- [Rust Cursor & fseek concept](./rust/cursor_1.md)
@@ -54,6 +55,7 @@
 	- [kumpulan soal Matematika Diskrit](./math/kumpulan_soal_matematika_diskrit.md)
 	- [asal usul rumus sudut vektor](./math/degree_vector_formula_origin.md)
 	- [transformasi elementer](./math/transformasi_elementer.md)
+	- [matrix invers](./math/matrix-invers.md)
 
 - [Cryptography](./crypto/readme-crypto.md)
 	- [Alur koneksi ke RPC server telegram](./crypto/alur_koneksi_RPC_telegram.md)

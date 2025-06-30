@@ -1530,6 +1530,69 @@ typedef __u32	Elf64_Word;
 <li>Sword -&gt; signed 32 bit</li>
 <li>Sxword -&gt; signed 64 bit</li>
 </ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="finding-shstrtab-section"><a class="header" href="#finding-shstrtab-section">finding .shstrtab section</a></h1>
+<p>first, we need to look at some struct in order to find shstrtab on ELF file</p>
+<p><img src="sysprog//assets/Ai9OqOB.png" alt="gambar" /></p>
+<p>this is ELF header</p>
+<pre><code class="language-c">typedef struct
+{
+  unsigned char	e_ident[EI_NIDENT];	/* Magic number and other info */
+  Elf64_Half	e_type;			/* Object file type */
+  Elf64_Half	e_machine;		/* Architecture */
+  Elf64_Word	e_version;		/* Object file version */
+  Elf64_Addr	e_entry;		/* Entry point virtual address */
+  Elf64_Off	e_phoff;		/* Program header table file offset */
+  Elf64_Off	e_shoff;		/* Section header table file offset */
+  Elf64_Word	e_flags;		/* Processor-specific flags */
+  Elf64_Half	e_ehsize;		/* ELF header size in bytes */
+  Elf64_Half	e_phentsize;		/* Program header table entry size */
+  Elf64_Half	e_phnum;		/* Program header table entry count */
+  Elf64_Half	e_shentsize;		/* Section header table entry size */
+  Elf64_Half	e_shnum;		/* Section header table entry count */
+  Elf64_Half	e_shstrndx;		/* Section header string table index */
+} Elf64_Ehdr;
+</code></pre>
+<p>this is section header</p>
+<pre><code class="language-c">typedef struct
+{
+  Elf64_Word	sh_name;		/* Section name (string tbl index) */
+  Elf64_Word	sh_type;		/* Section type */
+  Elf64_Xword	sh_flags;		/* Section flags */
+  Elf64_Addr	sh_addr;		/* Section virtual addr at execution */
+  Elf64_Off	sh_offset;		/* Section file offset */
+  Elf64_Xword	sh_size;		/* Section size in bytes */
+  Elf64_Word	sh_link;		/* Link to another section */
+  Elf64_Word	sh_info;		/* Additional section information */
+  Elf64_Xword	sh_addralign;		/* Section alignment */
+  Elf64_Xword	sh_entsize;		/* Entry size if section holds table */
+} Elf64_Shdr;
+</code></pre>
+<h1 id="finding-it"><a class="header" href="#finding-it">finding it</a></h1>
+<p>first, we need obtain how much we need to walk, to enter the start of <code>section header</code>, this is can be done by</p>
+<p><img src="sysprog//assets/2fc55efb4f13ecf2b520cff13c74658508b6f5b06c2244bf48e46720c40a8f945266fb626d4d7afbb540079996bbd3ff04fe4842f1579ff2d12ccfe8.png" alt="image" /></p>
+<p>keep your mind in "Start of section headers"</p>
+<h1 id="access-the-array"><a class="header" href="#access-the-array">access the array</a></h1>
+<p>because this is just start, so its started on index 0, luckly the ELF header tell me, what index <code>.shstrtab</code> is located, look at "Section header string table index". its 36</p>
+<p>in C you may doing</p>
+<pre><code class="language-c">Elf64_Shdr data = /* any data */;
+dump(data[36]);
+</code></pre>
+<p>but in binary level, which what you should do is calculating how far away we need to walk from start  to index of 36, which can be done by <code>36 * sizeof(Elf64_Shdr)</code>, in this case, this is same as <code>36 * ehdr-&gt;e_shentsize</code>, then add it with initial offset where Shdr start off.</p>
+<p>final formula
+<code>ehdr-&gt;e_shoff + (shstrtab_idx * ehdr-&gt;e_shentsize)</code></p>
+<h1 id="tests"><a class="header" href="#tests">tests</a></h1>
+<p>this is how shdr at index 36 look like (at binary view)</p>
+<p><img src="sysprog//assets/b4101386f834b7ee3be61da47e7d3204970dc31288edbd1e6a54551ed23b6818a398e69e5ffa8f9e0906f4401733ce4cdd5249a910ad1754e3016e3c.png" alt="image" /></p>
+<p>lets map it into C code for better readibility
+<img src="sysprog//assets/c9d50158491b3f0ab8f1a8f5bbdade5d3b74124f3f8d8eb3f3ac18a1bd43307145c0a16434319a073691cbaa436e549dba971708353d737bdc71aeab.png" alt="image" /></p>
+<p>we know that, in current section header array, <code>.shstrtab</code> located on 67577 far away from 0, that is location of actual <code>.shstrtab</code>, the Shdr only create a "list of section table, what section in this binary".</p>
+<p>also, <code>374</code> is the size, how many memory you need to spend for this a bunch of string.</p>
+<p>lets jump to <code>67577</code></p>
+<h1 id="xxd-stuff"><a class="header" href="#xxd-stuff">xxd stuff</a></h1>
+<p><img src="sysprog//assets/830d5efac23b007e78db56747a4d1898bcaa931e09bf065986f90f21e684271f41152f00a39f53e75be8b4449ed3762a8f0e501be8d1c53768908394.png" alt="image" /></p>
+<p>found!</p>
+<h1 id="future"><a class="header" href="#future">future</a></h1>
+<p>you just need to map <code>Elf64_Shdr</code> on section <code>sh_name</code> which this data. <code>sh_name</code> is a offset how much we walk from 67577 until we found \0</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-stuff"><a class="header" href="#rust-stuff">Rust stuff</a></h1>
 <p>Welcome in this rust stuff section.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-cursor-how-it-works"><a class="header" href="#rust-cursor-how-it-works">Rust cursor, How it works</a></h1>
@@ -2347,6 +2410,11 @@ notasinya: \( p \leftrightarrow q \)</p>
 <li>\( H_{ij}^{(k)} \): hitung dulu konstanta k dikali baris j, lalu hasilnya ditambah baris i, simpan jg hasilnya ke baris i</li>
 <li>\( H_{i \space \space \space \space \space \space \space j}^{\space \space (k) \space \space \space (z)}(A)_i \): intinya, baris ke i dikalikan dgn k, kalau udah lanjut hitung baris j dikalikan z. setelah itu hasilnya tentusaja simpan ke i hasil itung2 an tadi.</li>
 </ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="matrix-invers"><a class="header" href="#matrix-invers">matrix invers</a></h1>
+<p>for 2x2</p>
+<p>\[ A^{-1} = \frac{1}{(a \cdot d) - (b \cdot c)} \begin{bmatrix} d &amp; -b &amp; \newline -c &amp; a \end{bmatrix}\]</p>
+<p>for 3x3
+\[ A^{-1} = \frac{1}{\det A} \text{adj } A \]</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="cryptography"><a class="header" href="#cryptography">Cryptography</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="alur-konek-ke-rpc-server-telegram"><a class="header" href="#alur-konek-ke-rpc-server-telegram">Alur konek ke RPC server telegram</a></h1>
 <p>step ini dibuat oleh seseorang dari masa lalu sekitar tahun 2020 yang akunnya telah terhapus, credit kepada Butthx</p>
@@ -4152,11 +4220,11 @@ qemu-system-x86_64 \
 </code></pre>
 <p>VPS KVM siap jadi bahan ujicoba, langsung test saja ke <code>ssh -p 20022 root@127.0.0.1</code></p>
 <h1 id="experimental-jangan-dipakai"><a class="header" href="#experimental-jangan-dipakai">experimental (jangan dipakai)</a></h1>
-<p>untuk catatan bahan experimental UEFI, KVM, sama custom machine q35</p>
+<p>untuk catatan pribadi bahan experimental UEFI, KVM, sama custom machine q35</p>
 <p>dgn iso</p>
 <pre><code class="language-sh">qemu-system-x86_64 \
 	-name guest=ubuntu22.04,debug-threads=on \
-	-accel kvm \
+	-machine type=pc,accel=kvm \
 	-cpu host \
 	-enable-kvm \
 	-boot order=d \
@@ -4166,12 +4234,31 @@ qemu-system-x86_64 \
 	-drive file=ubuntu-server.img,format=qcow2 \
 	-m 4G \
 	-smp 4 \
-	-netdev user,id=net0,hostfwd=tcp::20022-:22,hostfwd=tcp::10000-:5432 \
-	-:5432 \
+	-netdev user,id=net0,hostfwd=tcp::20022-:22,hostfwd=tcp::10302-:10302,hostfwd=tcp::10000-:5432 \
 	-device e1000,netdev=net0 \
 	-netdev tap,id=net1,ifname=tap1,script=no,downscript=no \
 	-device virtio-net-pci,netdev=net1,mac=02:11:2a:3b:aa:c4 \
 	-vga virtio
+</code></pre>
+<p>custom machine chipset PC, KVM, UEFI headless</p>
+<pre><code class="language-sh">qemu-system-x86_64 \
+	-name guest=ubuntu22.04,debug-threads=on \
+	-machine type=pc,accel=kvm \
+	-cpu host \
+	-enable-kvm \
+	-boot order=d \
+	-cdrom a.iso \
+	-drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
+	-drive if=pflash,format=raw,file=OVMF_VARS_ubuntu_server_gpt.4m.fd \
+	-drive file=ubuntu-server.img,format=qcow2 \
+	-m 4G \
+	-smp 4 \
+	-netdev user,id=net0,hostfwd=tcp::20022-:22,hostfwd=tcp::10302-:10302,hostfwd=tcp::10000-:5432 \
+	-device e1000,netdev=net0 \
+	-netdev tap,id=net1,ifname=tap1,script=no,downscript=no \
+	-device virtio-net-pci,netdev=net1,mac=02:11:2a:3b:aa:c4 \
+	-vga virtio \
+	-nographic
 </code></pre>
 <p>working (part 2)</p>
 <pre><code class="language-sh">qemu-system-x86_64 \
@@ -6152,22 +6239,6 @@ endl;
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 
