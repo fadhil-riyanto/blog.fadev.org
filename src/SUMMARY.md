@@ -36,6 +36,8 @@
 	- [bits data models](./sysprog/bits-data-model.md)
 	- [ELF struct datatype](./sysprog/ELF-struct-datatype.md)
 	- [finding .shstrtab section](./sysprog/finding-shstrtab.md)
+	- [print binary using shift and masking](./sysprog/print_binary_using_shift_and_masking.md)
+	- [all about ASan & debug symbol](./sysprog/all_about_asan_debug_symbol.md)
 
 - [Rust stuff](./rust/readme-rust-stuff.md)
 	- [Rust Cursor & fseek concept](./rust/cursor_1.md)
@@ -93,6 +95,7 @@
 	- [sshfs](./server/sshfs.md)
 	- [TLDR qemu](./server/tldr-qemu.md)
 	- [qemu q35 vs i440fx](./server/qemu-q35-i440fx.md)
+	- [qemu & dedicated nic + macvtap](./server/qemu-dedicated-nic-macvtap.md)
 
 - [Database](./database/readme-database.md)
 	- [psql command](./database/psql_command.md)

@@ -99,8 +99,28 @@ qemu-system-x86_64 \
 
 VPS KVM siap jadi bahan ujicoba, langsung test saja ke `ssh -p 20022 root@127.0.0.1`
 
-# experimental (jangan dipakai)
+# experimental (jangan dipakai / do not use)
 untuk catatan pribadi bahan experimental UEFI, KVM, sama custom machine q35 
+
+# experimental 1 (safest)
+```sh
+qemu-system-x86_64 \
+    -name guest=ubuntu22.04,debug-threads=on \
+    -machine type=pc,accel=kvm \
+    -cpu host \
+    -enable-kvm \
+    -boot order=d \
+    -drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
+    -drive if=pflash,format=raw,file=OVMF_VARS_ubuntu_server_gpt.4m.fd \
+    -drive file=ubuntu-server.img,format=qcow2 \
+    -m 4G \
+    -smp 4 \
+    -netdev user,id=net0,hostfwd=tcp::20022-:22,hostfwd=tcp::10000-:5432 \
+    -device virtio-net-pci,netdev=net0 \
+    -netdev tap,id=net1,ifname=tap1,script=no,downscript=no \
+    -device virtio-net-pci,netdev=net1,mac=02:11:2a:3b:aa:c4
+
+```
 
 dgn iso
 
@@ -133,7 +153,6 @@ qemu-system-x86_64 \
 	-cpu host \
 	-enable-kvm \
 	-boot order=d \
-	-cdrom a.iso \
 	-drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
 	-drive if=pflash,format=raw,file=OVMF_VARS_ubuntu_server_gpt.4m.fd \
 	-drive file=ubuntu-server.img,format=qcow2 \

@@ -1593,6 +1593,165 @@ dump(data[36]);
 <p>found!</p>
 <h1 id="future"><a class="header" href="#future">future</a></h1>
 <p>you just need to map <code>Elf64_Shdr</code> on section <code>sh_name</code> which this data. <code>sh_name</code> is a offset how much we walk from 67577 until we found \0</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="print-binary-using-shift-and-masking"><a class="header" href="#print-binary-using-shift-and-masking">print binary using shift and masking</a></h1>
+<h2 id="8-bit-int"><a class="header" href="#8-bit-int">8 bit int</a></h2>
+<p>lets play with small number first, imagine we want print 200 into binary, which is <code>0b11001000</code>, this is how I do</p>
+<h3 id="step-0"><a class="header" href="#step-0">step 0</a></h3>
+<p>identify how many bits we need?
+say, char has 1 byte, int has 4 byte, long long has 8 byte. just multiply it with 8. you'll get the bit.</p>
+<ul>
+<li>1 * 8 = 8 bit</li>
+<li>4 * 8 = 32 bit</li>
+<li>8 * 8 = 64 bit</li>
+</ul>
+<h3 id="step-1"><a class="header" href="#step-1">step 1</a></h3>
+<p>mask, lets see this pattern</p>
+<pre><code class="language-txt">0b11001000
+0b10000000
+---------- &amp;
+0b10000000
+</code></pre>
+<p>see? <code>0b10000000</code>, which is <code>0x80</code>, what about <code>0x8</code>? its <code>0x1000</code>. find that? by shift left the bit, we turn <code>0x8</code> into <code>0x80</code></p>
+<p>lets follow this pattern</p>
+<ul>
+<li>0x8 &lt;&lt; 0  = 0x8 			(4 bit)</li>
+<li>0x8 &lt;&lt; 4  = 0x80     		(8 bit) &lt;--- this is mask</li>
+<li>0x8 &lt;&lt; 8  = 0x800     	(12 bit)</li>
+<li>0x8 &lt;&lt; 12 = 0x8000     	(16 bit) &lt;--- this is mask</li>
+<li>0x8 &lt;&lt; 16 = 0x80000  		(20 bit)</li>
+</ul>
+<p>when I want mask 8 bit int? the mask is 0x80 because its perfectly fit <code>0b10000000</code>, if I want mask 16 bit int? the mask is 0x8000, because its fit <code>0b1000000000000000</code> 16 bit int, can filter the MSB</p>
+<p>conlusion:
+the mask that we will use, is</p>
+<p><code>0x8 &lt;&lt; BIT_SIZE - 4</code></p>
+<p>SAY, <code>BIT_SIZE</code> is 8 (eight bit int), 8 - 4 is 4, <code>0x8 &lt;&lt; 4 = 0x80</code>
+same thing with</p>
+<p>BIT_SIZE is 16, then 16 - 4 = 12, <code>0x8 &lt;&lt; 12 = 0x8000</code></p>
+<p>okay, the mask has been clearly explained</p>
+<h3 id="step-3-shifting"><a class="header" href="#step-3-shifting">step 3, shifting</a></h3>
+<p>say, I have 8 bit int. <code>0b11100011</code>, when I mask it</p>
+<h4 id="n--1"><a class="header" href="#n--1">n = 1</a></h4>
+<pre><code class="language-txt">0b11100011
+0b10000000
+---------- &amp;
+0b10000000
+</code></pre>
+<p>lets continue shift to left</p>
+<h4 id="n--2"><a class="header" href="#n--2">n = 2</a></h4>
+<pre><code class="language-txt">0b11000110
+0b10000000
+---------- &amp;
+0b10000000
+</code></pre>
+<h4 id="n--3"><a class="header" href="#n--3">n = 3</a></h4>
+<pre><code class="language-txt">0b10001100
+0b10000000
+---------- &amp;
+0b10000000
+</code></pre>
+<h4 id="n--4"><a class="header" href="#n--4">n = 4</a></h4>
+<pre><code class="language-txt">0b00011000
+0b10000000
+---------- &amp;
+0b0000000
+</code></pre>
+<h4 id="n--5"><a class="header" href="#n--5">n = 5</a></h4>
+<pre><code class="language-txt">0b00110000
+0b10000000
+---------- &amp;
+0b00000000
+</code></pre>
+<h4 id="n--6"><a class="header" href="#n--6">n = 6</a></h4>
+<pre><code class="language-txt">0b01100000
+0b10000000
+---------- &amp;
+0b00000000
+</code></pre>
+<h4 id="n--7"><a class="header" href="#n--7">n = 7</a></h4>
+<pre><code class="language-txt">0b11000000
+0b10000000
+---------- &amp;
+0b10000000
+</code></pre>
+<h4 id="n--8"><a class="header" href="#n--8">n = 8</a></h4>
+<pre><code class="language-txt">0b10000000
+0b10000000
+---------- &amp;
+0b10000000
+</code></pre>
+<h3 id="obtaining-result"><a class="header" href="#obtaining-result">obtaining result</a></h3>
+<p>lets see this pattern</p>
+<p><code>0b10000000 0b10000000 0b10000000 0b0000000 0b00000000 0b00000000 0b10000000 0b10000000</code></p>
+<p>if we use if else, to match whatever one byte is same as 0b10000000 or not, we will get result
+<code>1110 0011</code></p>
+<p>YES, we successfully turn int 8 bit into binary presentation</p>
+<h3 id="example-1"><a class="header" href="#example-1">example</a></h3>
+<pre><code class="language-c">#include &lt;stddef.h&gt;
+#include &lt;stdio.h&gt;
+
+int main() {
+        long long x = 3;
+
+        size_t BIT_SIZE = sizeof(x) * 8;
+        printf("size: %zu bit\n", BIT_SIZE);
+
+        long long big_mask = (0x8ULL &lt;&lt; (BIT_SIZE - 4));
+
+        int counter = 0;
+        for (int i = 0; i &lt; BIT_SIZE; i++) {
+                if (i % 4 == 0 &amp;&amp; i != 0) {
+                        printf("  ");
+                }
+
+                if (i % 16 == 0 &amp;&amp; i != 0) {
+                        printf("\n");
+                }
+
+                
+                long int y = x &amp; big_mask;
+                printf("%d ", y == big_mask ? 1 : 0);
+                x = x &lt;&lt; 1;
+        }
+       
+}
+</code></pre>
+<p><img src="sysprog//assets/f4c49ae0150291afc943b1c0d3adb4786a0768a73c6aea239966843d52ce7c036f588724916621a890b4a2a6798ca26bfd7d92e8cb0081f203ea742f.png" alt="image" /></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="all-about-asan--debug-symbol"><a class="header" href="#all-about-asan--debug-symbol">all about ASan &amp; debug symbol</a></h1>
+<h2 id="prerequisites"><a class="header" href="#prerequisites">prerequisites</a></h2>
+<p>if you use clang infrastructure</p>
+<ul>
+<li><a href="https://man.archlinux.org/man/llvm-symbolizer.1.en">llvm-symbolizer</a>: without this, asan offset at debug output will be binary offset, not actual source code. I will demonstrate it</li>
+<li>clang</li>
+</ul>
+<p>if you use GCC</p>
+<ul>
+<li>addr2line (usually preinstalled)</li>
+<li>gcc</li>
+</ul>
+<p>the tools</p>
+<ul>
+<li>gdb (optional)</li>
+<li><a href="https://github.com/google/sanitizers.git">address sanitizer</a></li>
+</ul>
+<h2 id="testing"><a class="header" href="#testing">testing</a></h2>
+<p>very simple memory buggy program</p>
+<pre><code class="language-c">#include &lt;stdlib.h&gt;
+#include &lt;stdio.h&gt;
+
+int main() {
+        char* data = malloc(1024);
+        printf("%s", data);
+        return 0;
+}
+</code></pre>
+<p><code>gcc ./leak.c -o leak -g -fsanitize=address</code></p>
+<p>here buggy result
+<img src="sysprog//assets/08c0c6679e504c218e3ea81a7a77b8113be47f6f1051d4ee8a309e861e279d04f7b62f86d5869c61686070f49d3b2721989b5ba0cd9fa4e97e797002.png" alt="image" /></p>
+<p>lets compile it with clang
+<code>clang ./leak.c -o leak -g -fsanitize=address</code></p>
+<p><img src="sysprog//assets/e7127c07db68b7f553bb1e16e9527a2acd0e61c8e53fd6adda3ea10ff960327a91028e0581ef0b02653e3b75d4e586818af5ae6b3a3c81fbd409adc8.png" alt="image" /></p>
+<p>after llvm-symbolizer installed
+<img src="sysprog//assets/0a689ab3274a41163d066078f133ed63f1cc7316538b018e94490a106f7b3e8d8395616fb744109e4b91b9f072f9426a0a1e4a0f0a32055106216181.png" alt="image" /></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-stuff"><a class="header" href="#rust-stuff">Rust stuff</a></h1>
 <p>Welcome in this rust stuff section.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-cursor-how-it-works"><a class="header" href="#rust-cursor-how-it-works">Rust cursor, How it works</a></h1>
@@ -2419,7 +2578,7 @@ notasinya: \( p \leftrightarrow q \)</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="alur-konek-ke-rpc-server-telegram"><a class="header" href="#alur-konek-ke-rpc-server-telegram">Alur konek ke RPC server telegram</a></h1>
 <p>step ini dibuat oleh seseorang dari masa lalu sekitar tahun 2020 yang akunnya telah terhapus, credit kepada Butthx</p>
 <p>`originals written in telegram chat, but because I want to preserve it. I write it here</p>
-<h2 id="step-1"><a class="header" href="#step-1">step 1:</a></h2>
+<h2 id="step-1-1"><a class="header" href="#step-1-1">step 1:</a></h2>
 <p>Bikin koneksi ke server telegram pakai TCP yang tersedia (disini gwa pakai TCPIntermediate)</p>
 <h2 id="step-2"><a class="header" href="#step-2">step 2:</a></h2>
 <p>Bikin random nonce dengan value int128</p>
@@ -4219,8 +4378,26 @@ qemu-system-x86_64 \
 	-nographic
 </code></pre>
 <p>VPS KVM siap jadi bahan ujicoba, langsung test saja ke <code>ssh -p 20022 root@127.0.0.1</code></p>
-<h1 id="experimental-jangan-dipakai"><a class="header" href="#experimental-jangan-dipakai">experimental (jangan dipakai)</a></h1>
+<h1 id="experimental-jangan-dipakai--do-not-use"><a class="header" href="#experimental-jangan-dipakai--do-not-use">experimental (jangan dipakai / do not use)</a></h1>
 <p>untuk catatan pribadi bahan experimental UEFI, KVM, sama custom machine q35</p>
+<h1 id="experimental-1-safest"><a class="header" href="#experimental-1-safest">experimental 1 (safest)</a></h1>
+<pre><code class="language-sh">qemu-system-x86_64 \
+    -name guest=ubuntu22.04,debug-threads=on \
+    -machine type=pc,accel=kvm \
+    -cpu host \
+    -enable-kvm \
+    -boot order=d \
+    -drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
+    -drive if=pflash,format=raw,file=OVMF_VARS_ubuntu_server_gpt.4m.fd \
+    -drive file=ubuntu-server.img,format=qcow2 \
+    -m 4G \
+    -smp 4 \
+    -netdev user,id=net0,hostfwd=tcp::20022-:22,hostfwd=tcp::10000-:5432 \
+    -device virtio-net-pci,netdev=net0 \
+    -netdev tap,id=net1,ifname=tap1,script=no,downscript=no \
+    -device virtio-net-pci,netdev=net1,mac=02:11:2a:3b:aa:c4
+
+</code></pre>
 <p>dgn iso</p>
 <pre><code class="language-sh">qemu-system-x86_64 \
 	-name guest=ubuntu22.04,debug-threads=on \
@@ -4247,7 +4424,6 @@ qemu-system-x86_64 \
 	-cpu host \
 	-enable-kvm \
 	-boot order=d \
-	-cdrom a.iso \
 	-drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
 	-drive if=pflash,format=raw,file=OVMF_VARS_ubuntu_server_gpt.4m.fd \
 	-drive file=ubuntu-server.img,format=qcow2 \
@@ -4302,6 +4478,89 @@ qemu-system-x86_64 \
 <p>http://wiki.qemu.org/images/4/4e/Q35.pdf</p>
 <p>http://wiki.qemu.org/images/f/f6/PCIvsPCIe.pdf</p>
 <p>http://git.qemu.org/?p=qemu.git;a=blob;f=docs/pcie.txt</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="qemu--dedicated-nic--macvtap"><a class="header" href="#qemu--dedicated-nic--macvtap">qemu &amp; dedicated nic + macvtap</a></h1>
+<p>docs ini memahas solusi agar bisa akses tap (dari vm) tetapi hw yang diakses adalah nic asli, diusahakan tanpa bridge dan NAT NAT</p>
+<p>ADA 2 strategi</p>
+<ul>
+<li>add iface fisik ke bridge, lalu attach bridge tersebut ke vm.</li>
+<li>pakai macvtap, dengan cara meredirect packet yang datang, ke arah tap device menggunakan fd (file descriptor). kita akan (ab)use option <code>-net</code> tap di qemu</li>
+</ul>
+<p>strategi lain (tidak direkomendasikan, diluar topik macvtap)</p>
+<ul>
+<li>membuat virtual eth pair, redirect pakai iptables</li>
+<li>pakai -netdev user (somewhat slow, need triage)</li>
+</ul>
+<h1 id="normal"><a class="header" href="#normal">normal</a></h1>
+<p>bagian ini tanpa macvtap ataupun hal hal lain dahulu, pure qemu bridging</p>
+<p>configuration</p>
+<ul>
+<li>eth1: mostly WAN</li>
+<li>eth2: tap</li>
+</ul>
+<pre><code class="language-sh">qemu-system-x86_64 \
+    -enable-kvm \
+    -smp 4 -m 256M \
+    -drive file=chr7.qcow2,format=qcow2 \
+    -boot order=d \
+    -net user,hostfwd=tcp::8291-:8291,hostfwd=tcp::10022-:22 \
+    -net nic \
+    -netdev tap,id=net0,ifname=tap0,script=no,downscript=no \
+    -device virtio-net-pci,netdev=net0,mac=02:11:2a:3b:ff:c3 \
+    -nographic
+</code></pre>
+<pre><code class="language-sh">qemu-system-x86_64 \
+	-name guest=ubuntu22.04 \
+	-machine type=pc,accel=kvm \
+	-cpu host -m 4G -smp 4 \
+	-enable-kvm \
+	-boot order=d \
+	-drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
+	-drive if=pflash,format=raw,file=OVMF_VARS_ubuntu_server_gpt.4m.fd \
+	-drive file=ubuntu-server.img,format=qcow2 \
+	-netdev user,id=net0,hostfwd=tcp::20022-:22,hostfwd=tcp::10000-:5432,hostfwd=tcp::10302-:10302 \
+	-device virtio-net-pci,netdev=net0 \
+	-netdev tap,id=net1,ifname=tap1,script=no,downscript=no \
+	-device virtio-net-pci,netdev=net1,mac=02:11:2a:3b:aa:c4 \
+	-nographic
+</code></pre>
+<p>network stack note:</p>
+<ul>
+<li>ens3: come from qemu bridge (for ssh purpose)</li>
+<li>ens4: come from tap1 (connected to bridge, internal lan)</li>
+</ul>
+<p>netplan configuration</p>
+<pre><code class="language-yaml">network:
+  version: 2
+  ethernets:
+    ens4:
+      addresses:
+        - 192.168.1.2/24
+      routes:
+        - to: default
+          via: 192.168.1.1
+    ens3:
+      dhcp4: true
+</code></pre>
+<pre><code class="language-sh">// ip a 
+
+2: ens3: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 52:54:00:12:34:56 brd ff:ff:ff:ff:ff:ff
+    altname enp0s3
+    inet 10.0.2.15/24 metric 100 brd 10.0.2.255 scope global dynamic ens3
+       valid_lft 86314sec preferred_lft 86314sec
+    inet6 fec0::5054:ff:fe12:3456/64 scope site dynamic mngtmpaddr noprefixroute 
+       valid_lft 86317sec preferred_lft 14317sec
+    inet6 fe80::5054:ff:fe12:3456/64 scope link 
+       valid_lft forever preferred_lft forever
+3: ens4: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 02:11:2a:3b:aa:c4 brd ff:ff:ff:ff:ff:ff
+    altname enp0s4
+    inet 192.168.1.2/24 brd 192.168.1.255 scope global ens4
+       valid_lft forever preferred_lft forever
+    inet6 fe80::11:2aff:fe3b:aac4/64 scope link 
+       valid_lft forever preferred_lft forever
+
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="database"><a class="header" href="#database">Database</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="psql-command"><a class="header" href="#psql-command">psql command</a></h1>
 <h2 id="general"><a class="header" href="#general">General</a></h2>

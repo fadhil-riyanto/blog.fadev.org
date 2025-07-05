@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>TLDR qemu - Fadhil Journal &amp; Notes</title>
+        <title>qemu &amp; dedicated nic + macvtap - Fadhil Journal &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -160,192 +160,99 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="tldr-qemu"><a class="header" href="#tldr-qemu">TLDR qemu</a></h1>
-<p>buat file namanya <code>setup-network.sh</code>, lalu isi dengan</p>
-<pre><code class="language-sh">sudo ip link add br0-lan type bridge
-sudo ip tuntap add tap0 mode tap
-sudo ip tuntap add tap1 mode tap
-sudo ip tuntap add tap2 mode tap
-
-sudo ip link set tap0 master br0-lan
-sudo ip link set tap1 master br0-lan
-sudo ip link set tap2 master br0-lan
-
-sudo ip link set br0-lan up
-sudo ip link set tap0 up
-sudo ip link set tap1 up
-sudo ip link set tap2 up
-
-sudo ip a
-
-</code></pre>
-<p>lalu lakukan ini agar bisa di exec via terminal</p>
+                        <h1 id="qemu--dedicated-nic--macvtap"><a class="header" href="#qemu--dedicated-nic--macvtap">qemu &amp; dedicated nic + macvtap</a></h1>
+<p>docs ini memahas solusi agar bisa akses tap (dari vm) tetapi hw yang diakses adalah nic asli, diusahakan tanpa bridge dan NAT NAT</p>
+<p>ADA 2 strategi</p>
 <ul>
-<li><code>sudo chmod 666 setup-network.sh</code></li>
-<li><code>sh ./setup-network.sh</code></li>
+<li>add iface fisik ke bridge, lalu attach bridge tersebut ke vm.</li>
+<li>pakai macvtap, dengan cara meredirect packet yang datang, ke arah tap device menggunakan fd (file descriptor). kita akan (ab)use option <code>-net</code> tap di qemu</li>
 </ul>
-<h1 id="running-qemu"><a class="header" href="#running-qemu">running qemu</a></h1>
-<p>run routerOS</p>
-<pre><code class="language-sh"># download dahulu chr-7.19.1.img dari web resminya
-qemu-img convert -f raw -O qcow2 chr-7.19.1.img chr7.qcow2
-
-# run chr
-# port yang dipakai
-# - 8291: untuk winbox
-# - 30022: untuk keperluan sftp, utak atik file hotspot nya
-qemu-system-x86_64 \
-	-enable-kvm \
-	-smp 4 \
-	-m 256M \
-	-drive file=chr7.qcow2,format=qcow2 \
-	-boot order=d \
-	-net user,hostfwd=tcp::8291-:8291,hostfwd=tcp::30022-:22 \
-	-net nic \
-	-nographic \
-	-netdev tap,id=net0,ifname=tap0,script=no,downscript=no \
-	-device virtio-net-pci,netdev=net0,mac=02:11:2a:3b:ff:c3
-</code></pre>
-<h1 id="ubuntu-server"><a class="header" href="#ubuntu-server">ubuntu server</a></h1>
-<p>buat image (HDD virtual untuk os kita nanti)</p>
-<pre><code class="language-sh">qemu-img create -f qcow2 ubuntu-server.img 15G
-</code></pre>
-<p>run iso (saat install)</p>
-<pre><code class="language-sh">qemu-system-x86_64 \
-	-enable-kvm \
-	-boot order=d \
-	-cdrom GANTI_NAMA_ISO_UBUNTU.iso \
-	-drive file=ubuntu-server.img,format=qcow2 \
-	-m 4G \
-	-smp 4 \
-	-netdev user,id=net0,hostfwd=tcp::20022-:22,hostfwd=tcp::10000-:5432 \
-	-device e1000,netdev=net0 \
-	-netdev tap,id=net1,ifname=tap1,script=no,downscript=no \
-	-device virtio-net-pci,netdev=net1,mac=02:11:2a:3b:aa:c4 \
-	-vga virtio
-</code></pre>
-<p>lalu run hasil image (Default no graphic, jadi ntar kita ssh pakai <code>ssh -p 20022 root@127.0.0.1</code> biar bisa copas)</p>
-<p>dan juga kita optimalisasi dengan cara pakai nographic, tanpa cdrom, map port yang dibutuhkan saja</p>
-<p>port yg di forward:</p>
+<p>strategi lain (tidak direkomendasikan, diluar topik macvtap)</p>
 <ul>
-<li>20022: untuk remote</li>
-<li>10302: untuk keperluan ngoding laravel</li>
-<li>10000: untuk keperluan postgresql, siapa tahu mau di remote via adminer, pgadmin dari local, atau cuman psql dll</li>
+<li>membuat virtual eth pair, redirect pakai iptables</li>
+<li>pakai -netdev user (somewhat slow, need triage)</li>
+</ul>
+<h1 id="normal"><a class="header" href="#normal">normal</a></h1>
+<p>bagian ini tanpa macvtap ataupun hal hal lain dahulu, pure qemu bridging</p>
+<p>configuration</p>
+<ul>
+<li>eth1: mostly WAN</li>
+<li>eth2: tap</li>
 </ul>
 <pre><code class="language-sh">qemu-system-x86_64 \
-	-enable-kvm \
-	-boot order=d \
-	-drive file=ubuntu-server.img,format=qcow2 \
-	-m 4G \
-	-smp 4 \
-	-netdev user,id=net0,hostfwd=tcp::20022-:22,hostfwd=tcp::10302-:10302,hostfwd=tcp::10000-:5432 \
-	-device e1000,netdev=net0 \
-	-netdev tap,id=net1,ifname=tap1,script=no,downscript=no \
-	-device virtio-net-pci,netdev=net1,mac=02:11:2a:3b:aa:c4 \
-	-vga virtio \
-	-nographic
-</code></pre>
-<p>VPS KVM siap jadi bahan ujicoba, langsung test saja ke <code>ssh -p 20022 root@127.0.0.1</code></p>
-<h1 id="experimental-jangan-dipakai--do-not-use"><a class="header" href="#experimental-jangan-dipakai--do-not-use">experimental (jangan dipakai / do not use)</a></h1>
-<p>untuk catatan pribadi bahan experimental UEFI, KVM, sama custom machine q35</p>
-<h1 id="experimental-1-safest"><a class="header" href="#experimental-1-safest">experimental 1 (safest)</a></h1>
-<pre><code class="language-sh">qemu-system-x86_64 \
-    -name guest=ubuntu22.04,debug-threads=on \
-    -machine type=pc,accel=kvm \
-    -cpu host \
     -enable-kvm \
+    -smp 4 -m 256M \
+    -drive file=chr7.qcow2,format=qcow2 \
     -boot order=d \
-    -drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
-    -drive if=pflash,format=raw,file=OVMF_VARS_ubuntu_server_gpt.4m.fd \
-    -drive file=ubuntu-server.img,format=qcow2 \
-    -m 4G \
-    -smp 4 \
-    -netdev user,id=net0,hostfwd=tcp::20022-:22,hostfwd=tcp::10000-:5432 \
-    -device virtio-net-pci,netdev=net0 \
-    -netdev tap,id=net1,ifname=tap1,script=no,downscript=no \
-    -device virtio-net-pci,netdev=net1,mac=02:11:2a:3b:aa:c4
-
+    -net user,hostfwd=tcp::8291-:8291,hostfwd=tcp::10022-:22 \
+    -net nic \
+    -netdev tap,id=net0,ifname=tap0,script=no,downscript=no \
+    -device virtio-net-pci,netdev=net0,mac=02:11:2a:3b:ff:c3 \
+    -nographic
 </code></pre>
-<p>dgn iso</p>
 <pre><code class="language-sh">qemu-system-x86_64 \
-	-name guest=ubuntu22.04,debug-threads=on \
+	-name guest=ubuntu22.04 \
 	-machine type=pc,accel=kvm \
-	-cpu host \
-	-enable-kvm \
-	-boot order=d \
-	-cdrom a.iso \
-	-drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
-	-drive if=pflash,format=raw,file=OVMF_VARS_ubuntu_server_gpt.4m.fd \
-	-drive file=ubuntu-server.img,format=qcow2 \
-	-m 4G \
-	-smp 4 \
-	-netdev user,id=net0,hostfwd=tcp::20022-:22,hostfwd=tcp::10302-:10302,hostfwd=tcp::10000-:5432 \
-	-device e1000,netdev=net0 \
-	-netdev tap,id=net1,ifname=tap1,script=no,downscript=no \
-	-device virtio-net-pci,netdev=net1,mac=02:11:2a:3b:aa:c4 \
-	-vga virtio
-</code></pre>
-<p>custom machine chipset PC, KVM, UEFI headless</p>
-<pre><code class="language-sh">qemu-system-x86_64 \
-	-name guest=ubuntu22.04,debug-threads=on \
-	-machine type=pc,accel=kvm \
-	-cpu host \
+	-cpu host -m 4G -smp 4 \
 	-enable-kvm \
 	-boot order=d \
 	-drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
 	-drive if=pflash,format=raw,file=OVMF_VARS_ubuntu_server_gpt.4m.fd \
 	-drive file=ubuntu-server.img,format=qcow2 \
-	-m 4G \
-	-smp 4 \
-	-netdev user,id=net0,hostfwd=tcp::20022-:22,hostfwd=tcp::10302-:10302,hostfwd=tcp::10000-:5432 \
-	-device e1000,netdev=net0 \
+	-netdev user,id=net0,hostfwd=tcp::20022-:22,hostfwd=tcp::10000-:5432,hostfwd=tcp::10302-:10302 \
+	-device virtio-net-pci,netdev=net0 \
 	-netdev tap,id=net1,ifname=tap1,script=no,downscript=no \
 	-device virtio-net-pci,netdev=net1,mac=02:11:2a:3b:aa:c4 \
-	-vga virtio \
 	-nographic
 </code></pre>
-<p>working (part 2)</p>
-<pre><code class="language-sh">qemu-system-x86_64 \
-          -enable-kvm \
-          -boot order=d \
-          -drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
-          -drive if=pflash,format=raw,file=OVMF_VARS_ubuntu_server_gpt.4m.fd \
-          -drive file=ubuntu-server.img,format=qcow2 \
-          -m 4G \
-          -smp 4 \
-          -netdev user,id=net0,hostfwd=tcp::20022-:22,hostfwd=tcp::10000-:5432 \
-          -device e1000,netdev=net0 \
-          -netdev tap,id=net1,ifname=tap1,script=no,downscript=no \
-          -device virtio-net-pci,netdev=net1,mac=02:11:2a:3b:aa:c4 \
-          -vga virtio
-
+<p>network stack note:</p>
+<ul>
+<li>ens3: come from qemu bridge (for ssh purpose)</li>
+<li>ens4: come from tap1 (connected to bridge, internal lan)</li>
+</ul>
+<p>netplan configuration</p>
+<pre><code class="language-yaml">network:
+  version: 2
+  ethernets:
+    ens4:
+      addresses:
+        - 192.168.1.2/24
+      routes:
+        - to: default
+          via: 192.168.1.1
+    ens3:
+      dhcp4: true
 </code></pre>
-<p>no iso (headless)</p>
-<pre><code class="language-sh">qemu-system-x86_64 \
-	-name guest=ubuntu22.04,debug-threads=on \
-	-machine type=q35,accel=kvm \
-	-cpu host \
-	-enable-kvm \
-	-boot order=d \
-	-drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
-	-drive if=pflash,format=raw,file=OVMF_VARS_ubuntu_server_gpt.4m.fd \
-	-drive file=ubuntu-server.img,format=qcow2 \
-	-m 4G \
-	-smp 4 \
-	-netdev user,id=net0,hostfwd=tcp::20022-:22,hostfwd=tcp::10000-:5432 \
-	-device e1000,netdev=net0 \
-	-netdev tap,id=net1,ifname=tap1,script=no,downscript=no \
-	-device virtio-net-pci,netdev=net1,mac=02:11:2a:3b:aa:c4
+<pre><code class="language-sh">// ip a 
+
+2: ens3: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 52:54:00:12:34:56 brd ff:ff:ff:ff:ff:ff
+    altname enp0s3
+    inet 10.0.2.15/24 metric 100 brd 10.0.2.255 scope global dynamic ens3
+       valid_lft 86314sec preferred_lft 86314sec
+    inet6 fec0::5054:ff:fe12:3456/64 scope site dynamic mngtmpaddr noprefixroute 
+       valid_lft 86317sec preferred_lft 14317sec
+    inet6 fe80::5054:ff:fe12:3456/64 scope link 
+       valid_lft forever preferred_lft forever
+3: ens4: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 02:11:2a:3b:aa:c4 brd ff:ff:ff:ff:ff:ff
+    altname enp0s4
+    inet 192.168.1.2/24 brd 192.168.1.255 scope global ens4
+       valid_lft forever preferred_lft forever
+    inet6 fe80::11:2aff:fe3b:aac4/64 scope link 
+       valid_lft forever preferred_lft forever
+
 </code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../server/sshfs.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../server/qemu-q35-i440fx.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../server/qemu-q35-i440fx.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../database/readme-database.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -355,11 +262,11 @@ qemu-system-x86_64 \
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../server/sshfs.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../server/qemu-q35-i440fx.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../server/qemu-q35-i440fx.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../database/readme-database.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
