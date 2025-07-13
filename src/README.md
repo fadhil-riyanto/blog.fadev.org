@@ -12,6 +12,11 @@ Found a mistake? You can freely DM me on [telegram](https://t.me/fadhil_riyanto)
 - [fadhil.riyanto@gnuweeb.org](mailto:fadhil.riyanto@gnuweeb.org) (alternative-1)
 - [xor@3xploit.dev](mailto:xor@3xploit.dev) (alternative-2)
 
+# other intresting site 
+- [x86_64 Instruction Set Reference](https://x86.fadev.org/)
+- [some nice book collection (WIP)](https://libs.fadev.org/)
+- [git.fadev.org (WIP)](https://libs.fadev.org/)
+
 # Language
 Because I'm indonesian, some part of this website may written in indonesian. But I will try to translating it into english language.
 

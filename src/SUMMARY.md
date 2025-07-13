@@ -38,6 +38,8 @@
 	- [finding .shstrtab section](./sysprog/finding-shstrtab.md)
 	- [print binary using shift and masking](./sysprog/print_binary_using_shift_and_masking.md)
 	- [all about ASan & debug symbol](./sysprog/all_about_asan_debug_symbol.md)
+	- [asm volatile](./sysprog/asm_volatile.md)
+	- [amd64 endianness](./sysprog/AMD64_endianness.md)
 
 - [Rust stuff](./rust/readme-rust-stuff.md)
 	- [Rust Cursor & fseek concept](./rust/cursor_1.md)
@@ -49,6 +51,10 @@
 	- [Rust build logging](./rust/rust-build-logging.md)
 	- [Rust tonic gRPC server](./rust/rust-tonic-grpc-build.md)
 	- [Rust tokio-postgres connection config example](./rust/rust-tokio-connection-config-example.md)
+	- [miri rust setup](./rust/miri-rust.md)
+
+- [Embedtronics](./embedtronics/readme-embedtronics.md)
+	- [picotool build](./embedtronics/picotool-build.md)
 
 - [Math](./math/readme-math.md)
 	- [Set formula](./math/set_formula_1.md)
@@ -96,6 +102,7 @@
 	- [TLDR qemu](./server/tldr-qemu.md)
 	- [qemu q35 vs i440fx](./server/qemu-q35-i440fx.md)
 	- [qemu & dedicated nic + macvtap](./server/qemu-dedicated-nic-macvtap.md)
+	- [alpine install ssh + firefox lite qemu](./server/alpine-firefox-lite.md)
 
 - [Database](./database/readme-database.md)
 	- [psql command](./database/psql_command.md)
@@ -136,3 +143,7 @@
 	- [catatan subnetting from scratch](./other/subnetting_from_scratch.md)
 	- [set PATH fish shell](./other/set_path_fish_shell.md)
 	- [tree](./other/tree.md)
+	- [clang-format](./other/clang-format.md)
+
+- [Gallery](./gallery/gallery-readme.md)
+	- [july-2025](./gallery/july-2025.md)

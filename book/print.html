@@ -172,6 +172,12 @@
 <li><a href="mailto:fadhil.riyanto@gnuweeb.org">fadhil.riyanto@gnuweeb.org</a> (alternative-1)</li>
 <li><a href="mailto:xor@3xploit.dev">xor@3xploit.dev</a> (alternative-2)</li>
 </ul>
+<h1 id="other-intresting-site"><a class="header" href="#other-intresting-site">other intresting site</a></h1>
+<ul>
+<li><a href="https://x86.fadev.org/">x86_64 Instruction Set Reference</a></li>
+<li><a href="https://libs.fadev.org/">some nice book collection (WIP)</a></li>
+<li><a href="https://libs.fadev.org/">git.fadev.org (WIP)</a></li>
+</ul>
 <h1 id="language"><a class="header" href="#language">Language</a></h1>
 <p>Because I'm indonesian, some part of this website may written in indonesian. But I will try to translating it into english language.</p>
 <div class="warning">
@@ -1752,6 +1758,61 @@ int main() {
 <p><img src="sysprog//assets/e7127c07db68b7f553bb1e16e9527a2acd0e61c8e53fd6adda3ea10ff960327a91028e0581ef0b02653e3b75d4e586818af5ae6b3a3c81fbd409adc8.png" alt="image" /></p>
 <p>after llvm-symbolizer installed
 <img src="sysprog//assets/0a689ab3274a41163d066078f133ed63f1cc7316538b018e94490a106f7b3e8d8395616fb744109e4b91b9f072f9426a0a1e4a0f0a32055106216181.png" alt="image" /></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="asm-volatile"><a class="header" href="#asm-volatile">asm volatile</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="amd64-endianness"><a class="header" href="#amd64-endianness">amd64 endianness</a></h1>
+<p>I'll show you, the little endian (that used in most x86-64 linux systems), let go deeper</p>
+<p>I have very simple program, the program</p>
+<pre><code class="language-c">#include &lt;stdio.h&gt;
+
+typedef unsigned char byte_ptr;
+
+void show_bytes(byte_ptr *data, size_t n) {
+        int i = 0;
+        for(; i &lt; n; i++) {
+                printf("%p -&gt; %.2x\n",  &amp;data[i], data[i]);
+        }
+
+        printf("\n");
+}
+
+int main() {
+        unsigned long da = 0x5894F93;
+        show_bytes((unsigned char*)&amp;da, 8);
+}
+</code></pre>
+<p>as you can see, this is what we write</p>
+<pre><code>hexadecimal	: 0x05 0x89 0x4F 0x93
+dummy addr  : 0    1    2    3
+</code></pre>
+<p>the result</p>
+<pre><code>0x7fff0fe80d10 -&gt; 93
+0x7fff0fe80d11 -&gt; 4f
+0x7fff0fe80d12 -&gt; 89
+0x7fff0fe80d13 -&gt; 05
+0x7fff0fe80d14 -&gt; 00
+0x7fff0fe80d15 -&gt; 00
+0x7fff0fe80d16 -&gt; 00
+0x7fff0fe80d17 -&gt; 00
+</code></pre>
+<p>wow, it reversed!, because</p>
+<pre><code>hexcode      : 0x93 0x4f 0x89 0x05 0x00 0x00 0x00 0x00
+dummy addr   : 0    1    2    3    4    5    6    7
+               ^~~ MSB                            ^~~ LSB
+</code></pre>
+<p>(read it first from right, to left, as you read binary code)
+WOW, its least endian first, so the machine is <code>little-endian</code></p>
+<p>you can also check out my lscpu result
+<img src="sysprog//assets/cb27cc742ecc2180a209e7c7e35460caf57e4d3354e8a1c1b0056a66365d64f1f9b419000ab32ea67b58ef467e860f098f4a239813be980dc17e7573.png" alt="image" /></p>
+<p><img src="sysprog//assets/b482f061fbd71bb226383393d5343644a6bf830c9c43ac2ac45380889b93986d110b6c192b18208f71e9cfba970939fd8004466e719577e245116607.png" alt="image" /></p>
+<h2 id="rust"><a class="header" href="#rust">rust</a></h2>
+<p>result
+<img src="sysprog//assets/168766015cce02d62b18bb5339cd98f30dd83b729fbece7e291a97bcd758d1bfccc4a96c3d97f772b334d83b09a091c4a495abc30921582e8a95b291.png" alt="image" /></p>
+<h1 id="big-endian"><a class="header" href="#big-endian">big endian</a></h1>
+<p>because most of machine is little-endian, even RP2040 ARM chip, I'll demontrate it (with some stuff)</p>
+<p>first, I'll use miri</p>
+<h2 id="miri"><a class="header" href="#miri">miri</a></h2>
+<p>this unique tool can emulate big endian
+<img src="sysprog//assets/c33299af4f933e3251ee297c402e8474c8786599200d7b8675187d3d3b880b0ece7f37b8d3c5028c577f16e44d80cde36cba17ed83a776c41bd55492.png" alt="image" /></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-stuff"><a class="header" href="#rust-stuff">Rust stuff</a></h1>
 <p>Welcome in this rust stuff section.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-cursor-how-it-works"><a class="header" href="#rust-cursor-how-it-works">Rust cursor, How it works</a></h1>
@@ -2105,6 +2166,27 @@ async fn main() {
 
 
 }</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="miri-rust-setup"><a class="header" href="#miri-rust-setup">miri rust setup</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="embedtronics"><a class="header" href="#embedtronics">Embedtronics</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="picotool-build"><a class="header" href="#picotool-build">picotool build</a></h1>
+<h2 id="os-setup"><a class="header" href="#os-setup">os setup</a></h2>
+<pre><code class="language-sh">sudo pacman -S cmake arm-none-eabi-gcc arm-none-eabi-newlib
+</code></pre>
+<h2 id="setup-picosdk"><a class="header" href="#setup-picosdk">setup picosdk</a></h2>
+<pre><code class="language-sh">git clone https://github.com/raspberrypi/pico-sdk.git
+cd pico-sdk
+git submodule update --init
+export PICO_SDK_PATH=$PWD
+</code></pre>
+<h2 id="build-picotool"><a class="header" href="#build-picotool">build picotool</a></h2>
+<pre><code class="language-sh">git clone https://github.com/raspberrypi/picotool.git
+cd picotool
+mkdir build
+cd build
+cmake ..
+make
+</code></pre>
+<p>if you get cmake error minimum etc..., use <code>cmake .. -DCMAKE_POLICY_VERSION_MINIMUM=3.5</code> instead</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="math"><a class="header" href="#math">Math</a></h1>
 <p>Welcome in this section.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="set-operations-formula"><a class="header" href="#set-operations-formula">Set operations formula</a></h1>
@@ -4561,6 +4643,22 @@ qemu-system-x86_64 \
        valid_lft forever preferred_lft forever
 
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="alpine-install-ssh--firefox-lite-qemu"><a class="header" href="#alpine-install-ssh--firefox-lite-qemu">alpine install SSH + firefox lite qemu</a></h1>
+<h2 id="create-image"><a class="header" href="#create-image">create image</a></h2>
+<pre><code class="language-sh">qemu-img create -f qcow2 alpine-client.qcow2 2G
+</code></pre>
+<h2 id="run"><a class="header" href="#run">RUN</a></h2>
+<p>THIS is dry run</p>
+<pre><code class="language-sh">qemu-system-x86_64 \
+	-enable-kvm \
+	-m 1G -smp 4 -cpu host \
+	-boot d \
+	-drive file=alpine-client.qcow2,format=qcow2 \
+	-cdrom ./iso/alpine-virt-3.21.3-x86_64.iso \
+	-netdev user,id=net0,hostfwd=tcp::30022-:22 \
+	-device virtio-net-pci,netdev=net0
+	-vga virtio
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="database"><a class="header" href="#database">Database</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="psql-command"><a class="header" href="#psql-command">psql command</a></h1>
 <h2 id="general"><a class="header" href="#general">General</a></h2>
@@ -6138,7 +6236,7 @@ Switch&gt;
 </ul>
 <h3 id="advanced-switch-cisco-command"><a class="header" href="#advanced-switch-cisco-command">Advanced switch cisco command</a></h3>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="tealinux-qemu-promp--testing"><a class="header" href="#tealinux-qemu-promp--testing">Tealinux qemu promp &amp; testing</a></h1>
-<h2 id="create-image"><a class="header" href="#create-image">create image</a></h2>
+<h2 id="create-image-1"><a class="header" href="#create-image-1">create image</a></h2>
 <p><code>qemu-img create -f qcow2 &lt;NAME&gt;.img 45G</code></p>
 <ul>
 <li>Change 45G with your desired size</li>
@@ -6480,6 +6578,16 @@ endl;
 " " &lt;&lt; head-&gt;next-&gt;next-&gt;val &lt;&lt; endl;
 
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="clang-format"><a class="header" href="#clang-format">clang-format</a></h1>
+<p>here my clang format</p>
+<pre><code>IndentWidth: 8
+Cpp11BracedListStyle: false
+</code></pre>
+<p>filename: <code>.clang-format</code></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="gallery"><a class="header" href="#gallery">Gallery</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="july-2025"><a class="header" href="#july-2025">july-2025</a></h1>
+<h3 id="compiling-arm-gnu-abi"><a class="header" href="#compiling-arm-gnu-abi">compiling arm gnu abi</a></h3>
+<p><img src="gallery//assets/15fd0bb09202c24cb3b940c8806134c187da160f89abf4cd8b3bbf4cca3ee74d20c17ca74aea0b44066d9a2d4ab90f58aea12e27324a1a61c72d8db0.png" alt="image" /></p>
 
                     </main>
 
