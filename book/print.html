@@ -2167,6 +2167,29 @@ async fn main() {
 
 }</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="miri-rust-setup"><a class="header" href="#miri-rust-setup">miri rust setup</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="backend"><a class="header" href="#backend">Backend</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="jwt"><a class="header" href="#jwt">JWT</a></h1>
+<p>nice article:</p>
+<ul>
+<li><a href="https://auth0.com/docs/secure/tokens/json-web-tokens/json-web-token-claims">https://auth0.com/docs/secure/tokens/json-web-tokens/json-web-token-claims</a></li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="laravel-named-routes"><a class="header" href="#laravel-named-routes">laravel named routes</a></h1>
+<p>ref: <a href="https://laravel.com/docs/12.x/routing#named-routes">https://laravel.com/docs/12.x/routing#named-routes</a></p>
+<p>examples</p>
+<pre><code class="language-php">Route::prefix('auth')-&gt;group(function () {
+    Route::prefix('google')-&gt;group(function () {
+        Route::get('/redirect', [Controllers\GoogleAuthController::class, 'redirect'])
+            -&gt;name("auth.google.redirect");
+        Route::get('/callback', [Controllers\GoogleAuthController::class, 'callback'])
+            -&gt;name("auth.google.callback");;
+    });
+
+    /* .. */
+});
+</code></pre>
+<p>acces it (in blade)</p>
+<pre><code class="language-php">&lt;h1&gt;{{ route("auth.google.callback"); }}&lt;/h1&gt;
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="embedtronics"><a class="header" href="#embedtronics">Embedtronics</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="picotool-build"><a class="header" href="#picotool-build">picotool build</a></h1>
 <h2 id="os-setup"><a class="header" href="#os-setup">os setup</a></h2>
@@ -4658,6 +4681,21 @@ qemu-system-x86_64 \
 	-netdev user,id=net0,hostfwd=tcp::30022-:22 \
 	-device virtio-net-pci,netdev=net0
 	-vga virtio
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="resizing-qemu-image"><a class="header" href="#resizing-qemu-image">resizing qemu image</a></h1>
+<p>lets add 10 GiB</p>
+<pre><code class="language-sh">qemu-img resize ubuntu-server.img +10G
+</code></pre>
+<p>then</p>
+<p><img src="server//assets/184aa9877fe42d187e0b75e010695b33809a7f5245f90e087adcfa877be2cd55c8bb193f90bd86b497e97884c6aa5d2b04423fb87d92e639ce121671.png" alt="image" /></p>
+<p>nice work!</p>
+<h1 id="fixing"><a class="header" href="#fixing">fixing</a></h1>
+<p>if your ubuntu use LVM2, Use this command</p>
+<p><img src="server//assets/1845e6740dc67207974700ee9a9583d8cd4d4056d4be06a3fdacd31643a1c6585009adc6f696bd47113242084f2f30307415a32464b5f709122c2216.png" alt="image" /></p>
+<p>then, run</p>
+<pre><code class="language-sh">sudo lvextend -l +100%FREE /dev/ubuntu-vg/ubuntu-lv
+sudo e2fsck -f /dev/ubuntu-vg/ubuntu-lv
+sudo resize2fs /dev/ubuntu-vg/ubuntu-lv
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="database"><a class="header" href="#database">Database</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="psql-command"><a class="header" href="#psql-command">psql command</a></h1>

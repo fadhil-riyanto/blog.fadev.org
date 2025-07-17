@@ -53,6 +53,11 @@
 	- [Rust tokio-postgres connection config example](./rust/rust-tokio-connection-config-example.md)
 	- [miri rust setup](./rust/miri-rust.md)
 
+- [Backend](./backend/readme-backend.md)
+	- [JWT](./backend/jwt.md)
+	- [laravel named routes](./backend/laravel-named-routes.md)
+	
+
 - [Embedtronics](./embedtronics/readme-embedtronics.md)
 	- [picotool build](./embedtronics/picotool-build.md)
 
@@ -103,6 +108,7 @@
 	- [qemu q35 vs i440fx](./server/qemu-q35-i440fx.md)
 	- [qemu & dedicated nic + macvtap](./server/qemu-dedicated-nic-macvtap.md)
 	- [alpine install ssh + firefox lite qemu](./server/alpine-firefox-lite.md)
+	- [resizing qemu image](./server/resize-qemu-image.md)
 
 - [Database](./database/readme-database.md)
 	- [psql command](./database/psql_command.md)
