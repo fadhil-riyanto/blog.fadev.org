@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>resizing qemu image - Fadhil Journal &amp; Notes</title>
+        <title>installing tymon/jwt-auth with custom guard - Fadhil Journal &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -160,31 +160,67 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="resizing-qemu-image"><a class="header" href="#resizing-qemu-image">resizing qemu image</a></h1>
-<p>lets add 10 GiB</p>
-<pre><code class="language-sh">qemu-img resize ubuntu-server.img +10G
+                        <h1 id="installing-tymonjwt-auth-with-custom-guard"><a class="header" href="#installing-tymonjwt-auth-with-custom-guard">installing tymon/jwt-auth with custom guard</a></h1>
+<p>now, we will install this package as is with custom guard. so we do not use <code>web</code> guard.</p>
+<h1 id="installing"><a class="header" href="#installing">installing</a></h1>
+<p>read <a href="https://jwt-auth.readthedocs.io/en/develop/laravel-installation/">https://jwt-auth.readthedocs.io/en/develop/laravel-installation/</a> please</p>
+<p>do the step until reached <code>php artisan jwt:secret</code>, skip lumen Installation please</p>
+<h1 id="quickstart"><a class="header" href="#quickstart">quickstart</a></h1>
+<p>please read <a href="/php/custom_auth_guard_w_tables.html">php/custom_auth_guard_w_tables.md</a> first, then replace this</p>
+<pre><code class="language-php">'guest' =&gt; [
+    'driver' =&gt; 'jwt',
+    'provider' =&gt; 'guest_users',
+],
 </code></pre>
-<p>then</p>
-<p><img src="/assets/184aa9877fe42d187e0b75e010695b33809a7f5245f90e087adcfa877be2cd55c8bb193f90bd86b497e97884c6aa5d2b04423fb87d92e639ce121671.png" alt="image" /></p>
-<p>nice work!</p>
-<h1 id="fixing"><a class="header" href="#fixing">fixing</a></h1>
-<p>if your ubuntu use LVM2, Use this command</p>
-<p><img src="/assets/1845e6740dc67207974700ee9a9583d8cd4d4056d4be06a3fdacd31643a1c6585009adc6f696bd47113242084f2f30307415a32464b5f709122c2216.png" alt="image" /></p>
-<p>then, run</p>
-<pre><code class="language-sh">sudo lvextend -l +100%FREE /dev/ubuntu-vg/ubuntu-lv
-sudo e2fsck -f /dev/ubuntu-vg/ubuntu-lv
-sudo resize2fs /dev/ubuntu-vg/ubuntu-lv
+<p>in your <code>./config/auth.php</code> file, just like this</p>
+<p><img src="/assets/054150e05a7b1c8c584febefb9460cd7ae34110ff589e5c8cac4c20e89f137da080cb3fe84711c582f0f04f39d99e3a0caaf7d5c95f96858e2afdc0f.png" alt="image" /></p>
+<p>then, make sure your custom guard class is implement <code>Tymon\JWTAuth\Contracts\JWTSubject</code>, you can see the location of models class</p>
+<p>example, in <code>./config/auth.php</code></p>
+<p><img src="/assets/ae5832b0d60ad775cb9f2abfd1f69d844be87529528c2a9c1895f11c10ec88d26d15e2c2ad8e6295c020333d0f9f8a2fc800018d94171df3564f0097.png" alt="image" /></p>
+<p>just make it like this</p>
+<p><img src="/assets/ae3db2de9d514e1eb4c3ca63b13344280f8133638bb908d07ab1622b6073fcc57336f374fcfadf7d0da5e3bfe65f38fb255e16abece6ad2bd2c05c4c.png" alt="image" /></p>
+<h1 id="middleware--routing-config"><a class="header" href="#middleware--routing-config">middleware &amp; routing config</a></h1>
+<p>this section you only need to do</p>
+<pre><code class="language-php">Route::get('/callback', [Controllers\Guest\GoogleAuthController::class, 'callback'])
+            -&gt;name("auth.google.callback")
+            -&gt;middleware("guest");
+</code></pre>
+<p>change with your own routing</p>
+<h1 id="poc"><a class="header" href="#poc">PoC</a></h1>
+<p>FIRST, we use <code>callback</code> method, so the inside of <code>callback</code> method body should look like this</p>
+<pre><code class="language-php">packed_arr = [
+    "email" =&gt; $email,
+    "password" =&gt; "password"
+];
+
+$token = Auth::guard("guest")-&gt;attempt($packed_arr);
+
+if ($token) {
+    return  $this-&gt;respondWithToken($token);
+} else {
+    return response()-&gt;json(['error' =&gt; 'Invalid credentials'], 401);
+}
+</code></pre>
+<p><code>respondWithToken</code> method</p>
+<pre><code class="language-php">protected function respondWithToken($token)
+    {
+        return response()-&gt;json([
+            'access_token' =&gt; $token,
+            'token_type' =&gt; 'bearer',
+            'expires_in' =&gt; Auth::guard("guest")-&gt;factory()-&gt;getTTL() * 60
+        ]);
+    }
 </code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../server/alpine-firefox-lite.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../php/laravel-named-routes.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../server/docker-snippets.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../other/other-readme.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -194,11 +230,11 @@ sudo resize2fs /dev/ubuntu-vg/ubuntu-lv
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../server/alpine-firefox-lite.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../php/laravel-named-routes.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../server/docker-snippets.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../other/other-readme.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

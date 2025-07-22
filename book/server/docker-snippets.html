@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>resizing qemu image - Fadhil Journal &amp; Notes</title>
+        <title>docker snippets - Fadhil Journal &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -160,31 +160,27 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="resizing-qemu-image"><a class="header" href="#resizing-qemu-image">resizing qemu image</a></h1>
-<p>lets add 10 GiB</p>
-<pre><code class="language-sh">qemu-img resize ubuntu-server.img +10G
+                        <h1 id="docker-snippets"><a class="header" href="#docker-snippets">docker snippets</a></h1>
+<h2 id="docker-run"><a class="header" href="#docker-run">docker run</a></h2>
+<p>this command will run as daemon, from image <code>freeradius/freeradius-server</code></p>
+<pre><code class="language-sh">docker run --name my-radius -d freeradius/freeradius-server
 </code></pre>
-<p>then</p>
-<p><img src="/assets/184aa9877fe42d187e0b75e010695b33809a7f5245f90e087adcfa877be2cd55c8bb193f90bd86b497e97884c6aa5d2b04423fb87d92e639ce121671.png" alt="image" /></p>
-<p>nice work!</p>
-<h1 id="fixing"><a class="header" href="#fixing">fixing</a></h1>
-<p>if your ubuntu use LVM2, Use this command</p>
-<p><img src="/assets/1845e6740dc67207974700ee9a9583d8cd4d4056d4be06a3fdacd31643a1c6585009adc6f696bd47113242084f2f30307415a32464b5f709122c2216.png" alt="image" /></p>
-<p>then, run</p>
-<pre><code class="language-sh">sudo lvextend -l +100%FREE /dev/ubuntu-vg/ubuntu-lv
-sudo e2fsck -f /dev/ubuntu-vg/ubuntu-lv
-sudo resize2fs /dev/ubuntu-vg/ubuntu-lv
+<p>no daemon involved</p>
+<pre><code class="language-sh">docker run --name my-radius freeradius/freeradius-server
+</code></pre>
+<h1 id="logging-running-container"><a class="header" href="#logging-running-container">logging running container</a></h1>
+<pre><code class="language-sh">docker logs my-radius
 </code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../server/alpine-firefox-lite.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../server/resize-qemu-image.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../server/docker-snippets.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../database/readme-database.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -194,11 +190,11 @@ sudo resize2fs /dev/ubuntu-vg/ubuntu-lv
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../server/alpine-firefox-lite.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../server/resize-qemu-image.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../server/docker-snippets.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../database/readme-database.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

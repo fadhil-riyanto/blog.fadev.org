@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>laravel named routes - Fadhil Journal &amp; Notes</title>
+        <title>JWT - Fadhil Journal &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -160,33 +160,17 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="laravel-named-routes"><a class="header" href="#laravel-named-routes">laravel named routes</a></h1>
-<p>ref: <a href="https://laravel.com/docs/12.x/routing#named-routes">https://laravel.com/docs/12.x/routing#named-routes</a></p>
-<p>examples</p>
-<pre><code class="language-php">Route::prefix('auth')-&gt;group(function () {
-    Route::prefix('google')-&gt;group(function () {
-        Route::get('/redirect', [Controllers\GoogleAuthController::class, 'redirect'])
-            -&gt;name("auth.google.redirect");
-        Route::get('/callback', [Controllers\GoogleAuthController::class, 'callback'])
-            -&gt;name("auth.google.callback");;
-    });
-
-    /* .. */
-});
-</code></pre>
-<p>acces it (in blade)</p>
-<pre><code class="language-php">&lt;h1&gt;{{ route("auth.google.callback"); }}&lt;/h1&gt;
-</code></pre>
+                        <h1 id="jwt"><a class="header" href="#jwt">JWT</a></h1>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../backend/jwt.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../php/laravel_pgsql_migration_setup.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../embedtronics/readme-embedtronics.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../php/laravel-named-routes.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -196,11 +180,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../backend/jwt.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../php/laravel_pgsql_migration_setup.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../embedtronics/readme-embedtronics.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../php/laravel-named-routes.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

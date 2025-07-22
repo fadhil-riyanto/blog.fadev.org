@@ -2168,28 +2168,6 @@ async fn main() {
 }</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="miri-rust-setup"><a class="header" href="#miri-rust-setup">miri rust setup</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="backend"><a class="header" href="#backend">Backend</a></h1>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="jwt"><a class="header" href="#jwt">JWT</a></h1>
-<p>nice article:</p>
-<ul>
-<li><a href="https://auth0.com/docs/secure/tokens/json-web-tokens/json-web-token-claims">https://auth0.com/docs/secure/tokens/json-web-tokens/json-web-token-claims</a></li>
-</ul>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="laravel-named-routes"><a class="header" href="#laravel-named-routes">laravel named routes</a></h1>
-<p>ref: <a href="https://laravel.com/docs/12.x/routing#named-routes">https://laravel.com/docs/12.x/routing#named-routes</a></p>
-<p>examples</p>
-<pre><code class="language-php">Route::prefix('auth')-&gt;group(function () {
-    Route::prefix('google')-&gt;group(function () {
-        Route::get('/redirect', [Controllers\GoogleAuthController::class, 'redirect'])
-            -&gt;name("auth.google.redirect");
-        Route::get('/callback', [Controllers\GoogleAuthController::class, 'callback'])
-            -&gt;name("auth.google.callback");;
-    });
-
-    /* .. */
-});
-</code></pre>
-<p>acces it (in blade)</p>
-<pre><code class="language-php">&lt;h1&gt;{{ route("auth.google.callback"); }}&lt;/h1&gt;
-</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="embedtronics"><a class="header" href="#embedtronics">Embedtronics</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="picotool-build"><a class="header" href="#picotool-build">picotool build</a></h1>
 <h2 id="os-setup"><a class="header" href="#os-setup">os setup</a></h2>
@@ -2210,6 +2188,38 @@ cmake ..
 make
 </code></pre>
 <p>if you get cmake error minimum etc..., use <code>cmake .. -DCMAKE_POLICY_VERSION_MINIMUM=3.5</code> instead</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="debug-pico-with-another-pico"><a class="header" href="#debug-pico-with-another-pico">debug pico with another pico</a></h1>
+<p>first, we need a patch this stuff https://review.openocd.org/c/openocd/+/8223/3/src/flash/nor/spi.c#187</p>
+<h1 id="optional-dry-run"><a class="header" href="#optional-dry-run">optional dry run</a></h1>
+<pre><code class="language-sh">pacman -S mingw-w64-x86_64-toolchain git make libtool pkg-config autoconf automake texinfo mingw-w64-x86_64-libusb
+</code></pre>
+<p>then run</p>
+<pre><code class="language-sh">git clone https://github.com/raspberrypi/openocd.git --branch picoprobe --depth=1
+cd openocd
+nvim /src/flash/nor/spi.c
+</code></pre>
+<p>then add patch</p>
+<p>after that</p>
+<h1 id="build-1"><a class="header" href="#build-1">build</a></h1>
+<pre><code class="language-sh">./bootstrap
+./configure --enable-picoprobe --disable-werror
+make -j4
+sudo make install
+</code></pre>
+<h1 id="flash-elf"><a class="header" href="#flash-elf">flash ELF</a></h1>
+<pre><code class="language-sh">sudo openocd -f interface/cmsis-dap.cfg -f target/rp2040.cfg -c "adapter speed 5000" -c "program blink.elf verify reset exit"
+</code></pre>
+<h1 id="just-debugging"><a class="header" href="#just-debugging">just debugging</a></h1>
+<pre><code class="language-sh">sudo openocd -f interface/cmsis-dap.cfg -f target/rp2040.cfg -c "adapter speed 5000"
+
+```sh
+arm-none-eabi-gdb blink.elf
+&gt; target remote localhost:3333
+&gt; monitor reset init
+&gt; continue
+</code></pre>
+<p>wiring position: <img src="embedtronics//assets/ffd3b015a7065c6a5188c94644ad5f017417ed0e7e010f92a6b4baff4e07d2da9be208c33b42527fb4bf2e6bbad3a0fd735c20ce4020101264e9aa77.png" alt="image" /></p>
+<p><img src="embedtronics//assets/0470af216a4453ea5bfbded85fd6d523d2eac2fa64d59787e0c17ad13789eac7f54f1dd97bb273e4730c31ec8328f324db69cbb7a13852c789b482d7.png" alt="image" /></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="math"><a class="header" href="#math">Math</a></h1>
 <p>Welcome in this section.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="set-operations-formula"><a class="header" href="#set-operations-formula">Set operations formula</a></h1>
@@ -4697,6 +4707,17 @@ qemu-system-x86_64 \
 sudo e2fsck -f /dev/ubuntu-vg/ubuntu-lv
 sudo resize2fs /dev/ubuntu-vg/ubuntu-lv
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="docker-snippets"><a class="header" href="#docker-snippets">docker snippets</a></h1>
+<h2 id="docker-run"><a class="header" href="#docker-run">docker run</a></h2>
+<p>this command will run as daemon, from image <code>freeradius/freeradius-server</code></p>
+<pre><code class="language-sh">docker run --name my-radius -d freeradius/freeradius-server
+</code></pre>
+<p>no daemon involved</p>
+<pre><code class="language-sh">docker run --name my-radius freeradius/freeradius-server
+</code></pre>
+<h1 id="logging-running-container"><a class="header" href="#logging-running-container">logging running container</a></h1>
+<pre><code class="language-sh">docker logs my-radius
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="database"><a class="header" href="#database">Database</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="psql-command"><a class="header" href="#psql-command">psql command</a></h1>
 <h2 id="general"><a class="header" href="#general">General</a></h2>
@@ -5607,6 +5628,75 @@ dd($user);
 </code></pre>
 <p>rollback terbaru</p>
 <pre><code class="language-sh">php artisan migrate --rollback 1
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="jwt"><a class="header" href="#jwt">JWT</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="laravel-named-routes"><a class="header" href="#laravel-named-routes">laravel named routes</a></h1>
+<p>ref: <a href="https://laravel.com/docs/12.x/routing#named-routes">https://laravel.com/docs/12.x/routing#named-routes</a></p>
+<p>examples</p>
+<pre><code class="language-php">Route::prefix('auth')-&gt;group(function () {
+    Route::prefix('google')-&gt;group(function () {
+        Route::get('/redirect', [Controllers\GoogleAuthController::class, 'redirect'])
+            -&gt;name("auth.google.redirect");
+        Route::get('/callback', [Controllers\GoogleAuthController::class, 'callback'])
+            -&gt;name("auth.google.callback");;
+    });
+
+    /* .. */
+});
+</code></pre>
+<p>acces it (in blade)</p>
+<pre><code class="language-php">&lt;h1&gt;{{ route("auth.google.callback"); }}&lt;/h1&gt;
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="installing-tymonjwt-auth-with-custom-guard"><a class="header" href="#installing-tymonjwt-auth-with-custom-guard">installing tymon/jwt-auth with custom guard</a></h1>
+<p>now, we will install this package as is with custom guard. so we do not use <code>web</code> guard.</p>
+<h1 id="installing"><a class="header" href="#installing">installing</a></h1>
+<p>read <a href="https://jwt-auth.readthedocs.io/en/develop/laravel-installation/">https://jwt-auth.readthedocs.io/en/develop/laravel-installation/</a> please</p>
+<p>do the step until reached <code>php artisan jwt:secret</code>, skip lumen Installation please</p>
+<h1 id="quickstart"><a class="header" href="#quickstart">quickstart</a></h1>
+<p>please read <a href="php//php/custom_auth_guard_w_tables.html">php/custom_auth_guard_w_tables.md</a> first, then replace this</p>
+<pre><code class="language-php">'guest' =&gt; [
+    'driver' =&gt; 'jwt',
+    'provider' =&gt; 'guest_users',
+],
+</code></pre>
+<p>in your <code>./config/auth.php</code> file, just like this</p>
+<p><img src="php//assets/054150e05a7b1c8c584febefb9460cd7ae34110ff589e5c8cac4c20e89f137da080cb3fe84711c582f0f04f39d99e3a0caaf7d5c95f96858e2afdc0f.png" alt="image" /></p>
+<p>then, make sure your custom guard class is implement <code>Tymon\JWTAuth\Contracts\JWTSubject</code>, you can see the location of models class</p>
+<p>example, in <code>./config/auth.php</code></p>
+<p><img src="php//assets/ae5832b0d60ad775cb9f2abfd1f69d844be87529528c2a9c1895f11c10ec88d26d15e2c2ad8e6295c020333d0f9f8a2fc800018d94171df3564f0097.png" alt="image" /></p>
+<p>just make it like this</p>
+<p><img src="php//assets/ae3db2de9d514e1eb4c3ca63b13344280f8133638bb908d07ab1622b6073fcc57336f374fcfadf7d0da5e3bfe65f38fb255e16abece6ad2bd2c05c4c.png" alt="image" /></p>
+<h1 id="middleware--routing-config"><a class="header" href="#middleware--routing-config">middleware &amp; routing config</a></h1>
+<p>this section you only need to do</p>
+<pre><code class="language-php">Route::get('/callback', [Controllers\Guest\GoogleAuthController::class, 'callback'])
+            -&gt;name("auth.google.callback")
+            -&gt;middleware("guest");
+</code></pre>
+<p>change with your own routing</p>
+<h1 id="poc"><a class="header" href="#poc">PoC</a></h1>
+<p>FIRST, we use <code>callback</code> method, so the inside of <code>callback</code> method body should look like this</p>
+<pre><code class="language-php">packed_arr = [
+    "email" =&gt; $email,
+    "password" =&gt; "password"
+];
+
+$token = Auth::guard("guest")-&gt;attempt($packed_arr);
+
+if ($token) {
+    return  $this-&gt;respondWithToken($token);
+} else {
+    return response()-&gt;json(['error' =&gt; 'Invalid credentials'], 401);
+}
+</code></pre>
+<p><code>respondWithToken</code> method</p>
+<pre><code class="language-php">protected function respondWithToken($token)
+    {
+        return response()-&gt;json([
+            'access_token' =&gt; $token,
+            'token_type' =&gt; 'bearer',
+            'expires_in' =&gt; Auth::guard("guest")-&gt;factory()-&gt;getTTL() * 60
+        ]);
+    }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="other"><a class="header" href="#other">Other</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="bookmarks-highly-useful-link"><a class="header" href="#bookmarks-highly-useful-link">bookmarks highly useful link</a></h1>

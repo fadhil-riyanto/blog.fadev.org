@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>resizing qemu image - Fadhil Journal &amp; Notes</title>
+        <title>debug pico with another pico - Fadhil Journal &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -160,31 +160,48 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="resizing-qemu-image"><a class="header" href="#resizing-qemu-image">resizing qemu image</a></h1>
-<p>lets add 10 GiB</p>
-<pre><code class="language-sh">qemu-img resize ubuntu-server.img +10G
+                        <h1 id="debug-pico-with-another-pico"><a class="header" href="#debug-pico-with-another-pico">debug pico with another pico</a></h1>
+<p>first, we need a patch this stuff https://review.openocd.org/c/openocd/+/8223/3/src/flash/nor/spi.c#187</p>
+<h1 id="optional-dry-run"><a class="header" href="#optional-dry-run">optional dry run</a></h1>
+<pre><code class="language-sh">pacman -S mingw-w64-x86_64-toolchain git make libtool pkg-config autoconf automake texinfo mingw-w64-x86_64-libusb
 </code></pre>
-<p>then</p>
-<p><img src="/assets/184aa9877fe42d187e0b75e010695b33809a7f5245f90e087adcfa877be2cd55c8bb193f90bd86b497e97884c6aa5d2b04423fb87d92e639ce121671.png" alt="image" /></p>
-<p>nice work!</p>
-<h1 id="fixing"><a class="header" href="#fixing">fixing</a></h1>
-<p>if your ubuntu use LVM2, Use this command</p>
-<p><img src="/assets/1845e6740dc67207974700ee9a9583d8cd4d4056d4be06a3fdacd31643a1c6585009adc6f696bd47113242084f2f30307415a32464b5f709122c2216.png" alt="image" /></p>
-<p>then, run</p>
-<pre><code class="language-sh">sudo lvextend -l +100%FREE /dev/ubuntu-vg/ubuntu-lv
-sudo e2fsck -f /dev/ubuntu-vg/ubuntu-lv
-sudo resize2fs /dev/ubuntu-vg/ubuntu-lv
+<p>then run</p>
+<pre><code class="language-sh">git clone https://github.com/raspberrypi/openocd.git --branch picoprobe --depth=1
+cd openocd
+nvim /src/flash/nor/spi.c
 </code></pre>
+<p>then add patch</p>
+<p>after that</p>
+<h1 id="build"><a class="header" href="#build">build</a></h1>
+<pre><code class="language-sh">./bootstrap
+./configure --enable-picoprobe --disable-werror
+make -j4
+sudo make install
+</code></pre>
+<h1 id="flash-elf"><a class="header" href="#flash-elf">flash ELF</a></h1>
+<pre><code class="language-sh">sudo openocd -f interface/cmsis-dap.cfg -f target/rp2040.cfg -c "adapter speed 5000" -c "program blink.elf verify reset exit"
+</code></pre>
+<h1 id="just-debugging"><a class="header" href="#just-debugging">just debugging</a></h1>
+<pre><code class="language-sh">sudo openocd -f interface/cmsis-dap.cfg -f target/rp2040.cfg -c "adapter speed 5000"
+
+```sh
+arm-none-eabi-gdb blink.elf
+&gt; target remote localhost:3333
+&gt; monitor reset init
+&gt; continue
+</code></pre>
+<p>wiring position: <img src="/assets/ffd3b015a7065c6a5188c94644ad5f017417ed0e7e010f92a6b4baff4e07d2da9be208c33b42527fb4bf2e6bbad3a0fd735c20ce4020101264e9aa77.png" alt="image" /></p>
+<p><img src="/assets/0470af216a4453ea5bfbded85fd6d523d2eac2fa64d59787e0c17ad13789eac7f54f1dd97bb273e4730c31ec8328f324db69cbb7a13852c789b482d7.png" alt="image" /></p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../server/alpine-firefox-lite.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../embedtronics/picotool-build.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../server/docker-snippets.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../math/readme-math.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -194,11 +211,11 @@ sudo resize2fs /dev/ubuntu-vg/ubuntu-lv
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../server/alpine-firefox-lite.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../embedtronics/picotool-build.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../server/docker-snippets.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../math/readme-math.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

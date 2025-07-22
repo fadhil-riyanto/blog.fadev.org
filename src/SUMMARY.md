@@ -54,12 +54,12 @@
 	- [miri rust setup](./rust/miri-rust.md)
 
 - [Backend](./backend/readme-backend.md)
-	- [JWT](./backend/jwt.md)
-	- [laravel named routes](./backend/laravel-named-routes.md)
+	
 	
 
 - [Embedtronics](./embedtronics/readme-embedtronics.md)
 	- [picotool build](./embedtronics/picotool-build.md)
+	- [debug pico with another pico](./embedtronics/pico-debug-with-pico.md)
 
 - [Math](./math/readme-math.md)
 	- [Set formula](./math/set_formula_1.md)
@@ -109,6 +109,7 @@
 	- [qemu & dedicated nic + macvtap](./server/qemu-dedicated-nic-macvtap.md)
 	- [alpine install ssh + firefox lite qemu](./server/alpine-firefox-lite.md)
 	- [resizing qemu image](./server/resize-qemu-image.md)
+	- [docker snippets](./server/docker-snippets.md)
 
 - [Database](./database/readme-database.md)
 	- [psql command](./database/psql_command.md)
@@ -132,6 +133,9 @@
 	- [laravel 12 custom auth guard + tables](./php/custom_auth_guard_w_tables.md)
 	- [laravel Socialite setup](./php/laravel_socialite_setup.md)
 	- [laravel pgsql migration setup](./php/laravel_pgsql_migration_setup.md)
+	- [JWT](./php/jwt.md)
+	- [laravel named routes](./php/laravel-named-routes.md)
+	- [installing tymon/jwt-auth with custom guard](./php/tymon-jwt-auth-custom-guard.md)
 	
 - [Other](./other/other-readme.md)
 	- [bookmarks highly useful link](./other/bookmarks_useful_links.md)
