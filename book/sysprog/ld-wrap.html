@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Database - Fadhil Journal &amp; Notes</title>
+        <title>linker --wrap symbol - Fadhil Journal &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -160,17 +160,61 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="database"><a class="header" href="#database">Database</a></h1>
+                        <h1 id="linker---wrap-symbol"><a class="header" href="#linker---wrap-symbol">linker --wrap symbol</a></h1>
+<p>konsep wrap linker compiler ini sebenernya berguna ketika kita ingin menimpa suatu fungsi, ke fungsi yang kita map sendiri. contoh misal saya ada</p>
+<pre><code class="language-c">printf()
+</code></pre>
+<p>ketika saya compile dengan gcc, printf akan dipanggil sebagai</p>
+<pre><code class="language-c">__wrap_printf()
+</code></pre>
+<p>nah, dengan trick ini, kita bisa mengubah behavior dari printf nya itu sendiri, misal</p>
+<ul>
+<li>kirim ke uart</li>
+<li>kirim ke swdclk</li>
+</ul>
+<h1 id="poc"><a class="header" href="#poc">PoC</a></h1>
+<pre><code class="language-c">#include &lt;stdlib.h&gt;
+#include &lt;stdio.h&gt;
+
+void* __real_malloc(size_t __size) {
+        // return malloc(__size);
+        printf("do?\n");
+}
+
+void* __wrap_malloc(size_t __size) {
+        printf("wrap malloc called\n");
+        return __real_malloc(__size);
+}
+
+int main() {
+        char* x = malloc(1);
+
+        // free(x);
+}
+</code></pre>
+<p>lalu compile dengan <code>gcc -Wl,--wrap=malloc wrap_malloc.c -o p -g</code></p>
+<p>hasil hexdump main</p>
+<pre><code class="language-c">0000000000001180 &lt;main&gt;:
+    1180:       55                      push   %rbp
+    1181:       48 89 e5                mov    %rsp,%rbp
+    1184:       48 83 ec 10             sub    $0x10,%rsp
+    1188:       bf 01 00 00 00          mov    $0x1,%edi
+    118d:       e8 c5 ff ff ff          call   1157 &lt;__wrap_malloc&gt;
+    1192:       48 89 45 f8             mov    %rax,-0x8(%rbp)
+    1196:       b8 00 00 00 00          mov    $0x0,%eax
+    119b:       c9                      leave
+    119c:       c3                      ret
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../server/routeros-on-qemu.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../sysprog/AMD64_endianness.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../database/psql_command.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../rust/readme-rust-stuff.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -180,11 +224,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../server/routeros-on-qemu.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../sysprog/AMD64_endianness.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../database/psql_command.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../rust/readme-rust-stuff.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

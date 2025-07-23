@@ -1813,6 +1813,51 @@ WOW, its least endian first, so the machine is <code>little-endian</code></p>
 <h2 id="miri"><a class="header" href="#miri">miri</a></h2>
 <p>this unique tool can emulate big endian
 <img src="sysprog//assets/c33299af4f933e3251ee297c402e8474c8786599200d7b8675187d3d3b880b0ece7f37b8d3c5028c577f16e44d80cde36cba17ed83a776c41bd55492.png" alt="image" /></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="linker---wrap-symbol"><a class="header" href="#linker---wrap-symbol">linker --wrap symbol</a></h1>
+<p>konsep wrap linker compiler ini sebenernya berguna ketika kita ingin menimpa suatu fungsi, ke fungsi yang kita map sendiri. contoh misal saya ada</p>
+<pre><code class="language-c">printf()
+</code></pre>
+<p>ketika saya compile dengan gcc, printf akan dipanggil sebagai</p>
+<pre><code class="language-c">__wrap_printf()
+</code></pre>
+<p>nah, dengan trick ini, kita bisa mengubah behavior dari printf nya itu sendiri, misal</p>
+<ul>
+<li>kirim ke uart</li>
+<li>kirim ke swdclk</li>
+</ul>
+<h1 id="poc"><a class="header" href="#poc">PoC</a></h1>
+<pre><code class="language-c">#include &lt;stdlib.h&gt;
+#include &lt;stdio.h&gt;
+
+void* __real_malloc(size_t __size) {
+        // return malloc(__size);
+        printf("do?\n");
+}
+
+void* __wrap_malloc(size_t __size) {
+        printf("wrap malloc called\n");
+        return __real_malloc(__size);
+}
+
+int main() {
+        char* x = malloc(1);
+
+        // free(x);
+}
+</code></pre>
+<p>lalu compile dengan <code>gcc -Wl,--wrap=malloc wrap_malloc.c -o p -g</code></p>
+<p>hasil hexdump main</p>
+<pre><code class="language-c">0000000000001180 &lt;main&gt;:
+    1180:       55                      push   %rbp
+    1181:       48 89 e5                mov    %rsp,%rbp
+    1184:       48 83 ec 10             sub    $0x10,%rsp
+    1188:       bf 01 00 00 00          mov    $0x1,%edi
+    118d:       e8 c5 ff ff ff          call   1157 &lt;__wrap_malloc&gt;
+    1192:       48 89 45 f8             mov    %rax,-0x8(%rbp)
+    1196:       b8 00 00 00 00          mov    $0x0,%eax
+    119b:       c9                      leave
+    119c:       c3                      ret
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-stuff"><a class="header" href="#rust-stuff">Rust stuff</a></h1>
 <p>Welcome in this rust stuff section.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-cursor-how-it-works"><a class="header" href="#rust-cursor-how-it-works">Rust cursor, How it works</a></h1>
@@ -2167,7 +2212,6 @@ async fn main() {
 
 }</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="miri-rust-setup"><a class="header" href="#miri-rust-setup">miri rust setup</a></h1>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="backend"><a class="header" href="#backend">Backend</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="embedtronics"><a class="header" href="#embedtronics">Embedtronics</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="picotool-build"><a class="header" href="#picotool-build">picotool build</a></h1>
 <h2 id="os-setup"><a class="header" href="#os-setup">os setup</a></h2>
@@ -2220,6 +2264,110 @@ arm-none-eabi-gdb blink.elf
 </code></pre>
 <p>wiring position: <img src="embedtronics//assets/ffd3b015a7065c6a5188c94644ad5f017417ed0e7e010f92a6b4baff4e07d2da9be208c33b42527fb4bf2e6bbad3a0fd735c20ce4020101264e9aa77.png" alt="image" /></p>
 <p><img src="embedtronics//assets/0470af216a4453ea5bfbded85fd6d523d2eac2fa64d59787e0c17ad13789eac7f54f1dd97bb273e4730c31ec8328f324db69cbb7a13852c789b482d7.png" alt="image" /></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="pico-sdk-install--cmake-template"><a class="header" href="#pico-sdk-install--cmake-template">PICO SDK install &amp; cmake template</a></h1>
+<p>install step is very easy,</p>
+<pre><code class="language-sh">git clone https://github.com/raspberrypi/pico-sdk.git
+cd pico-sdk
+git submodule update --init
+</code></pre>
+<h1 id="cmake-template"><a class="header" href="#cmake-template">CMAKE Template</a></h1>
+<p>this is my own standard of pico rp2040 chip cmake build template</p>
+<pre><code class="language-C">cmake_minimum_required(VERSION 3.13)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+include(/home/fadhil_riyanto/git_clone/pico-sdk/pico_sdk_init.cmake)
+
+pico_sdk_init()
+
+project(hello_usb C CXX ASM)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
+
+
+add_executable(hello_usb hello_usb.c)
+target_link_libraries(hello_usb pico_stdlib)
+
+# # enable usb output, disable uart output
+# pico_enable_stdio_usb(hello_usb 1)
+# pico_enable_stdio_uart(hello_usb 0)
+
+pico_add_extra_outputs(hello_usb)
+</code></pre>
+<p>if you ask about</p>
+<blockquote>
+<blockquote>
+<p>what uses of <code>pico_sdk_init</code>, or <code>pico_enable_stdio_usb</code>, please read it yourself on <a href="https://github.com/raspberrypi/pico-sdk/blob/9a4113fbbae65ee82d8cd6537963bc3d3b14bcca/pico_sdk_init.cmake#L44-L49">https://github.com/raspberrypi/pico-sdk/blob/9a4113fbbae65ee82d8cd6537963bc3d3b14bcca/pico_sdk_init.cmake#L44-L49</a>, thats is a macro!</p>
+</blockquote>
+</blockquote>
+<p>feel free to change <code>include(/home/fadhil_riyanto/git_clone/pico-sdk/pico_sdk_init.cmake)</code> with your own SDK Path</p>
+<p><img src="embedtronics//assets/3cd8678ed1023faefda7a4811168e691c0c03b33959a8272ce79f4833dba63016f479fe6da574e7b9dd0cfab422e1c05562aae820819ae717115691c.png" alt="image" /></p>
+<p><img src="embedtronics//assets/647a46c8f9f938fa98e322298755afe0249e3cfe64d7ffcddd8626d6a31f07e8cf9f3e1fd131d2ce12001631a942c041f072916f19e416e26f2b1da9.png" alt="image" /></p>
+<h1 id="vscode-autocomplete-settings"><a class="header" href="#vscode-autocomplete-settings">vscode autocomplete settings</a></h1>
+<p>create file named <code>.vscode/c_cpp_properties.json</code></p>
+<p>fill with</p>
+<pre><code class="language-json">{
+  "configurations": [
+    {
+      "name": "Linux",
+      "compileCommands": "${workspaceFolder}/build/compile_commands.json",
+      "intelliSenseMode": "linux-gcc-x64",
+      "compilerPath": "/usr/bin/g++",
+      "cStandard": "c11",
+      "cppStandard": "c++17"
+    }
+  ],
+  "version": 4
+}
+
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="arm-none-eabi-gdb-debugging-with-openocd"><a class="header" href="#arm-none-eabi-gdb-debugging-with-openocd">arm-none-eabi-gdb debugging with openocd</a></h1>
+<p>the simplest thing to debug your RP2040 chip is using secondary pico as picoprobe, then running openocd.
+I assume you're was ready with your pico debugprobe</p>
+<h1 id="identify-your-tty"><a class="header" href="#identify-your-tty">identify your TTY</a></h1>
+<p>check with <code>sudo dmesg</code>, the run a command like this <code>sudo chmod 666 /dev/ttyACM0</code></p>
+<h1 id="openocd"><a class="header" href="#openocd">openocd</a></h1>
+<pre><code class="language-sh">openocd -f interface/cmsis-dap.cfg -f target/rp2040.cfg -c "adapter speed 5000"
+</code></pre>
+<h1 id="cmake"><a class="header" href="#cmake">cmake</a></h1>
+<p>make sure your ELF was build with <code>cmake -DCMAKE_BUILD_TYPE=Debug -DPICO_BOARD=pico ..</code></p>
+<h1 id="flashing"><a class="header" href="#flashing">flashing</a></h1>
+<pre><code class="language-sh">openocd -f interface/cmsis-dap.cfg -f target/rp2040.cfg -c "adapter speed 5000" -c "program hello_usb.elf verify reset exit"
+</code></pre>
+<p>without sudo</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="analysis-how-printf-rp2040-work-under-low-level-stuff"><a class="header" href="#analysis-how-printf-rp2040-work-under-low-level-stuff">analysis how printf rp2040 work under low level stuff</a></h1>
+<p>in order to know how printf works in rp2040 uart bridge, lets compile simple program, compile as debug, then run GDB</p>
+<p>consider this very simple hello world</p>
+<pre><code class="language-c">#include &lt;pico/printf.h&gt;
+#include &lt;pico/time.h&gt;
+
+int main() {
+    int n = 0;
+    stdio_init_all();
+    while (true) {
+        printf("Hello, world! %d\n", n);
+        sleep_ms(1000);
+        n = n + 1;
+    }
+}
+</code></pre>
+<h1 id="analysis-1"><a class="header" href="#analysis-1">analysis</a></h1>
+<p><img src="embedtronics//assets/c9a172f5c6ce190e648f88df4af894d4d115b23d2128cad758833395f62d3f5e5d2ef9cb3dc4d695806f538fa26510bf6bc0da2b995b7fceeaff4899.png" alt="image" /></p>
+<p>see?</p>
+<pre><code class="language-c">=&gt; 0x100002b4 &lt;+12&gt;:    bl      0x10003a64 &lt;__wrap_printf&gt;
+</code></pre>
+<p>its call <code>__wrap_printf</code> which mean, the backend call <code>-Wl,--wrap=printf</code> internally, but if we reffer to <code>/home/fadhil_riyanto/git_clone/pico-sdk/src/rp2_common/pico_stdio/stdio.c:347</code></p>
+<p><img src="embedtronics//assets/44f66f5c4e0c51a2c0b4bc3885079beb5de306725363b91ba2a38898bf59d0e76fe467ec3abf98eb4881aaf0ce408cf5ebd19b28747ef3720bb99107.png" alt="image" /></p>
+<p>the signature is different, this function has signature</p>
+<pre><code class="language-c">int __printflike(1, 0) PRIMARY_STDIO_FUNC(printf)(const char* format, ...)
+</code></pre>
+<p>so, what exactly happen?</p>
+<h1 id="result"><a class="header" href="#result">result</a></h1>
+<p>lets look at stdio.c line 289</p>
+<p><img src="embedtronics//assets/a00ffec057742b32cb76c8db0d3da75c299ceba49a218edf9d559fb31eb9ae029da9b798e2d255ca0af5754dcd7ac62929645ad3aa63155c62bf61a8.png" alt="image" /></p>
+<p>when the macro <code>PICO_STDIO_SHORT_CIRCUIT_CLIB_FUNCS</code> is active, we replace the function name by <code>WRAPPER_FUNC(x)</code>, not <code>stdio_printf</code></p>
+<p>after that, lets jump into <a href="https://github.com/raspberrypi/pico-sdk/blob/9a4113fbbae65ee82d8cd6537963bc3d3b14bcca/src/rp2_common/pico_platform_compiler/include/pico/platform/compiler.h#L185">https://github.com/raspberrypi/pico-sdk/blob/9a4113fbbae65ee82d8cd6537963bc3d3b14bcca/src/rp2_common/pico_platform_compiler/include/pico/platform/compiler.h#L185</a>, very clear definition</p>
+<p>so, basically. this function
+<img src="embedtronics//assets/b0dbbe24380b5411221dbffcf2cb8409180135d704b9ede610a1e8f3e032a9ce6071551b9c2628a7d85fec6dcb88aa3f8b529d15999cdf75570fdab8.png" alt="image" /></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="math"><a class="header" href="#math">Math</a></h1>
 <p>Welcome in this section.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="set-operations-formula"><a class="header" href="#set-operations-formula">Set operations formula</a></h1>
@@ -4718,6 +4866,40 @@ sudo resize2fs /dev/ubuntu-vg/ubuntu-lv
 <h1 id="logging-running-container"><a class="header" href="#logging-running-container">logging running container</a></h1>
 <pre><code class="language-sh">docker logs my-radius
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="install-routerosiso-not-chr-on-qemu"><a class="header" href="#install-routerosiso-not-chr-on-qemu">install routerOS.iso (not chr) on qemu</a></h1>
+<p>please download this <a href="https://download.mikrotik.com/routeros/7.19.3/mikrotik-7.19.3.iso">https://download.mikrotik.com/routeros/7.19.3/mikrotik-7.19.3.iso</a>, <a href="https://mikrotik.com/download">https://mikrotik.com/download</a></p>
+<p>select x86</p>
+<p>after that, run this command (dry run)</p>
+<pre><code class="language-sh">qemu-img create -f qcow2 mikrotik-7.qcow2 4G
+</code></pre>
+<p>install</p>
+<pre><code class="language-sh">qemu-system-x86_64 \
+      -enable-kvm \
+      -smp 4 -m 256M \
+      -drive file=mikrotik-7.qcow2,format=qcow2 \
+      -boot order=d \
+      -cdrom ./iso/mikrotik-7.19.3.iso \
+      -net user,hostfwd=tcp::8291-:8291,hostfwd=tcp::10022-:22 \
+      -net nic
+</code></pre>
+<p>select wireless, and system</p>
+<p>after that, run this</p>
+<pre><code class="language-sh">wget https://gist.githubusercontent.com/fadhil-riyanto/d370c3551426ced874f7c0e0e6f62800/raw/9ef4886bcb5c49137b47a2ce60f49a840751e753/setup-network.sh &amp;&amp; chmod 777 setup-network.sh &amp;&amp; sudo sh setup-network.sh
+</code></pre>
+<p>now, we have virtual lan that uses tun-tap network. now run chr on <code>tap0</code></p>
+<pre><code class="language-sh">qemu-system-x86_64 \
+      -enable-kvm \
+      -smp 4 -m 256M \
+      -drive file=mikrotik-7.qcow2,format=qcow2 \
+      -boot order=d \
+      -netdev user,id=net0,hostfwd=tcp::8291-:8291,hostfwd=tcp::10022-:22 \
+      -device virtio-net-pci,netdev=net0 \
+      -netdev tap,id=net1,ifname=tap1,script=no,downscript=no \
+      -device virtio-net-pci,netdev=net1,mac=02:11:2a:3b:aa:c4 \
+      -nographic
+</code></pre>
+<h1 id="post-install"><a class="header" href="#post-install">post install</a></h1>
+<p>do not forget to enable DHCP in order to get internet from qemu internal routes</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="database"><a class="header" href="#database">Database</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="psql-command"><a class="header" href="#psql-command">psql command</a></h1>
 <h2 id="general"><a class="header" href="#general">General</a></h2>
@@ -5673,7 +5855,7 @@ dd($user);
             -&gt;middleware("guest");
 </code></pre>
 <p>change with your own routing</p>
-<h1 id="poc"><a class="header" href="#poc">PoC</a></h1>
+<h1 id="poc-1"><a class="header" href="#poc-1">PoC</a></h1>
 <p>FIRST, we use <code>callback</code> method, so the inside of <code>callback</code> method body should look like this</p>
 <pre><code class="language-php">packed_arr = [
     "email" =&gt; $email,

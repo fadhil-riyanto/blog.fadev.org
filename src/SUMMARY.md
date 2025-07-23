@@ -40,6 +40,7 @@
 	- [all about ASan & debug symbol](./sysprog/all_about_asan_debug_symbol.md)
 	- [asm volatile](./sysprog/asm_volatile.md)
 	- [amd64 endianness](./sysprog/AMD64_endianness.md)
+	- [linker --wrap symbol](./sysprog/ld-wrap.md)
 
 - [Rust stuff](./rust/readme-rust-stuff.md)
 	- [Rust Cursor & fseek concept](./rust/cursor_1.md)
@@ -53,13 +54,13 @@
 	- [Rust tokio-postgres connection config example](./rust/rust-tokio-connection-config-example.md)
 	- [miri rust setup](./rust/miri-rust.md)
 
-- [Backend](./backend/readme-backend.md)
-	
-	
-
 - [Embedtronics](./embedtronics/readme-embedtronics.md)
 	- [picotool build](./embedtronics/picotool-build.md)
 	- [debug pico with another pico](./embedtronics/pico-debug-with-pico.md)
+	- [pico sdk install & cmake template](./embedtronics/pico-sdk-install.md)
+	- [arm-none-eabi-gdb debugging with openocd](./embedtronics/arm-none-eabi-gdb-debugging-with-openocd.md)
+	- [analysis how printf rp2040 work under low level stuff](./embedtronics/analysis-how-printf-rp2040-work-under-low-level-stuff.md)
+	
 
 - [Math](./math/readme-math.md)
 	- [Set formula](./math/set_formula_1.md)
@@ -110,6 +111,8 @@
 	- [alpine install ssh + firefox lite qemu](./server/alpine-firefox-lite.md)
 	- [resizing qemu image](./server/resize-qemu-image.md)
 	- [docker snippets](./server/docker-snippets.md)
+	- [install routerOS.iso (not chr) on qemu](./server/routeros-on-qemu.md)
+	
 
 - [Database](./database/readme-database.md)
 	- [psql command](./database/psql_command.md)

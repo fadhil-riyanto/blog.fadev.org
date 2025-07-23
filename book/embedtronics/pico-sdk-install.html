@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Database - Fadhil Journal &amp; Notes</title>
+        <title>pico sdk install &amp; cmake template - Fadhil Journal &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -160,17 +160,72 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="database"><a class="header" href="#database">Database</a></h1>
+                        <h1 id="pico-sdk-install--cmake-template"><a class="header" href="#pico-sdk-install--cmake-template">PICO SDK install &amp; cmake template</a></h1>
+<p>install step is very easy,</p>
+<pre><code class="language-sh">git clone https://github.com/raspberrypi/pico-sdk.git
+cd pico-sdk
+git submodule update --init
+</code></pre>
+<h1 id="cmake-template"><a class="header" href="#cmake-template">CMAKE Template</a></h1>
+<p>this is my own standard of pico rp2040 chip cmake build template</p>
+<pre><code class="language-C">cmake_minimum_required(VERSION 3.13)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+include(/home/fadhil_riyanto/git_clone/pico-sdk/pico_sdk_init.cmake)
+
+pico_sdk_init()
+
+project(hello_usb C CXX ASM)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
+
+
+add_executable(hello_usb hello_usb.c)
+target_link_libraries(hello_usb pico_stdlib)
+
+# # enable usb output, disable uart output
+# pico_enable_stdio_usb(hello_usb 1)
+# pico_enable_stdio_uart(hello_usb 0)
+
+pico_add_extra_outputs(hello_usb)
+</code></pre>
+<p>if you ask about</p>
+<blockquote>
+<blockquote>
+<p>what uses of <code>pico_sdk_init</code>, or <code>pico_enable_stdio_usb</code>, please read it yourself on <a href="https://github.com/raspberrypi/pico-sdk/blob/9a4113fbbae65ee82d8cd6537963bc3d3b14bcca/pico_sdk_init.cmake#L44-L49">https://github.com/raspberrypi/pico-sdk/blob/9a4113fbbae65ee82d8cd6537963bc3d3b14bcca/pico_sdk_init.cmake#L44-L49</a>, thats is a macro!</p>
+</blockquote>
+</blockquote>
+<p>feel free to change <code>include(/home/fadhil_riyanto/git_clone/pico-sdk/pico_sdk_init.cmake)</code> with your own SDK Path</p>
+<p><img src="/assets/3cd8678ed1023faefda7a4811168e691c0c03b33959a8272ce79f4833dba63016f479fe6da574e7b9dd0cfab422e1c05562aae820819ae717115691c.png" alt="image" /></p>
+<p><img src="/assets/647a46c8f9f938fa98e322298755afe0249e3cfe64d7ffcddd8626d6a31f07e8cf9f3e1fd131d2ce12001631a942c041f072916f19e416e26f2b1da9.png" alt="image" /></p>
+<h1 id="vscode-autocomplete-settings"><a class="header" href="#vscode-autocomplete-settings">vscode autocomplete settings</a></h1>
+<p>create file named <code>.vscode/c_cpp_properties.json</code></p>
+<p>fill with</p>
+<pre><code class="language-json">{
+  "configurations": [
+    {
+      "name": "Linux",
+      "compileCommands": "${workspaceFolder}/build/compile_commands.json",
+      "intelliSenseMode": "linux-gcc-x64",
+      "compilerPath": "/usr/bin/g++",
+      "cStandard": "c11",
+      "cppStandard": "c++17"
+    }
+  ],
+  "version": 4
+}
+
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../server/routeros-on-qemu.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../embedtronics/pico-debug-with-pico.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../database/psql_command.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../embedtronics/arm-none-eabi-gdb-debugging-with-openocd.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -180,11 +235,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../server/routeros-on-qemu.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../embedtronics/pico-debug-with-pico.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../database/psql_command.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../embedtronics/arm-none-eabi-gdb-debugging-with-openocd.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

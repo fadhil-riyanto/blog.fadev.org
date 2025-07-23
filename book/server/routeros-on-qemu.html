@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Backend - Fadhil Journal &amp; Notes</title>
+        <title>install routerOS.iso (not chr) on qemu - Fadhil Journal &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -160,17 +160,50 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="backend"><a class="header" href="#backend">Backend</a></h1>
+                        <h1 id="install-routerosiso-not-chr-on-qemu"><a class="header" href="#install-routerosiso-not-chr-on-qemu">install routerOS.iso (not chr) on qemu</a></h1>
+<p>please download this <a href="https://download.mikrotik.com/routeros/7.19.3/mikrotik-7.19.3.iso">https://download.mikrotik.com/routeros/7.19.3/mikrotik-7.19.3.iso</a>, <a href="https://mikrotik.com/download">https://mikrotik.com/download</a></p>
+<p>select x86</p>
+<p>after that, run this command (dry run)</p>
+<pre><code class="language-sh">qemu-img create -f qcow2 mikrotik-7.qcow2 4G
+</code></pre>
+<p>install</p>
+<pre><code class="language-sh">qemu-system-x86_64 \
+      -enable-kvm \
+      -smp 4 -m 256M \
+      -drive file=mikrotik-7.qcow2,format=qcow2 \
+      -boot order=d \
+      -cdrom ./iso/mikrotik-7.19.3.iso \
+      -net user,hostfwd=tcp::8291-:8291,hostfwd=tcp::10022-:22 \
+      -net nic
+</code></pre>
+<p>select wireless, and system</p>
+<p>after that, run this</p>
+<pre><code class="language-sh">wget https://gist.githubusercontent.com/fadhil-riyanto/d370c3551426ced874f7c0e0e6f62800/raw/9ef4886bcb5c49137b47a2ce60f49a840751e753/setup-network.sh &amp;&amp; chmod 777 setup-network.sh &amp;&amp; sudo sh setup-network.sh
+</code></pre>
+<p>now, we have virtual lan that uses tun-tap network. now run chr on <code>tap0</code></p>
+<pre><code class="language-sh">qemu-system-x86_64 \
+      -enable-kvm \
+      -smp 4 -m 256M \
+      -drive file=mikrotik-7.qcow2,format=qcow2 \
+      -boot order=d \
+      -netdev user,id=net0,hostfwd=tcp::8291-:8291,hostfwd=tcp::10022-:22 \
+      -device virtio-net-pci,netdev=net0 \
+      -netdev tap,id=net1,ifname=tap1,script=no,downscript=no \
+      -device virtio-net-pci,netdev=net1,mac=02:11:2a:3b:aa:c4 \
+      -nographic
+</code></pre>
+<h1 id="post-install"><a class="header" href="#post-install">post install</a></h1>
+<p>do not forget to enable DHCP in order to get internet from qemu internal routes</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../rust/miri-rust.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../server/docker-snippets.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../embedtronics/readme-embedtronics.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../database/readme-database.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -180,11 +213,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../rust/miri-rust.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../server/docker-snippets.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../embedtronics/readme-embedtronics.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../database/readme-database.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
