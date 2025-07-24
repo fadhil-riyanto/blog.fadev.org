@@ -1804,6 +1804,7 @@ WOW, its least endian first, so the machine is <code>little-endian</code></p>
 <p>you can also check out my lscpu result
 <img src="sysprog//assets/cb27cc742ecc2180a209e7c7e35460caf57e4d3354e8a1c1b0056a66365d64f1f9b419000ab32ea67b58ef467e860f098f4a239813be980dc17e7573.png" alt="image" /></p>
 <p><img src="sysprog//assets/b482f061fbd71bb226383393d5343644a6bf830c9c43ac2ac45380889b93986d110b6c192b18208f71e9cfba970939fd8004466e719577e245116607.png" alt="image" /></p>
+<p><img src="sysprog//assets/e70f7497ba5ae41b2a242bfa5bf80ee2706a328cb64e3b23e731cf475ad845b143274ef27879d63789c844812caf425c5c8d031360efd6a5b371284e.png" alt="image" /></p>
 <h2 id="rust"><a class="header" href="#rust">rust</a></h2>
 <p>result
 <img src="sysprog//assets/168766015cce02d62b18bb5339cd98f30dd83b729fbece7e291a97bcd758d1bfccc4a96c3d97f772b334d83b09a091c4a495abc30921582e8a95b291.png" alt="image" /></p>
@@ -1858,6 +1859,169 @@ int main() {
     119b:       c9                      leave
     119c:       c3                      ret
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="arm"><a class="header" href="#arm">ARM</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="thumb-thumb-2-arm-aarch64-introduction"><a class="header" href="#thumb-thumb-2-arm-aarch64-introduction">Thumb, Thumb-2, ARM, AArch64 introduction</a></h1>
+<h2 id="thumb"><a class="header" href="#thumb">Thumb</a></h2>
+<p>Apa itu thumb instruction?</p>
+<p>mengutip dari dokumentasi <a href="https://developer.arm.com/documentation/ddi0210/c/CACBCAAE">https://developer.arm.com/documentation/ddi0210/c/CACBCAAE</a></p>
+<blockquote>
+<p>The Thumb instruction set is a subset of the most commonly used 32-bit ARM instructions. Thumb instructions are each 16 bits long, and have a corresponding 32-bit ARM instruction that has the same effect on the processor model. Thumb instructions operate with the standard ARM register configuration, allowing excellent interoperability between ARM and Thumb states.</p>
+<p>On execution, 16-bit Thumb instructions are transparently decompressed to full 32-bit ARM instructions in real time, without performance loss.</p>
+<p>Thumb has all the advantages of a 32-bit core:</p>
+<ul>
+<li>32-bit address space</li>
+<li>32-bit registers</li>
+<li>32-bit shifter, and Arithmetic Logic Unit (ALU)</li>
+<li>32-bit memory transfer.</li>
+</ul>
+</blockquote>
+<p>tambahan: Thumb juga disebut A32/T32</p>
+<p>thumb ISA adalah versi lite dari full arm instruction, tapi di encoded ke versi kecil, 16 bit format, dimana format ini tidak akan menghabiskan banyak space program.</p>
+<p>tapi ada caveat disini, processor tidak mengeksekusi 16 bit instruction langsung, tapi ia mendekompresi nya dahulu, baru masuk stage final execution</p>
+<p>dan juga, kata "transparent" yang juga berati, arm-nya hanya mengesekusi standard 32 bit instrution, kita sebagai programmer tidak perlu bingung &amp; mengurus conversion antara 16 bit ke 32 bit. ini murni "fitur hw"</p>
+<p><code>"...in real time, without performance loss."</code>
+itu berarti, instruction nya dijalankan secara langsung, dari 16 bit instruction di interpretkan sebagai instruksi 32 bit (tanpa ada loss peformance)</p>
+<blockquote>
+<pre><code>16-bit, halfword-aligned Thumb instructions are executed in this state.
+</code></pre>
+</blockquote>
+<p>contoh</p>
+<ul>
+<li>ARM7TDMI:
+<ul>
+<li><a href="https://developer.arm.com/documentation/ka001209/latest/">https://developer.arm.com/documentation/ka001209/latest/</a></li>
+<li><a href="https://www.linkedin.com/pulse/why-arm7-called-tdmi-shanmukhapriya-g-2pgmc/">https://www.linkedin.com/pulse/why-arm7-called-tdmi-shanmukhapriya-g-2pgmc/</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="thumb-2"><a class="header" href="#thumb-2">thumb-2</a></h2>
+<p>sama seperti thumb 1, hanya saja ia bisa memuat either 32 bit, atau 16 bit instruction</p>
+<h2 id="arm-1"><a class="header" href="#arm-1">ARM</a></h2>
+<p>normal instruksi ARM yang berjalan di android, selayaknya normal CPU</p>
+<h2 id="aarch64"><a class="header" href="#aarch64">AArch64</a></h2>
+<p>versi 64 bit dari ARM, yang biasanya dipakai di rasberry PI 5, server, dsb</p>
+<p>Biasa disebut ARMv8-A,</p>
+<h1 id="keluarga-arm"><a class="header" href="#keluarga-arm">keluarga ARM</a></h1>
+<h2 id="armv6-m"><a class="header" href="#armv6-m">ARMv6-M</a></h2>
+<p>arm ini support thumb 1 ISA, dan merupakan versi paling lite dari ARM, bisa dibaca di <a href="https://www.st.com/content/st_com/en/arm-32-bit-microcontrollers/arm-cortex-m0.html#:~:text=Arm%C2%AE%2032%2Dbit%20Microcontrollers,Arm%20Cortex%2DM3">https://www.st.com/content/st_com/en/arm-32-bit-microcontrollers/arm-cortex-m0.html#:~:text=Arm%C2%AE%2032%2Dbit%20Microcontrollers,Arm%20Cortex%2DM3</a></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="arm-m0-registers"><a class="header" href="#arm-m0-registers">ARM M0+ registers</a></h1>
+<p>nice read: <a href="https://blog.smittytone.net/2022/06/19/get-started-with-arm-assembly-on-the-pi-pico/">https://blog.smittytone.net/2022/06/19/get-started-with-arm-assembly-on-the-pi-pico/</a></p>
+<p>secara formal, arm M0 punya register2 berikut</p>
+<pre><code class="language-txt">* r0
+* r1
+* r2
+* r3
+* r4
+* r5
+* r6
+* r7
+* r8
+* r9
+* r10
+* r11
+* r12
+* sp (aka r13)
+* lr (aka r14)
+* pc (aka r15)
+* xPSR
+* msp
+* psp
+</code></pre>
+<p>official docs: <a href="https://developer.arm.com/documentation/ddi0484/c/Programmers-Model/Processor-core-registers-summary">https://developer.arm.com/documentation/ddi0484/c/Programmers-Model/Processor-core-registers-summary</a></p>
+<p><img src="arm//assets/67d40423b0860d9b96c140c1202fcfadb325fec9d8b479f8f44b8c0143da9151159e09322096c7145b7a79bc65141591e894111a667c7451e185a951.png" alt="image" /></p>
+<p>intinya</p>
+<ul>
+<li>register r0 sampai r12 itu adalah GP register</li>
+<li>r13 dibagi jadi 2, ada Main Stack Pointer (MSP) dan Process Stack Pointer (PSP)</li>
+<li>r14 adalah link register</li>
+<li>pc (r15), program counter</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="arm-aarch32-abi-convention"><a class="header" href="#arm-aarch32-abi-convention">ARM AArch32 ABI Convention</a></h1>
+<p>link: <a href="https://github.com/ARM-software/abi-aa/blob/main/aapcs32/aapcs32.rst">https://github.com/ARM-software/abi-aa/blob/main/aapcs32/aapcs32.rst</a></p>
+<p><img src="arm//assets/c9f880c8e4778755426768441f6f31d9f9f6694a62c0a28dd8498d4f43783e2307c68fda111aa8b7c810553a96cd4eeb2eaba31080f4bc92b2e1413f.png" alt="image" /></p>
+<p>Registers R0-3 are also, by convention, used to hold parameter values to be passed to a subroutine or function. Functions with more than four parameters typically use one or more of those parameter registers to hold addresses pointing to data structures in memory.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="asm-gnu-as-direction-collection"><a class="header" href="#asm-gnu-as-direction-collection">ASM gnu-as direction collection</a></h1>
+<ul>
+<li>
+<p><code>.equ</code></p>
+<blockquote>
+<p><a href="https://sourceware.org/binutils/docs-2.24/as/Equ.html#Equ">https://sourceware.org/binutils/docs-2.24/as/Equ.html#Equ</a></p>
+<p>this is equalivalent of <code>#define FOO 6</code> in c</p>
+<p>example:</p>
+<pre><code class="language-txt">.equ LED_PIN,      25
+.equ GPIO_DIR_IN,  0
+.equ GPIO_DIR_OUT, 1
+.equ PIN_HIGH,     1
+.equ PIN_LOW,      0
+</code></pre>
+</blockquote>
+</li>
+<li>
+<p><code>.syntax</code></p>
+<blockquote>
+<p><a href="https://sourceware.org/binutils/docs/as.html#Instruction-Set-Syntax">https://sourceware.org/binutils/docs/as.html#Instruction-Set-Syntax</a>
+<a href="https://www.sourceware.org/binutils/docs/as/ARM-Directives.html#index-_002esyntax-directive_002c-ARM">https://www.sourceware.org/binutils/docs/as/ARM-Directives.html#index-_002esyntax-directive_002c-ARM</a></p>
+<p>this is either <code>unified</code> or <code>divided</code></p>
+<p>example:</p>
+<pre><code class="language-txt">empty?
+</code></pre>
+</blockquote>
+</li>
+</ul>
+<p>this is just template</p>
+<ul>
+<li>``
+<blockquote>
+<p>link here</p>
+<p>small explanation</p>
+<p>example:</p>
+<pre><code class="language-txt"></code></pre>
+</blockquote>
+</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="branch-exchange-bx"><a class="header" href="#branch-exchange-bx">branch exchange (BX)</a></h1>
+<p>consider this simple code</p>
+<pre><code class="language-c">int main() {
+        /* nop */
+        return 10;
+}
+</code></pre>
+<p>produces this:
+<img src="arm//assets/8679d31db2d22a5b165c92d842214ff3d0ff3ba1b69436d093cf0b7a04125e545167bd788a2acd38cc6c210ad9477096c426cc04aa3fa264e3f6a3ef.png" alt="image" /></p>
+<p>It's almost always returning from a function, like ret in some other ISAs like AArch64.</p>
+<p>nice read:</p>
+<ul>
+<li><a href="https://developer.arm.com/documentation/dui0379/e/arm-and-thumb-instructions/bx">https://developer.arm.com/documentation/dui0379/e/arm-and-thumb-instructions/bx</a></li>
+<li><a href="https://developer.arm.com/documentation/dui0231/b/arm-instruction-reference/arm-branch-instructions/b-and-bl">https://developer.arm.com/documentation/dui0231/b/arm-instruction-reference/arm-branch-instructions/b-and-bl</a></li>
+</ul>
+<p>why?</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="calling-a-main-function"><a class="header" href="#calling-a-main-function">calling a main function</a></h1>
+<p>disini, ku akan memperlihatkan "kenapa" init function di rp2040 bisa bernama main, dan bagaimana steps nya</p>
+<p>pertama2, saya mencoba flash kode asm yang isinya hanya jump dan exit, seperti yang terlihat dibawah
+<img src="arm//assets/b2b3b96f8c0cddf06860d7198a04f2b9d127da925dc91d703e6f4b610ab2a5805be30372eb52d29c7490587856eff9352f31f60cb6ca70eeb9174e51.png" alt="image" /></p>
+<p>lalu saya jalankan, terlihat saya kasih dia breakpoint di <code>main</code> kan?
+<img src="arm//assets/1f9c9b01546d4faf7b1e805a045ca222500ed9f23f096963a302cb0260060c4eabc0b0a1d24476885d3e478fbb33b37d470a6b542f113150299fb519.png" alt="image" /></p>
+<p>sebenernya sudah benar bagian</p>
+<pre><code class="language-c">(gdb) disass
+Dump of assembler code for function main:
+=&gt; 0x100002a8 &lt;+0&gt;:	b.n	0x100002aa &lt;jump_here&gt;
+</code></pre>
+<p>lalu next, jump ke <code>jump_here</code></p>
+<pre><code class="language-c">(gdb) disass
+Dump of assembler code for function jump_here:
+=&gt; 0x100002aa &lt;+0&gt;:	movs	r0, #0
+   0x100002ac &lt;+2&gt;:	bx	lr
+   0x100002ae &lt;+4&gt;:	movs	r0, r0
+End of assembler dump.
+
+</code></pre>
+<p>terlihat sudah sampai di <code>movs r0, #0</code> kan? sama seperti assembly kita diatas, tapi ada beberapa yang strange (need triage)</p>
+<p>tiba tiba muncul</p>
+<pre><code class="language-c">movs	r0, r0
+</code></pre>
+<p>jika kita lihat juga, setelah jump <code>jump_here</code> dieksekusi, ia pindah ke <code>/home/fadhil_riyanto/git_clone/pico-sdk/src/rp2_common/pico_crt0/crt0.S:456</code></p>
+<p>dan akhirnya, tidak sengaja menemukan asm yang memanggil si main</p>
+<p><img src="arm//assets/e4d2f43598a6ede1d6e849fc30035b2df58a45619053524684b8563112890debca482cce96d66ec1d13c9e9140bb9665dd180d8c4b98c298f5df7c08.png" alt="image" /></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-stuff"><a class="header" href="#rust-stuff">Rust stuff</a></h1>
 <p>Welcome in this rust stuff section.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-cursor-how-it-works"><a class="header" href="#rust-cursor-how-it-works">Rust cursor, How it works</a></h1>
@@ -2212,6 +2376,12 @@ async fn main() {
 
 }</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="miri-rust-setup"><a class="header" href="#miri-rust-setup">miri rust setup</a></h1>
+<p>run this command</p>
+<ul>
+<li><code>rustup install nightly</code></li>
+<li><code>rustup +nightly component add miri</code></li>
+<li>lets run cool stuff: <code>cargo +nightly miri run --target s390x-unknown-linux-gnu</code></li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="embedtronics"><a class="header" href="#embedtronics">Embedtronics</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="picotool-build"><a class="header" href="#picotool-build">picotool build</a></h1>
 <h2 id="os-setup"><a class="header" href="#os-setup">os setup</a></h2>
@@ -2368,6 +2538,9 @@ int main() {
 <p>after that, lets jump into <a href="https://github.com/raspberrypi/pico-sdk/blob/9a4113fbbae65ee82d8cd6537963bc3d3b14bcca/src/rp2_common/pico_platform_compiler/include/pico/platform/compiler.h#L185">https://github.com/raspberrypi/pico-sdk/blob/9a4113fbbae65ee82d8cd6537963bc3d3b14bcca/src/rp2_common/pico_platform_compiler/include/pico/platform/compiler.h#L185</a>, very clear definition</p>
 <p>so, basically. this function
 <img src="embedtronics//assets/b0dbbe24380b5411221dbffcf2cb8409180135d704b9ede610a1e8f3e032a9ce6071551b9c2628a7d85fec6dcb88aa3f8b529d15999cdf75570fdab8.png" alt="image" /></p>
+<p>call <code>__wrap_printf</code></p>
+<p>make sense?</p>
+<h1 id=""><a class="header" href="#"></a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="math"><a class="header" href="#math">Math</a></h1>
 <p>Welcome in this section.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="set-operations-formula"><a class="header" href="#set-operations-formula">Set operations formula</a></h1>

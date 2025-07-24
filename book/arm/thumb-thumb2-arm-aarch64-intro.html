@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>analysis how printf rp2040 work under low level stuff - Fadhil Journal &amp; Notes</title>
+        <title>Thumb, Thumb-2, ARM, AArch64 introduction - Fadhil Journal &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -160,53 +160,60 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="analysis-how-printf-rp2040-work-under-low-level-stuff"><a class="header" href="#analysis-how-printf-rp2040-work-under-low-level-stuff">analysis how printf rp2040 work under low level stuff</a></h1>
-<p>in order to know how printf works in rp2040 uart bridge, lets compile simple program, compile as debug, then run GDB</p>
-<p>consider this very simple hello world</p>
-<pre><code class="language-c">#include &lt;pico/printf.h&gt;
-#include &lt;pico/time.h&gt;
-
-int main() {
-    int n = 0;
-    stdio_init_all();
-    while (true) {
-        printf("Hello, world! %d\n", n);
-        sleep_ms(1000);
-        n = n + 1;
-    }
-}
+                        <h1 id="thumb-thumb-2-arm-aarch64-introduction"><a class="header" href="#thumb-thumb-2-arm-aarch64-introduction">Thumb, Thumb-2, ARM, AArch64 introduction</a></h1>
+<h2 id="thumb"><a class="header" href="#thumb">Thumb</a></h2>
+<p>Apa itu thumb instruction?</p>
+<p>mengutip dari dokumentasi <a href="https://developer.arm.com/documentation/ddi0210/c/CACBCAAE">https://developer.arm.com/documentation/ddi0210/c/CACBCAAE</a></p>
+<blockquote>
+<p>The Thumb instruction set is a subset of the most commonly used 32-bit ARM instructions. Thumb instructions are each 16 bits long, and have a corresponding 32-bit ARM instruction that has the same effect on the processor model. Thumb instructions operate with the standard ARM register configuration, allowing excellent interoperability between ARM and Thumb states.</p>
+<p>On execution, 16-bit Thumb instructions are transparently decompressed to full 32-bit ARM instructions in real time, without performance loss.</p>
+<p>Thumb has all the advantages of a 32-bit core:</p>
+<ul>
+<li>32-bit address space</li>
+<li>32-bit registers</li>
+<li>32-bit shifter, and Arithmetic Logic Unit (ALU)</li>
+<li>32-bit memory transfer.</li>
+</ul>
+</blockquote>
+<p>tambahan: Thumb juga disebut A32/T32</p>
+<p>thumb ISA adalah versi lite dari full arm instruction, tapi di encoded ke versi kecil, 16 bit format, dimana format ini tidak akan menghabiskan banyak space program.</p>
+<p>tapi ada caveat disini, processor tidak mengeksekusi 16 bit instruction langsung, tapi ia mendekompresi nya dahulu, baru masuk stage final execution</p>
+<p>dan juga, kata "transparent" yang juga berati, arm-nya hanya mengesekusi standard 32 bit instrution, kita sebagai programmer tidak perlu bingung &amp; mengurus conversion antara 16 bit ke 32 bit. ini murni "fitur hw"</p>
+<p><code>"...in real time, without performance loss."</code>
+itu berarti, instruction nya dijalankan secara langsung, dari 16 bit instruction di interpretkan sebagai instruksi 32 bit (tanpa ada loss peformance)</p>
+<blockquote>
+<pre><code>16-bit, halfword-aligned Thumb instructions are executed in this state.
 </code></pre>
-<h1 id="analysis"><a class="header" href="#analysis">analysis</a></h1>
-<p><img src="/assets/c9a172f5c6ce190e648f88df4af894d4d115b23d2128cad758833395f62d3f5e5d2ef9cb3dc4d695806f538fa26510bf6bc0da2b995b7fceeaff4899.png" alt="image" /></p>
-<p>see?</p>
-<pre><code class="language-c">=&gt; 0x100002b4 &lt;+12&gt;:    bl      0x10003a64 &lt;__wrap_printf&gt;
-</code></pre>
-<p>its call <code>__wrap_printf</code> which mean, the backend call <code>-Wl,--wrap=printf</code> internally, but if we reffer to <code>/home/fadhil_riyanto/git_clone/pico-sdk/src/rp2_common/pico_stdio/stdio.c:347</code></p>
-<p><img src="/assets/44f66f5c4e0c51a2c0b4bc3885079beb5de306725363b91ba2a38898bf59d0e76fe467ec3abf98eb4881aaf0ce408cf5ebd19b28747ef3720bb99107.png" alt="image" /></p>
-<p>the signature is different, this function has signature</p>
-<pre><code class="language-c">int __printflike(1, 0) PRIMARY_STDIO_FUNC(printf)(const char* format, ...)
-</code></pre>
-<p>so, what exactly happen?</p>
-<h1 id="result"><a class="header" href="#result">result</a></h1>
-<p>lets look at stdio.c line 289</p>
-<p><img src="/assets/a00ffec057742b32cb76c8db0d3da75c299ceba49a218edf9d559fb31eb9ae029da9b798e2d255ca0af5754dcd7ac62929645ad3aa63155c62bf61a8.png" alt="image" /></p>
-<p>when the macro <code>PICO_STDIO_SHORT_CIRCUIT_CLIB_FUNCS</code> is active, we replace the function name by <code>WRAPPER_FUNC(x)</code>, not <code>stdio_printf</code></p>
-<p>after that, lets jump into <a href="https://github.com/raspberrypi/pico-sdk/blob/9a4113fbbae65ee82d8cd6537963bc3d3b14bcca/src/rp2_common/pico_platform_compiler/include/pico/platform/compiler.h#L185">https://github.com/raspberrypi/pico-sdk/blob/9a4113fbbae65ee82d8cd6537963bc3d3b14bcca/src/rp2_common/pico_platform_compiler/include/pico/platform/compiler.h#L185</a>, very clear definition</p>
-<p>so, basically. this function
-<img src="/assets/b0dbbe24380b5411221dbffcf2cb8409180135d704b9ede610a1e8f3e032a9ce6071551b9c2628a7d85fec6dcb88aa3f8b529d15999cdf75570fdab8.png" alt="image" /></p>
-<p>call <code>__wrap_printf</code></p>
-<p>make sense?</p>
-<h1 id=""><a class="header" href="#"></a></h1>
+</blockquote>
+<p>contoh</p>
+<ul>
+<li>ARM7TDMI:
+<ul>
+<li><a href="https://developer.arm.com/documentation/ka001209/latest/">https://developer.arm.com/documentation/ka001209/latest/</a></li>
+<li><a href="https://www.linkedin.com/pulse/why-arm7-called-tdmi-shanmukhapriya-g-2pgmc/">https://www.linkedin.com/pulse/why-arm7-called-tdmi-shanmukhapriya-g-2pgmc/</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="thumb-2"><a class="header" href="#thumb-2">thumb-2</a></h2>
+<p>sama seperti thumb 1, hanya saja ia bisa memuat either 32 bit, atau 16 bit instruction</p>
+<h2 id="arm"><a class="header" href="#arm">ARM</a></h2>
+<p>normal instruksi ARM yang berjalan di android, selayaknya normal CPU</p>
+<h2 id="aarch64"><a class="header" href="#aarch64">AArch64</a></h2>
+<p>versi 64 bit dari ARM, yang biasanya dipakai di rasberry PI 5, server, dsb</p>
+<p>Biasa disebut ARMv8-A,</p>
+<h1 id="keluarga-arm"><a class="header" href="#keluarga-arm">keluarga ARM</a></h1>
+<h2 id="armv6-m"><a class="header" href="#armv6-m">ARMv6-M</a></h2>
+<p>arm ini support thumb 1 ISA, dan merupakan versi paling lite dari ARM, bisa dibaca di <a href="https://www.st.com/content/st_com/en/arm-32-bit-microcontrollers/arm-cortex-m0.html#:~:text=Arm%C2%AE%2032%2Dbit%20Microcontrollers,Arm%20Cortex%2DM3">https://www.st.com/content/st_com/en/arm-32-bit-microcontrollers/arm-cortex-m0.html#:~:text=Arm%C2%AE%2032%2Dbit%20Microcontrollers,Arm%20Cortex%2DM3</a></p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../embedtronics/arm-none-eabi-gdb-debugging-with-openocd.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../arm/readme-arm.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../math/readme-math.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../arm/arm-m0-registers.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -216,11 +223,11 @@ int main() {
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../embedtronics/arm-none-eabi-gdb-debugging-with-openocd.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../arm/readme-arm.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../math/readme-math.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../arm/arm-m0-registers.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>analysis how printf rp2040 work under low level stuff - Fadhil Journal &amp; Notes</title>
+        <title>calling a main function - Fadhil Journal &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -160,53 +160,43 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="analysis-how-printf-rp2040-work-under-low-level-stuff"><a class="header" href="#analysis-how-printf-rp2040-work-under-low-level-stuff">analysis how printf rp2040 work under low level stuff</a></h1>
-<p>in order to know how printf works in rp2040 uart bridge, lets compile simple program, compile as debug, then run GDB</p>
-<p>consider this very simple hello world</p>
-<pre><code class="language-c">#include &lt;pico/printf.h&gt;
-#include &lt;pico/time.h&gt;
+                        <h1 id="calling-a-main-function"><a class="header" href="#calling-a-main-function">calling a main function</a></h1>
+<p>disini, ku akan memperlihatkan "kenapa" init function di rp2040 bisa bernama main, dan bagaimana steps nya</p>
+<p>pertama2, saya mencoba flash kode asm yang isinya hanya jump dan exit, seperti yang terlihat dibawah
+<img src="/assets/b2b3b96f8c0cddf06860d7198a04f2b9d127da925dc91d703e6f4b610ab2a5805be30372eb52d29c7490587856eff9352f31f60cb6ca70eeb9174e51.png" alt="image" /></p>
+<p>lalu saya jalankan, terlihat saya kasih dia breakpoint di <code>main</code> kan?
+<img src="/assets/1f9c9b01546d4faf7b1e805a045ca222500ed9f23f096963a302cb0260060c4eabc0b0a1d24476885d3e478fbb33b37d470a6b542f113150299fb519.png" alt="image" /></p>
+<p>sebenernya sudah benar bagian</p>
+<pre><code class="language-c">(gdb) disass
+Dump of assembler code for function main:
+=&gt; 0x100002a8 &lt;+0&gt;:	b.n	0x100002aa &lt;jump_here&gt;
+</code></pre>
+<p>lalu next, jump ke <code>jump_here</code></p>
+<pre><code class="language-c">(gdb) disass
+Dump of assembler code for function jump_here:
+=&gt; 0x100002aa &lt;+0&gt;:	movs	r0, #0
+   0x100002ac &lt;+2&gt;:	bx	lr
+   0x100002ae &lt;+4&gt;:	movs	r0, r0
+End of assembler dump.
 
-int main() {
-    int n = 0;
-    stdio_init_all();
-    while (true) {
-        printf("Hello, world! %d\n", n);
-        sleep_ms(1000);
-        n = n + 1;
-    }
-}
 </code></pre>
-<h1 id="analysis"><a class="header" href="#analysis">analysis</a></h1>
-<p><img src="/assets/c9a172f5c6ce190e648f88df4af894d4d115b23d2128cad758833395f62d3f5e5d2ef9cb3dc4d695806f538fa26510bf6bc0da2b995b7fceeaff4899.png" alt="image" /></p>
-<p>see?</p>
-<pre><code class="language-c">=&gt; 0x100002b4 &lt;+12&gt;:    bl      0x10003a64 &lt;__wrap_printf&gt;
+<p>terlihat sudah sampai di <code>movs r0, #0</code> kan? sama seperti assembly kita diatas, tapi ada beberapa yang strange (need triage)</p>
+<p>tiba tiba muncul</p>
+<pre><code class="language-c">movs	r0, r0
 </code></pre>
-<p>its call <code>__wrap_printf</code> which mean, the backend call <code>-Wl,--wrap=printf</code> internally, but if we reffer to <code>/home/fadhil_riyanto/git_clone/pico-sdk/src/rp2_common/pico_stdio/stdio.c:347</code></p>
-<p><img src="/assets/44f66f5c4e0c51a2c0b4bc3885079beb5de306725363b91ba2a38898bf59d0e76fe467ec3abf98eb4881aaf0ce408cf5ebd19b28747ef3720bb99107.png" alt="image" /></p>
-<p>the signature is different, this function has signature</p>
-<pre><code class="language-c">int __printflike(1, 0) PRIMARY_STDIO_FUNC(printf)(const char* format, ...)
-</code></pre>
-<p>so, what exactly happen?</p>
-<h1 id="result"><a class="header" href="#result">result</a></h1>
-<p>lets look at stdio.c line 289</p>
-<p><img src="/assets/a00ffec057742b32cb76c8db0d3da75c299ceba49a218edf9d559fb31eb9ae029da9b798e2d255ca0af5754dcd7ac62929645ad3aa63155c62bf61a8.png" alt="image" /></p>
-<p>when the macro <code>PICO_STDIO_SHORT_CIRCUIT_CLIB_FUNCS</code> is active, we replace the function name by <code>WRAPPER_FUNC(x)</code>, not <code>stdio_printf</code></p>
-<p>after that, lets jump into <a href="https://github.com/raspberrypi/pico-sdk/blob/9a4113fbbae65ee82d8cd6537963bc3d3b14bcca/src/rp2_common/pico_platform_compiler/include/pico/platform/compiler.h#L185">https://github.com/raspberrypi/pico-sdk/blob/9a4113fbbae65ee82d8cd6537963bc3d3b14bcca/src/rp2_common/pico_platform_compiler/include/pico/platform/compiler.h#L185</a>, very clear definition</p>
-<p>so, basically. this function
-<img src="/assets/b0dbbe24380b5411221dbffcf2cb8409180135d704b9ede610a1e8f3e032a9ce6071551b9c2628a7d85fec6dcb88aa3f8b529d15999cdf75570fdab8.png" alt="image" /></p>
-<p>call <code>__wrap_printf</code></p>
-<p>make sense?</p>
-<h1 id=""><a class="header" href="#"></a></h1>
+<p>jika kita lihat juga, setelah jump <code>jump_here</code> dieksekusi, ia pindah ke <code>/home/fadhil_riyanto/git_clone/pico-sdk/src/rp2_common/pico_crt0/crt0.S:456</code></p>
+<p>dan akhirnya, tidak sengaja menemukan asm yang memanggil si main</p>
+<p><img src="/assets/e4d2f43598a6ede1d6e849fc30035b2df58a45619053524684b8563112890debca482cce96d66ec1d13c9e9140bb9665dd180d8c4b98c298f5df7c08.png" alt="image" /></p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../embedtronics/arm-none-eabi-gdb-debugging-with-openocd.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../arm/arm-branch-exchange.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../math/readme-math.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../rust/readme-rust-stuff.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -216,11 +206,11 @@ int main() {
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../embedtronics/arm-none-eabi-gdb-debugging-with-openocd.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../arm/arm-branch-exchange.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../math/readme-math.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../rust/readme-rust-stuff.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

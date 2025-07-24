@@ -52,3 +52,9 @@ after that, lets jump into [https://github.com/raspberrypi/pico-sdk/blob/9a4113f
 
 so, basically. this function 
 ![image](/assets/b0dbbe24380b5411221dbffcf2cb8409180135d704b9ede610a1e8f3e032a9ce6071551b9c2628a7d85fec6dcb88aa3f8b529d15999cdf75570fdab8.png)
+
+call `__wrap_printf`
+
+make sense?
+
+#
