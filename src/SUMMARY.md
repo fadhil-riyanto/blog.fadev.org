@@ -4,6 +4,8 @@
 [Todo](TODO.md)
 
 - [System programming](./sysprog/readme-sysprog.md)
+	- [GNU linker scripts](./sysprog/ld-script.md)
+	- [nm and linker (ld)](./sysprog/nm.md)
 	- [How data movement changes a destination register](./sysprog/data_movement_changes_a_destination_register.md)
 	- [General embedded ASM linked in C](./sysprog/embed_asm.md)
 	- [Move sign & zero-extends a single byte](./sysprog/movsbl_movzbl.md)
@@ -42,6 +44,7 @@
 	- [amd64 endianness](./sysprog/AMD64_endianness.md)
 	- [linker --wrap symbol](./sysprog/ld-wrap.md)
 
+
 - [ARM](./arm/readme-arm.md)
 	- [Thumb, Thumb-2, ARM, AArch64 introduction](./arm/thumb-thumb2-arm-aarch64-intro.md)
 	- [ARM M0+ registers](./arm/arm-m0-registers.md)
@@ -49,6 +52,8 @@
 	- [ASM gnu-as direction collection](./arm/asm-direction.md)
 	- [branch exchange (BX)](./arm/arm-branch-exchange.md)
 	- [calling a main function](./arm/calling-a-main.md)
+	- [ARM MRS instruction](./arm/arm-mrs-instruction.md)
+	- [difference between thumb-1 (T16) and normal ARM](./arm/arm-thumb-1-vs-normal-arm.md)
 	
 
 - [Rust stuff](./rust/readme-rust-stuff.md)
@@ -69,7 +74,9 @@
 	- [pico sdk install & cmake template](./embedtronics/pico-sdk-install.md)
 	- [arm-none-eabi-gdb debugging with openocd](./embedtronics/arm-none-eabi-gdb-debugging-with-openocd.md)
 	- [analysis how printf rp2040 work under low level stuff](./embedtronics/analysis-how-printf-rp2040-work-under-low-level-stuff.md)
-	
+	- [RP2040 chip static RAM layout](./embedtronics/rp2040-memory-layout.md)
+	- [stdio_init_all() analysis](./embedtronics/rp2040-stdio-init-all.md)
+	- [pico_default_asm_volatile](./embedtronics/pico_default_asm_volatile.md)
 
 - [Math](./math/readme-math.md)
 	- [Set formula](./math/set_formula_1.md)
@@ -121,7 +128,7 @@
 	- [resizing qemu image](./server/resize-qemu-image.md)
 	- [docker snippets](./server/docker-snippets.md)
 	- [install routerOS.iso (not chr) on qemu](./server/routeros-on-qemu.md)
-	
+	- [change default postgresql data dir](./server/change-default-postgresql-data-dir.md)
 
 - [Database](./database/readme-database.md)
 	- [psql command](./database/psql_command.md)

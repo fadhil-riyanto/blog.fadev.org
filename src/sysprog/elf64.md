@@ -4,6 +4,8 @@ what is ELF64? ELF64 is Executable and Linkable Format for unix system (mostly),
 
 this struct located at beginning of object file, the main usage is locate all other parts of object file. the header (such \*.o file contains ELF struct)
 
+![image](/assets/68747470733a2f2f692e696d6775722e636f6d2f4169394f714f422e706e67.png)
+
 # preface
 
 this is how ELF file look-like

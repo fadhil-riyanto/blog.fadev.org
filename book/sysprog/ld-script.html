@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>analysis how printf rp2040 work under low level stuff - Fadhil Journal &amp; Notes</title>
+        <title>GNU linker scripts - Fadhil Journal &amp; Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -160,53 +160,143 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="analysis-how-printf-rp2040-work-under-low-level-stuff"><a class="header" href="#analysis-how-printf-rp2040-work-under-low-level-stuff">analysis how printf rp2040 work under low level stuff</a></h1>
-<p>in order to know how printf works in rp2040 uart bridge, lets compile simple program, compile as debug, then run GDB</p>
-<p>consider this very simple hello world</p>
-<pre><code class="language-c">#include &lt;pico/printf.h&gt;
-#include &lt;pico/time.h&gt;
+                        <h1 id="gnu-linker-scripts-journey"><a class="header" href="#gnu-linker-scripts-journey">GNU linker scripts journey</a></h1>
+<p>first, we need to know about sections, lets take a look, nice stuff</p>
+<ul>
+<li><a href="https://mcyoung.xyz/2021/06/01/linker-script/#appendix">https://mcyoung.xyz/2021/06/01/linker-script/#appendix</a></li>
+<li><a href="https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/4/html/red_hat_enterprise_linux_4_-_archived_documents/index#using_ld_the_gnu_linker">https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/4/html/red_hat_enterprise_linux_4_-_archived_documents/index#using_ld_the_gnu_linker</a></li>
+</ul>
+<p>lets start with make very simple library</p>
+<pre><code class="language-c">// gcc -c libcall.c
 
-int main() {
-    int n = 0;
-    stdio_init_all();
-    while (true) {
-        printf("Hello, world! %d\n", n);
-        sleep_ms(1000);
-        n = n + 1;
+extern int random_me;
+
+/* this is .text section */
+int lib_call(const char* str) {
+        (void)str;
+
+        /* this is .bss */
+        static int im_counting;
+        im_counting++;
+}
+</code></pre>
+<p>then, run <code>nm libcall.o</code>
+<img src="/assets/7536e425e8a27c20b49228491904def3f58f23c9d9989eb537744c638817697c211122447ed8cbf5fed7e7f91648d019a4a19e6e8f35683fbfc0e5a0.png" alt="image" /></p>
+<p>as we can see, b (lowercase) means the <code>bss</code> section is not exported, while T (uppercase) means <code>.text</code> is exported. then, lets call <code>lib_call</code> function from <code>run</code> function (in other file), say the file is <code>run.c</code> which has contents</p>
+<pre><code class="language-c">// gcc -c run.c
+extern int  lib_call(const char* str);
+
+void run(void) {
+        /* this will be .data */
+        static int data = 5;
+        data = lib_call("im a .rodata");
+}
+</code></pre>
+<p>again, we got this</p>
+<p><img src="/assets/9d5ca7a30c57e872e52778eed34af90ddbfc56cbc1ec89b5bd73f75310a29996f4d23d9808827208f5fea5b8ed8662ee95b1c3a3637d63f816e3b146.png" alt="image" /></p>
+<p>the U uppercase is means, the <code>lib_call</code> is undefined. now how we can resolve it?</p>
+<p>first, lets link <code>run.o</code></p>
+<pre><code class="language-sh">&gt; gcc run.o
+/usr/bin/ld: /usr/lib/gcc/x86_64-pc-linux-gnu/15.1.1/../../../../lib/Scrt1.o: in function `_start':
+(.text+0x1b): undefined reference to `main'
+/usr/bin/ld: run.o: in function `run':
+run.c:(.text+0xf): undefined reference to `lib_call'
+collect2: error: ld returned 1 exit status
+</code></pre>
+<p>[ads]
+if you want automate it, use Makefile instead</p>
+<pre><code class="language-Makefile">CC = gcc
+
+stage_1_libcall: libcall.c
+	gcc -c libcall.c
+	ar r libcall.a libcall.o
+
+
+stage_2_run: run.c
+	gcc -c run.c
+
+stage_3: stage_1_libcall stage_2_run
+	gcc run.o -L. -lcall -nostartfiles
+
+clean:
+	rm -f a.out
+	rm -f libcall.a
+	rm -f libcall.o
+	rm -f run.o
+</code></pre>
+<p>back to linker, lets run <code>make stage_3</code>, and check for <code>nm a.out</code>. supraisingly, the <code>lib_call</code> is not undefined again. thanks for <code>ld</code></p>
+<p><img src="/assets/3d0ffb5e120f5d3030b8a5a715f0724c35c553ce1e7f3ce10e28c9200b1fef528e88be8384c81a129d10443ce9e1788295e86b5234b53df0c8aab4dc.png" alt="image" /></p>
+<h1 id="objdump"><a class="header" href="#objdump">objdump</a></h1>
+<p><img src="/assets/cd8d13d2935dc8fa5f9df1471b11c7cfec2585069abf1e84b70d84d253b97095a2b86e1052bd8f5ffcfb584997f8f968f3ee15b8ee34f548ffce1996.png" alt="image" /></p>
+<h1 id="ld"><a class="header" href="#ld">ld</a></h1>
+<p>now, our task. how to rearrange this order. lets create our <code>link.ld</code></p>
+<pre><code class="language-c">ENTRY(run) 
+SECTIONS {
+    .text : {
+        *(.text);
+        *(.text.*)
+    }
+
+    .bss : {
+        *(.bss);
+        *(.bss.*)
+    }
+
+    .data : {
+        *(.data);
+        *(.data.*)
+    }
+
+    .rodata : {
+        *(.rodata);
+        *(.rodata.*)
     }
 }
 </code></pre>
-<h1 id="analysis"><a class="header" href="#analysis">analysis</a></h1>
-<p><img src="/assets/c9a172f5c6ce190e648f88df4af894d4d115b23d2128cad758833395f62d3f5e5d2ef9cb3dc4d695806f538fa26510bf6bc0da2b995b7fceeaff4899.png" alt="image" /></p>
-<p>see?</p>
-<pre><code class="language-c">=&gt; 0x100002b4 &lt;+12&gt;:    bl      0x10003a64 &lt;__wrap_printf&gt;
+<p>v2:</p>
+<pre><code class="language-c">ENTRY(run)
+
+PHDRS {
+    text PT_LOAD FLAGS(5); /* RX */
+    data PT_LOAD FLAGS(6); /* RW */
+}
+
+SECTIONS {
+    . = 0x10000;
+
+    .text : {
+        *(.text);
+        *(.text.*)
+    } :text
+
+    .rodata : {
+        *(.rodata);
+        *(.rodata.*)
+    } :text
+
+    .data : {
+        *(.data);
+        *(.data.*)
+    } :data
+
+    .bss : {
+        *(.bss);
+        *(.bss.*)
+        *(COMMON)
+    } :data
+}
+
 </code></pre>
-<p>its call <code>__wrap_printf</code> which mean, the backend call <code>-Wl,--wrap=printf</code> internally, but if we reffer to <code>/home/fadhil_riyanto/git_clone/pico-sdk/src/rp2_common/pico_stdio/stdio.c:347</code></p>
-<p><img src="/assets/44f66f5c4e0c51a2c0b4bc3885079beb5de306725363b91ba2a38898bf59d0e76fe467ec3abf98eb4881aaf0ce408cf5ebd19b28747ef3720bb99107.png" alt="image" /></p>
-<p>the signature is different, this function has signature</p>
-<pre><code class="language-c">int __printflike(1, 0) PRIMARY_STDIO_FUNC(printf)(const char* format, ...)
-</code></pre>
-<p>so, what exactly happen?</p>
-<h1 id="result"><a class="header" href="#result">result</a></h1>
-<p>lets look at stdio.c line 289</p>
-<p><img src="/assets/a00ffec057742b32cb76c8db0d3da75c299ceba49a218edf9d559fb31eb9ae029da9b798e2d255ca0af5754dcd7ac62929645ad3aa63155c62bf61a8.png" alt="image" /></p>
-<p>when the macro <code>PICO_STDIO_SHORT_CIRCUIT_CLIB_FUNCS</code> is active, we replace the function name by <code>WRAPPER_FUNC(x)</code>, not <code>stdio_printf</code></p>
-<p>after that, lets jump into <a href="https://github.com/raspberrypi/pico-sdk/blob/9a4113fbbae65ee82d8cd6537963bc3d3b14bcca/src/rp2_common/pico_platform_compiler/include/pico/platform/compiler.h#L185">https://github.com/raspberrypi/pico-sdk/blob/9a4113fbbae65ee82d8cd6537963bc3d3b14bcca/src/rp2_common/pico_platform_compiler/include/pico/platform/compiler.h#L185</a>, very clear definition</p>
-<p>so, basically. this function
-<img src="/assets/b0dbbe24380b5411221dbffcf2cb8409180135d704b9ede610a1e8f3e032a9ce6071551b9c2628a7d85fec6dcb88aa3f8b529d15999cdf75570fdab8.png" alt="image" /></p>
-<p>call <code>__wrap_printf</code></p>
-<p>make sense?</p>
-<h1 id=""><a class="header" href="#"></a></h1>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../embedtronics/arm-none-eabi-gdb-debugging-with-openocd.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../sysprog/readme-sysprog.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../embedtronics/rp2040-memory-layout.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../sysprog/nm.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -216,11 +306,11 @@ int main() {
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../embedtronics/arm-none-eabi-gdb-debugging-with-openocd.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../sysprog/readme-sysprog.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../embedtronics/rp2040-memory-layout.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../sysprog/nm.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

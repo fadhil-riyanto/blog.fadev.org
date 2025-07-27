@@ -162,7 +162,8 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
-<p>Let me introduce my self, Who is Fadhil? Fadhil Riyanto (real-name), is a self-taught system programmer (also backend programmer) which live in Indonesian, This is some short &amp; dirty tutorial about computer science and litte about math.</p>
+<p>Let me introduce my self, Who is Fadhil? Fadhil Riyanto (real-name), is a self-taught system programmer (also backend programmer sometimes) which live in Indonesian, This is some short &amp; dirty tutorial about computer science and litte about math.</p>
+<p>I believe, this piece of information is a building block to become <code>Signed-off-by: Fadhil Riyanto &lt;fadhil.riyanto@intel.com&gt;</code></p>
 <p>mirrors: <a href="https://blog.fadhils.eu.org">blog.fadhils.eu.org</a></p>
 <h1 id="contributing"><a class="header" href="#contributing">Contributing</a></h1>
 <p>Found a mistake? You can freely DM me on <a href="https://t.me/fadhil_riyanto">telegram</a> or just email me on</p>
@@ -172,11 +173,13 @@
 <li><a href="mailto:fadhil.riyanto@gnuweeb.org">fadhil.riyanto@gnuweeb.org</a> (alternative-1)</li>
 <li><a href="mailto:xor@3xploit.dev">xor@3xploit.dev</a> (alternative-2)</li>
 </ul>
+<h1 id="helping-translating"><a class="header" href="#helping-translating">helping translating</a></h1>
+<p>that is very welcomed, you can start inspecting <a href="https://github.com/fadhil-riyanto/blog.fadev.org">my repos</a>. any contribution is appreciated, even just fix a typo (believe me). the target language is mosly english language.</p>
 <h1 id="other-intresting-site"><a class="header" href="#other-intresting-site">other intresting site</a></h1>
 <ul>
 <li><a href="https://x86.fadev.org/">x86_64 Instruction Set Reference</a></li>
-<li><a href="https://libs.fadev.org/">some nice book collection (WIP)</a></li>
-<li><a href="https://libs.fadev.org/">git.fadev.org (WIP)</a></li>
+<li><a href="https://pdf.fadev.org/">some nice book collection</a></li>
+<li><a href="https://git.fadev.org/">git.fadev.org (WIP)</a></li>
 </ul>
 <h1 id="language"><a class="header" href="#language">Language</a></h1>
 <p>Because I'm indonesian, some part of this website may written in indonesian. But I will try to translating it into english language.</p>
@@ -193,6 +196,142 @@
 <li>MAKE: "freeRADIUS deploy"</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="system-programming"><a class="header" href="#system-programming">System programming</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="gnu-linker-scripts-journey"><a class="header" href="#gnu-linker-scripts-journey">GNU linker scripts journey</a></h1>
+<p>first, we need to know about sections, lets take a look, nice stuff</p>
+<ul>
+<li><a href="https://mcyoung.xyz/2021/06/01/linker-script/#appendix">https://mcyoung.xyz/2021/06/01/linker-script/#appendix</a></li>
+<li><a href="https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/4/html/red_hat_enterprise_linux_4_-_archived_documents/index#using_ld_the_gnu_linker">https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/4/html/red_hat_enterprise_linux_4_-_archived_documents/index#using_ld_the_gnu_linker</a></li>
+</ul>
+<p>lets start with make very simple library</p>
+<pre><code class="language-c">// gcc -c libcall.c
+
+extern int random_me;
+
+/* this is .text section */
+int lib_call(const char* str) {
+        (void)str;
+
+        /* this is .bss */
+        static int im_counting;
+        im_counting++;
+}
+</code></pre>
+<p>then, run <code>nm libcall.o</code>
+<img src="sysprog//assets/7536e425e8a27c20b49228491904def3f58f23c9d9989eb537744c638817697c211122447ed8cbf5fed7e7f91648d019a4a19e6e8f35683fbfc0e5a0.png" alt="image" /></p>
+<p>as we can see, b (lowercase) means the <code>bss</code> section is not exported, while T (uppercase) means <code>.text</code> is exported. then, lets call <code>lib_call</code> function from <code>run</code> function (in other file), say the file is <code>run.c</code> which has contents</p>
+<pre><code class="language-c">// gcc -c run.c
+extern int  lib_call(const char* str);
+
+void run(void) {
+        /* this will be .data */
+        static int data = 5;
+        data = lib_call("im a .rodata");
+}
+</code></pre>
+<p>again, we got this</p>
+<p><img src="sysprog//assets/9d5ca7a30c57e872e52778eed34af90ddbfc56cbc1ec89b5bd73f75310a29996f4d23d9808827208f5fea5b8ed8662ee95b1c3a3637d63f816e3b146.png" alt="image" /></p>
+<p>the U uppercase is means, the <code>lib_call</code> is undefined. now how we can resolve it?</p>
+<p>first, lets link <code>run.o</code></p>
+<pre><code class="language-sh">&gt; gcc run.o
+/usr/bin/ld: /usr/lib/gcc/x86_64-pc-linux-gnu/15.1.1/../../../../lib/Scrt1.o: in function `_start':
+(.text+0x1b): undefined reference to `main'
+/usr/bin/ld: run.o: in function `run':
+run.c:(.text+0xf): undefined reference to `lib_call'
+collect2: error: ld returned 1 exit status
+</code></pre>
+<p>[ads]
+if you want automate it, use Makefile instead</p>
+<pre><code class="language-Makefile">CC = gcc
+
+stage_1_libcall: libcall.c
+	gcc -c libcall.c
+	ar r libcall.a libcall.o
+
+
+stage_2_run: run.c
+	gcc -c run.c
+
+stage_3: stage_1_libcall stage_2_run
+	gcc run.o -L. -lcall -nostartfiles
+
+clean:
+	rm -f a.out
+	rm -f libcall.a
+	rm -f libcall.o
+	rm -f run.o
+</code></pre>
+<p>back to linker, lets run <code>make stage_3</code>, and check for <code>nm a.out</code>. supraisingly, the <code>lib_call</code> is not undefined again. thanks for <code>ld</code></p>
+<p><img src="sysprog//assets/3d0ffb5e120f5d3030b8a5a715f0724c35c553ce1e7f3ce10e28c9200b1fef528e88be8384c81a129d10443ce9e1788295e86b5234b53df0c8aab4dc.png" alt="image" /></p>
+<h1 id="objdump"><a class="header" href="#objdump">objdump</a></h1>
+<p><img src="sysprog//assets/cd8d13d2935dc8fa5f9df1471b11c7cfec2585069abf1e84b70d84d253b97095a2b86e1052bd8f5ffcfb584997f8f968f3ee15b8ee34f548ffce1996.png" alt="image" /></p>
+<h1 id="ld"><a class="header" href="#ld">ld</a></h1>
+<p>now, our task. how to rearrange this order. lets create our <code>link.ld</code></p>
+<pre><code class="language-c">ENTRY(run) 
+SECTIONS {
+    .text : {
+        *(.text);
+        *(.text.*)
+    }
+
+    .bss : {
+        *(.bss);
+        *(.bss.*)
+    }
+
+    .data : {
+        *(.data);
+        *(.data.*)
+    }
+
+    .rodata : {
+        *(.rodata);
+        *(.rodata.*)
+    }
+}
+</code></pre>
+<p>v2:</p>
+<pre><code class="language-c">ENTRY(run)
+
+PHDRS {
+    text PT_LOAD FLAGS(5); /* RX */
+    data PT_LOAD FLAGS(6); /* RW */
+}
+
+SECTIONS {
+    . = 0x10000;
+
+    .text : {
+        *(.text);
+        *(.text.*)
+    } :text
+
+    .rodata : {
+        *(.rodata);
+        *(.rodata.*)
+    } :text
+
+    .data : {
+        *(.data);
+        *(.data.*)
+    } :data
+
+    .bss : {
+        *(.bss);
+        *(.bss.*)
+        *(COMMON)
+    } :data
+}
+
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="nm"><a class="header" href="#nm">nm</a></h1>
+<p>nm is a abbr of name, in linux. this tool is used to inspect binary section</p>
+<p>example
+<img src="sysprog//assets/4f3419224cc1bad6fb206703e4368ae14a707baf08bc1fb4d503fd727561ea7bff2d03d064a8870cdc6151d9d159198af2ba464c916a1a8604f81056.png" alt="image" /></p>
+<pre><code class="language-txt">&gt; nm libcall.o
+0000000000000000 T lib_call
+0000000000000000 b lib_call.im_counting
+</code></pre>
+<p>capital letter mean, the <code>symbol is exported</code></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="how-data-movement-changes-a-destination-register"><a class="header" href="#how-data-movement-changes-a-destination-register">How data movement changes a destination register</a></h1>
 <p>This snippets is from "Computer Systems A Programmer’s Perspective, by Randal E. Bryant and David R. O’Hallaron"</p>
 <p>As described, there are two different conventions regarding whether and how data movement instruc-
@@ -741,6 +880,7 @@ clang spesific: <a href="https://clang.llvm.org/docs/LanguageExtensions.html">ht
 <div style="break-before: page; page-break-before: always;"></div><h1 id="elf64"><a class="header" href="#elf64">ELF64</a></h1>
 <p>what is ELF64? ELF64 is Executable and Linkable Format for unix system (mostly), lets look the structure of elf64_hdr</p>
 <p>this struct located at beginning of object file, the main usage is locate all other parts of object file. the header (such *.o file contains ELF struct)</p>
+<p><img src="sysprog//assets/68747470733a2f2f692e696d6775722e636f6d2f4169394f714f422e706e67.png" alt="image" /></p>
 <h1 id="preface"><a class="header" href="#preface">preface</a></h1>
 <p>this is how ELF file look-like</p>
 <p><img src="sysprog//assets/479e744cf1e8b875f5f863c6611810a56dcd72d1fd8ac26ef937f6d33d42d4dbc62a656347a63085647c587c1b9f598a3239849e1198b500758796a4.png" alt="image" /></p>
@@ -2022,6 +2162,69 @@ End of assembler dump.
 <p>jika kita lihat juga, setelah jump <code>jump_here</code> dieksekusi, ia pindah ke <code>/home/fadhil_riyanto/git_clone/pico-sdk/src/rp2_common/pico_crt0/crt0.S:456</code></p>
 <p>dan akhirnya, tidak sengaja menemukan asm yang memanggil si main</p>
 <p><img src="arm//assets/e4d2f43598a6ede1d6e849fc30035b2df58a45619053524684b8563112890debca482cce96d66ec1d13c9e9140bb9665dd180d8c4b98c298f5df7c08.png" alt="image" /></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="arm-mrs-instruction"><a class="header" href="#arm-mrs-instruction">ARM MRS instruction</a></h1>
+<p>MRS: Move to Register from Special Register moves the value from the selected special-purpose register into a
+general-purpose register.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="difference-between-thumb-1-t16-and-normal-arm"><a class="header" href="#difference-between-thumb-1-t16-and-normal-arm">difference between thumb-1 (T16) and normal ARM</a></h1>
+<p>hi, today I will show you what difference between thumb-1 and normal arm</p>
+<h2 id="what-is-thumb-1"><a class="header" href="#what-is-thumb-1">what is thumb-1</a></h2>
+<p>thumb-1 is lite version of full arm instruction, the instruction has 16 bit wide. and because if its "lite", the binary size is should be smaller compared than normal arm</p>
+<p>normal arm has instruction wide 32 bit (idk about aarch64)</p>
+<h2 id="start"><a class="header" href="#start">start</a></h2>
+<p>tool:</p>
+<ul>
+<li>arm-none-eabi-gcc</li>
+<li>arm-none-eabi-objdump</li>
+</ul>
+<p>first, lets compile this very simple program</p>
+<pre><code class="language-c">#define A       0xA
+
+int _sbrk() {
+
+}
+
+int _write() {
+        
+}
+
+int _read() {
+        
+}
+
+int _lseek() {
+        
+}
+
+int _close() {
+        
+}
+
+int _exit() {
+        
+}
+
+int main() {
+        int a = 9;
+        int b = 2;
+
+        int c = a * b;
+}
+
+</code></pre>
+<p>compile it for normal arm, the output binary I call it as <code>a.out</code></p>
+<pre><code class="language-sh">arm-none-eabi-gcc test_asm.c
+</code></pre>
+<p>objdump it</p>
+<pre><code class="language-sh">arm-none-eabi-objdump -d a.out --disassemble=main
+</code></pre>
+<p><img src="arm//assets/c38e8c412d7bcbe693941611f86723b28fc4a786e84d164de0ca2f1d4ae5b764db556df0eb245afdad4f2d5db66cbfe540ce7a2e1a1e6d06c3780118.png" alt="image" /></p>
+<h1 id="thumb-1"><a class="header" href="#thumb-1">thumb-1</a></h1>
+<p>the instruction should be 16 bit wide</p>
+<pre><code class="language-sh">arm-none-eabi-gcc test_asm.c -mthumb -mcpu=cortex-m0plus -o a-thumb.out
+arm-none-eabi-objdump -d a-thumb.out --disassemble=main
+</code></pre>
+<p><img src="arm//assets/b04a081419adbabb9ed3f9109f8fea8b1c20b14413955f208d256afbef6ad9ace8712dd8fc5b5b1168effabe0ee4b59a0218443982237179aead52b4.png" alt="image" /></p>
+<p>see?</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-stuff"><a class="header" href="#rust-stuff">Rust stuff</a></h1>
 <p>Welcome in this rust stuff section.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-cursor-how-it-works"><a class="header" href="#rust-cursor-how-it-works">Rust cursor, How it works</a></h1>
@@ -2541,6 +2744,60 @@ int main() {
 <p>call <code>__wrap_printf</code></p>
 <p>make sense?</p>
 <h1 id=""><a class="header" href="#"></a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="rp2040-chip-memory-layout"><a class="header" href="#rp2040-chip-memory-layout">RP2040 chip memory layout</a></h1>
+<p>pembagian nya ada di sini:
+<img src="embedtronics//assets/dfd7de595d88027938f56b7e764d7dce7dfa1ef8dfad07f788a65565041f7442f2bc1b1df44d8fe2528858fcf2cfda1d3c4c1eb3fb3d157a644fa18e.png" alt="image" /></p>
+<h1 id="rom"><a class="header" href="#rom">ROM</a></h1>
+<p>Kode untuk rom ini immutable (belum dicoba), dimulai dari 0x00000000 sampai sejauh 16 kB (0x00004000)</p>
+<p>total sram di chip RP2040 ada 264kB (TOTALNYA saja), tapi perlu diketahu bahwa itu semua aslinya dibagi bagi per-area address nya</p>
+<p>jika di docs, sram ini dimulai dari 0x20000000 (summary), tapi secara fisik, dibagi menjadi 6 bank</p>
+<p>dimana</p>
+<p>word addr 0</p>
+<ul>
+<li>bank 0: 0x20000000</li>
+<li>bank 1: 0x20000004</li>
+<li>bank 2: 0x20000008</li>
+<li>bank 3: 0x2000000c</li>
+</ul>
+<p>word addr 1</p>
+<ul>
+<li>bank 0: 0x20000010</li>
+<li>bank 1: 0x20000014</li>
+<li>bank 2: 0x20000018</li>
+<li>bank 3: 0x2000001c</li>
+</ul>
+<p>word addr 2</p>
+<ul>
+<li>bank 0: 0x20000020</li>
+<li>bank 1: 0x20000024</li>
+<li>bank 2: 0x20000028</li>
+<li>bank 3: 0x2000002c</li>
+</ul>
+<p>dst</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="stdio_init_all-analysis"><a class="header" href="#stdio_init_all-analysis">stdio_init_all() analysis</a></h1>
+<p>first, lets debug this with real hardware &amp; openocd</p>
+<p>do not forget to add breakpoint in this func
+<img src="embedtronics//assets/d79a009da96a33c92b6b2ab63c28ed1181c1737c08fc3a9c81e1a8307687ceea6cf4823ebfccb102464099ec2aca35f2ba6c030577ac2097826aa79f.png" alt="image" /></p>
+<p>the sequence of execution:</p>
+<ul>
+<li><code>/home/fadhil_riyanto/git_clone/pico-sdk/src/rp2_common/pico_stdio/stdio.c:200</code> -&gt; stdio_init_all()</li>
+<li><code>/home/fadhil_riyanto/git_clone/pico-sdk/src/rp2_common/pico_stdio_uart/stdio_uart.c:37</code> -&gt; stdio_uart_init()</li>
+<li><code>/home/fadhil_riyanto/git_clone/pico-sdk/src/rp2_common/pico_stdio_uart/stdio_uart.c:93</code> -&gt; stdio_uart_init_full()</li>
+<li><code>/home/fadhil_riyanto/git_clone/pico-sdk/src/rp2_common/hardware_gpio/gpio.c:38</code> -&gt; gpio_set_function()</li>
+<li><code>/home/fadhil_riyanto/git_clone/pico-sdk/src/rp2_common/hardware_uart/uart.c:42</code> -&gt; uart_init()</li>
+</ul>
+<p>WIP (SOON)</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="pico_default_asm_volatile"><a class="header" href="#pico_default_asm_volatile">pico_default_asm_volatile</a></h1>
+<p>after a long time, I discover this macro from this screenshoot</p>
+<p><img src="embedtronics//assets/fe28d3decea5adad85287258acbfe1798633ddb0a31f160672716fc61632ab2866b9c0a853b77973296555b2e411342cee912b0cbc9a990ecacbed37.png" alt="image" /></p>
+<p>and I found it</p>
+<p><a href="https://github.com/raspberrypi/pico-sdk/blob/9a4113fbbae65ee82d8cd6537963bc3d3b14bcca/src/rp2_common/pico_platform_compiler/include/pico/platform/compiler.h#L149-L159">https://github.com/raspberrypi/pico-sdk/blob/9a4113fbbae65ee82d8cd6537963bc3d3b14bcca/src/rp2_common/pico_platform_compiler/include/pico/platform/compiler.h#L149-L159</a></p>
+<pre><code class="language-c">#define pico_default_asm_volatile(...) __asm volatile (".syntax unified\n" __VA_ARGS__)
+</code></pre>
+<p>and the explanation why use <code>__VA_ARGS__</code>: <a href="https://gcc.gnu.org/onlinedocs/cpp/Variadic-Macros.html">https://gcc.gnu.org/onlinedocs/cpp/Variadic-Macros.html</a></p>
+<p>here the example</p>
+<p><img src="embedtronics//assets/3f10433700ab0dbc062496ebf165befd3f1f55a283d912a7efcc09bf8dc6329ae0812cc1e0acb3e5b3a0fc39f3399bd794c66054ff1f919c3df6e703.png" alt="image" /></p>
+<p><img src="embedtronics//assets/7e4c168002be67f1892819134d389599878fa6ba856daa874fdb6273681b437fea071e16dbc52e877969d5efad3eff65283ab0337d9a054bb703e65b.png" alt="image" /></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="math"><a class="header" href="#math">Math</a></h1>
 <p>Welcome in this section.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="set-operations-formula"><a class="header" href="#set-operations-formula">Set operations formula</a></h1>
@@ -5073,6 +5330,23 @@ sudo resize2fs /dev/ubuntu-vg/ubuntu-lv
 </code></pre>
 <h1 id="post-install"><a class="header" href="#post-install">post install</a></h1>
 <p>do not forget to enable DHCP in order to get internet from qemu internal routes</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="change-default-postgresql-data-dir"><a class="header" href="#change-default-postgresql-data-dir">change default postgresql data dir</a></h1>
+<ul>
+<li>first, you need root account</li>
+<li>identify your service file. by running <code>systemctl status postgresql</code></li>
+</ul>
+<p><img src="server//assets/26366e59db755f52e6b47a512d0b02f8f0229c69643449cc81876f3eceed3d217e2001232f22e2696250f163e0f0289f7c0e590cd4f9085268a6ff2f.png" alt="image" /></p>
+<p>in my case, <code>/usr/lib/systemd/system/postgresql.service</code> is the service file</p>
+<ul>
+<li>editing
+<ul>
+<li><code>mkdir /home/postgres</code></li>
+<li><code>chown -R postgres:postgres /home/postgres</code></li>
+<li>edit <code>Environment=PGROOT=/home/postgres</code> and <code>ProtectHome=false</code></li>
+<li>run <code>systemctl daemon-reload &amp;&amp; sudo systemctl restart postgresql &amp;&amp; sudo systemctl status postgresql</code></li>
+</ul>
+</li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="database"><a class="header" href="#database">Database</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="psql-command"><a class="header" href="#psql-command">psql command</a></h1>
 <h2 id="general"><a class="header" href="#general">General</a></h2>
@@ -7071,6 +7345,8 @@ Cpp11BracedListStyle: false
 <div style="break-before: page; page-break-before: always;"></div><h1 id="july-2025"><a class="header" href="#july-2025">july-2025</a></h1>
 <h3 id="compiling-arm-gnu-abi"><a class="header" href="#compiling-arm-gnu-abi">compiling arm gnu abi</a></h3>
 <p><img src="gallery//assets/15fd0bb09202c24cb3b940c8806134c187da160f89abf4cd8b3bbf4cca3ee74d20c17ca74aea0b44066d9a2d4ab90f58aea12e27324a1a61c72d8db0.png" alt="image" /></p>
+<h3 id="old-site-unix-man"><a class="header" href="#old-site-unix-man">old site unix man</a></h3>
+<p><img src="gallery//assets/0c31386d00d90124c4ceb588f705ebec6e606594e25216245e53cda675190ca5acacb200f23558274e925be27f4f28c2dd243c25bd5bc742a32b5293.png" alt="image" /></p>
 
                     </main>
 
