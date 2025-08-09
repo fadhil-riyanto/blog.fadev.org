@@ -169,7 +169,7 @@
 <pre><code class="language-sh">docker run --name my-radius freeradius/freeradius-server
 </code></pre>
 <h1 id="logging-running-container"><a class="header" href="#logging-running-container">logging running container</a></h1>
-<pre><code class="language-sh">docker logs my-radius
+<pre><code class="language-sh">docker logs my-radius2
 </code></pre>
 
                     </main>
@@ -201,6 +201,22 @@
 
         </div>
 
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
 
 
 

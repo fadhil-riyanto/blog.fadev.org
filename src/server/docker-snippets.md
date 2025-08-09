@@ -14,5 +14,5 @@ docker run --name my-radius freeradius/freeradius-server
 
 # logging running container
 ```sh
-docker logs my-radius
+docker logs my-radius2
 ```

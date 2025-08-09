@@ -165,6 +165,12 @@
 <p>\[ A^{-1} = \frac{1}{(a \cdot d) - (b \cdot c)} \begin{bmatrix} d &amp; -b &amp; \newline -c &amp; a \end{bmatrix}\]</p>
 <p>for 3x3
 \[ A^{-1} = \frac{1}{\det A} \text{adj } A \]</p>
+<p>sequence for 3x3 matrix</p>
+<ul>
+<li>search minor matrices (tutup angka)</li>
+<li>then calculate cofactor (plus minus)</li>
+<li>matrix adjoin (transpose of cofactor matrix)</li>
+</ul>
 
                     </main>
 
@@ -195,6 +201,22 @@
 
         </div>
 
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
 
 
 

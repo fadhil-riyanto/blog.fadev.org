@@ -1,0 +1,321 @@
+<!DOCTYPE HTML>
+<html lang="en" class="ayu sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>RP2040 boot - Fadhil Journal &amp; Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+        <!-- MathJax -->
+        <script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "ayu";
+            const default_dark_theme = "ayu";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('ayu')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Fadhil Journal &amp; Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/fadhil-riyanto" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="rp2040-boot"><a class="header" href="#rp2040-boot">RP2040 boot</a></h1>
+<p>first, lets look at this docs</p>
+<p><img src="/assets/998ec4b763d9f5425da4db21da99228af9adbd259ec40252256c75100747460e8fb538967e28a5a64fdf51c8e0a606de7f6e4bcdcaabc362584b8d02.png" alt="image" /></p>
+<p>I'll prove this</p>
+<ul>
+<li>1st, please look at this cmake, they says <code>bootrom_rt0.S</code>, which is <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/CMakeLists.txt#L39">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/CMakeLists.txt#L39</a></li>
+<li>2nd, the contents
+<img src="/assets/805816ee1020531480c86e19163bbbc0425bbf9a0d26b0e181a6366be635690b2892c35657469fb8336baae679588ed7029b55155fa9a9d40fb92ba2.png" alt="image" /></li>
+</ul>
+<h1 id="the-strange-header"><a class="header" href="#the-strange-header">the strange header</a></h1>
+<p>in <code>bootrom_rt0.S</code> contains a strange header like this</p>
+<pre><code class="language-c">#include "hardware/regs/addressmap.h"
+#include "hardware/regs/pads_bank0.h"
+#include "hardware/regs/resets.h"
+#include "hardware/regs/sio.h"
+#include "hardware/regs/watchdog.h"
+#include "hardware/regs/syscfg.h"
+#include "hardware/regs/clocks.h"
+#include "hardware/regs/vreg_and_chip_reset.h"
+#include "hardware/regs/m0plus.h"
+#include "git_info.h"
+</code></pre>
+<p>warn:
+this is just my speculation, the real location is in <a href="https://github.com/raspberrypi/pico-sdk/tree/master/src/rp2040/hardware_regs/include/hardware/regs">https://github.com/raspberrypi/pico-sdk/tree/master/src/rp2040/hardware_regs/include/hardware/regs</a>, but the theory IDK. i just matching the file</p>
+<p>please inform me if you find something intresting in <a href="https://github.com/raspberrypi/pico-sdk/blob/master/src/CMakeLists.txt">https://github.com/raspberrypi/pico-sdk/blob/master/src/CMakeLists.txt</a></p>
+<h1 id="boot-sequence"><a class="header" href="#boot-sequence">boot sequence</a></h1>
+<p>this is the most important stuff</p>
+<ul>
+<li>1st, please look at this cmake, they says <code>bootrom_rt0.S</code>, which is <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/CMakeLists.txt#L39">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/CMakeLists.txt#L39</a></li>
+<li>2nd, the <code>bootrom_rt0.S</code>, this is important <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_rt0.S#L40-L43">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_rt0.S#L40-L43</a></li>
+<li>3st, <code>bootrom_rt0.S</code> jump into <code>main()</code>, <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_rt0.S#L303">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_rt0.S#L303</a></li>
+<li>the boot <code>main()</code> Cmake, <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/CMakeLists.txt#L41">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/CMakeLists.txt#L41</a></li>
+<li><code>main()</code> func, <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L226">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L226</a></li>
+<li>busy loop with ring-oscillator? <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L246">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L246</a></li>
+</ul>
+<p><img src="/assets/4f86ceb28ebef18c2f5b021c5bae32803869435991eaf6b2da4ecd70a73c0ff96fd7781040dce01ced5a086a4ab298bcdc0a255d52287b01f648e41a.png" alt="image" /></p>
+<ul>
+<li>jump into <code>_flash_boot()</code>, <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L251">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L251</a></li>
+<li>crc32 checking, <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L75-L77">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L75-L77</a></li>
+<li>intresting stuff, this is calculating the time taken? <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L67-L72">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L67-L72</a></li>
+<li>execute boot2 stage: <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L95">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L95</a></li>
+<li><a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L90">this</a> variable hold pointer into boot2 stage location, which is <code>boot2_load</code></li>
+<li><code>boot2_load</code> <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L44">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L44</a></li>
+<li>boot2 offset calculation, <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L41">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L41</a></li>
+<li>this <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L41">define</a> need a triage, because <code>SRAM_END</code> is 0x20042000, which at end of static ram. is really boot2 stage is lives before the sram ended?</li>
+</ul>
+<h1 id="boot2"><a class="header" href="#boot2">boot2</a></h1>
+<ul>
+<li><code>runtime_init</code> ?, in <a href="https://github.com/raspberrypi/pico-sdk/blob/a1438dff1d38bd9c65dbd693f0e5db4b9ae91779/src/rp2_common/pico_crt0/crt0.S#L572C1-L572C13">crt0.S</a>, like what <a href="https://vanhunteradams.com/Pico/Bootloader/Boot_sequence.html">https://vanhunteradams.com/Pico/Bootloader/Boot_sequence.html</a> mention?</li>
+</ul>
+<p><img src="/assets/9b97cd61d49ec79790a82a11ded40e61c8cf8563ccbf0d274bb2176aaac35c85d38ac9dbd1647a35f8f093a6a6ab81cb52d1b2182fea40662cdf7d5e.png" alt="image" /></p>
+<p>first, we look at this file <a href="https://github.com/raspberrypi/pico-sdk/blob/master/src/rp2_common/pico_crt0/rp2040/memmap_default.ld">memmap_default.ld</a></p>
+<ul>
+<li>here, we know that, they call <code>pico_flash_region.ld</code>, which located on <a href="https://github.com/raspberrypi/pico-sdk/blob/master/src/rp2_common/pico_standard_link/pico_flash_region.template.ld">src/rp2_common/pico_standard_link/pico_flash_region.template.ld</a></li>
+<li>the cmake then convert <code>pico_flash_region.template.ld</code> into <code>pico_flash_region.ld</code> using <a href="https://github.com/raspberrypi/pico-sdk/blob/a1438dff1d38bd9c65dbd693f0e5db4b9ae91779/src/rp2_common/pico_standard_link/CMakeLists.txt#L126">cmake</a></li>
+</ul>
+<p><a href="https://github.com/raspberrypi/pico-sdk/blob/a1438dff1d38bd9c65dbd693f0e5db4b9ae91779/src/rp2_common/pico_standard_link/CMakeLists.txt#L118-L120">this</a> code idk what its used for, also where the variable coming-off</p>
+<h1 id="boot2-revision"><a class="header" href="#boot2-revision">boot2 revision</a></h1>
+<p>this is the actual boot2 is located</p>
+<ul>
+<li><a href="https://github.com/raspberrypi/pico-sdk/tree/master/src/rp2040/boot_stage2">https://github.com/raspberrypi/pico-sdk/tree/master/src/rp2040/boot_stage2</a></li>
+<li>inside will have many files, all of them is bootloader, but with different hardware. in my case I USE w25q080, THIS is how I know it
+<img src="/assets/5eedcea5cb67eae04f32366d829efa9fbad1cb8b6fe52e7eec210003cbb998fc084083b06469d2b1fc6229f9d77afabb866f9500e1b13656b5c4569a.png" alt="image" /></li>
+</ul>
+<h1 id="linker-script"><a class="header" href="#linker-script">linker script</a></h1>
+<p>there has various linker scripts</p>
+<ul>
+<li><a href="https://github.com/raspberrypi/pico-sdk/blob/master/src/rp2040/boot_stage2/boot_stage2.ld">boot_stage2</a></li>
+<li><a href="https://github.com/raspberrypi/pico-sdk/blob/master/src/rp2_common/pico_crt0/rp2040/memmap_default.ld">memmap_default.ld</a></li>
+<li><a href="https://github.com/raspberrypi/pico-sdk/blob/master/src/rp2_common/pico_standard_link/pico_flash_region.template.ld">pico_flash_region</a>, this is included on <code>memmap_default.ld</code></li>
+</ul>
+<p>if we merge both <code>memmap_default.ld</code> and <code>pico_flash_region.ld</code>, we will got this</p>
+<pre><code class="language-c">MEMORY
+{
+    FLASH(rx) : ORIGIN = 0x10000000, LENGTH = ${PICO_FLASH_SIZE_BYTES_STRING}
+    RAM(rwx) : ORIGIN =  0x20000000, LENGTH = 256k
+    SCRATCH_X(rwx) : ORIGIN = 0x20040000, LENGTH = 4k
+    SCRATCH_Y(rwx) : ORIGIN = 0x20041000, LENGTH = 4k
+}
+</code></pre>
+<p>see missing part? yes, that is <code>PICO_FLASH_SIZE_BYTES_STRING</code>, lets find out in our *.elf.map</p>
+<p><img src="/assets/1cd8416a8065c0f0be4d8ccb319c644d5d2ec1f2b6ecfec3ecfb3c24c921238a1da5662379c6fd9eaa0c10d8f39166634c646b5b1caf491465ccc922.png" alt="image" /></p>
+<p><img src="/assets/823238e7e864c31772fe710047ad3355085924b1d49f46723a18fd60a5494a90466d8991ecd3cfcc9a990d7bf44a8979e37f409a0408498ef71c54ad.png" alt="image" /></p>
+<p>that is 2048K</p>
+<h1 id="issue-that-i-find"><a class="header" href="#issue-that-i-find">Issue that I find</a></h1>
+<p>I think <code>arm-none-eabi-objdump</code> is mistaken arm-thumb-1 instruction as full 32 bit arm, so they just say <code>.word 0xdeadbeef</code></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../embedtronics/readme-embedtronics.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../embedtronics/picotool-build.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../embedtronics/readme-embedtronics.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../embedtronics/picotool-build.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../ace.js"></script>
+        <script src="../editor.js"></script>
+        <script src="../mode-rust.js"></script>
+        <script src="../theme-dawn.js"></script>
+        <script src="../theme-tomorrow_night.js"></script>
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

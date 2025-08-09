@@ -35,3 +35,4 @@ intinya
 - r13 dibagi jadi 2, ada Main Stack Pointer (MSP) dan Process Stack Pointer (PSP) 
 - r14 adalah link register
 - pc (r15), program counter
+

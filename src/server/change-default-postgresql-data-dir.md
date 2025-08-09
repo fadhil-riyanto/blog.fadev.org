@@ -12,4 +12,5 @@ in my case, `/usr/lib/systemd/system/postgresql.service` is the service file
 	- `chown -R postgres:postgres /home/postgres`
 	- edit `Environment=PGROOT=/home/postgres` and `ProtectHome=false`
 	- run `systemctl daemon-reload && sudo systemctl restart postgresql && sudo systemctl status postgresql`
+
 	

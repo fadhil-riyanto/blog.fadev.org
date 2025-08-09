@@ -16,6 +16,8 @@ qemu-system-x86_64 \
 	-drive file=alpine-client.qcow2,format=qcow2 \
 	-cdrom ./iso/alpine-virt-3.21.3-x86_64.iso \
 	-netdev user,id=net0,hostfwd=tcp::30022-:22 \
-	-device virtio-net-pci,netdev=net0
+	-device virtio-net-pci,netdev=net0 \
 	-vga virtio
 ```
+
+

@@ -69,6 +69,7 @@
 	- [miri rust setup](./rust/miri-rust.md)
 
 - [Embedtronics](./embedtronics/readme-embedtronics.md)
+	- [RP2040 boot](./embedtronics/rp2040-boot.md)
 	- [picotool build](./embedtronics/picotool-build.md)
 	- [debug pico with another pico](./embedtronics/pico-debug-with-pico.md)
 	- [pico sdk install & cmake template](./embedtronics/pico-sdk-install.md)
@@ -77,6 +78,8 @@
 	- [RP2040 chip static RAM layout](./embedtronics/rp2040-memory-layout.md)
 	- [stdio_init_all() analysis](./embedtronics/rp2040-stdio-init-all.md)
 	- [pico_default_asm_volatile](./embedtronics/pico_default_asm_volatile.md)
+	- [RP2040 sram layout](./embedtronics/rp-2040-sram-layout.md)
+	- [mapping all pico-sdk CmakeLists.txt](./embedtronics/mapping-all-pico-sdk-CmakeLists-txt.md)
 
 - [Math](./math/readme-math.md)
 	- [Set formula](./math/set_formula_1.md)
@@ -129,6 +132,9 @@
 	- [docker snippets](./server/docker-snippets.md)
 	- [install routerOS.iso (not chr) on qemu](./server/routeros-on-qemu.md)
 	- [change default postgresql data dir](./server/change-default-postgresql-data-dir.md)
+
+- [Networking](./networking/readme-networking.md)
+	- [Huge IP addr in firewall mikrotik](./networking//huge-ip-addr-mikrotik.md)
 
 - [Database](./database/readme-database.md)
 	- [psql command](./database/psql_command.md)
