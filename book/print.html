@@ -187,7 +187,14 @@
 <p>Note</p>
 <p>[EN] If you found a mistake, let me know. BIG thanks!  <br>
 [ID] Jika kamu menemukan sesuatu yang sepertinya itu salah, bisa langsung kasih kabar ke saya. Terimakasih.</p>
-</div><div style="break-before: page; page-break-before: always;"></div><h1 id="todo"><a class="header" href="#todo">todo</a></h1>
+</div>
+<h1 id="footnote-section"><a class="header" href="#footnote-section">Footnote section</a></h1>
+<ul>
+<li><a href="https://blog.fadev.org">Fadhil Journal &amp; Notes</a> © 2023 by <a href="github.com/fadhil-riyanto">Fadhil Riyanto</a> is licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a><img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"></li>
+<li><img src="https://www.gnu.org/graphics/gplv3-127x51.png"> </img></li>
+<li><a href="https://rust-lang.github.io/mdBook/"><img src="https://img.shields.io/badge/powered_by-mdBook-3D3D3D?logo=mdbook" alt="Powered by mdBook" /></a></li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="todo"><a class="header" href="#todo">todo</a></h1>
 <ul>
 <li>MAKE: <code>./server/php-fpm-config.md</code> book</li>
 <li>COMPLETION: <code>./database/postgresql_system_table</code></li>
@@ -323,6 +330,390 @@ SECTIONS {
 }
 
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="gnu-linker-scripts-2"><a class="header" href="#gnu-linker-scripts-2">GNU linker scripts 2</a></h1>
+<p>first, in this section I will fix all of inconsistency in <a href="sysprog//sysprog/ld-script.html">ld-script.md</a></p>
+<h1 id="what-is-section"><a class="header" href="#what-is-section">what is section</a></h1>
+<blockquote>
+<blockquote>
+<p>An object file is divided into sections containing different types of data. In the most common case, there are three sections: the text section, which holds instructions and read-only data; the data section, which holds initialized writable data; and the bss section, which holds uninitialized data. Some systems have other kinds of sections.</p>
+</blockquote>
+</blockquote>
+<p>source: <a href="https://gcc.gnu.org/onlinedocs/gcc-8.3.0/gccint/Sections.html">https://gcc.gnu.org/onlinedocs/gcc-8.3.0/gccint/Sections.html</a></p>
+<p>my tldr is</p>
+<ul>
+<li>.data           = static initialized variable</li>
+<li>.bss            = static uninitialized variable</li>
+<li>.rodata = hold read only data</li>
+<li>.shstrtab       = display all section text</li>
+<li>.symtab		  = symbol section</li>
+<li>.rel 			  = relocation</li>
+</ul>
+<h1 id="linker-playground"><a class="header" href="#linker-playground">Linker playground</a></h1>
+<pre><code class="language-c">/* extern.c */
+
+int lib_call(const char *str) {
+        (void)str;
+
+        static int count;
+        count++;
+}
+
+</code></pre>
+<pre><code class="language-c">/* run.c */
+
+extern int  lib_call(const char* str);
+
+void run(void) {
+        /* this will be .data */
+        static int data = 5;
+
+        data = lib_call("im a .rodata");
+}
+</code></pre>
+<pre><code class="language-asm">
+// startfiles.S 
+
+.extern run
+
+.global main 
+
+main: 
+        call run
+        xor    %eax,%eax
+        ret
+</code></pre>
+<p>our linker script, named <code>link.ld</code></p>
+<pre><code>ENTRY(run)
+
+PHDRS {
+        text PT_LOAD FLAGS(5); /* RX */
+        data PT_LOAD FLAGS(6); /* RW */
+}
+
+SECTIONS {
+        .text : { 
+                *(.text); 
+                *(.text.*) 
+        } : text
+
+        .rodata : { 
+                *(.rodata); 
+                *(.rodata.*) 
+        }
+
+        .data : {
+                *(.data);
+                *(.data.*)
+        }
+
+        .bss : {
+                *(.bss);
+                *(.bss.*)
+        }
+}
+</code></pre>
+<p>compile using</p>
+<ul>
+<li><code>clang -c extern.c</code></li>
+<li><code>ar rc libextern.a extern.o</code></li>
+</ul>
+<p>we get <code>libextern.a</code>, which statically libraries, link it with</p>
+<p><code>clang run.o -L. -lextern -nostartfiles</code></p>
+<p>or optionally, let's use makefile</p>
+<pre><code class="language-makefile">mk_libextern: extern.c
+	clang -c extern.c
+	ar rc libextern.a extern.o
+
+mk_run: run.c
+	clang -c run.c
+
+all: mk_libextern mk_run
+	clang run.o -L. -lextern -nostartfiles
+
+all_custom_ld: mk_libextern mk_run
+	clang run.o -L. -lextern -nostartfiles -nostdlib -Wl,-T,link.ld -v
+
+clean:
+	rm -f a.out
+	rm -f libextern.a
+	rm -f extern.o
+	rm -f run.o
+	
+</code></pre>
+<p>testing time</p>
+<ol>
+<li><img src="sysprog//assets/f576906812a15e1d7100793c957365c6b778b742ec23a8a28053f281dc9a7cf1b43eecf862ce220fc9516ca0f1aef7a00b1835398251cff557f1438c.png" alt="image" /></li>
+</ol>
+<p>why <code>0000000000000000         *UND*  0000000000000000 lib_call</code> is undefined? because we dont link it with <code>libextern</code>, so linker need to do symbol resolution</p>
+<p>here the final executable
+<img src="sysprog//assets/aa9a742c47ba65515d65628ebb4cc63a50b8e0cc3496c3cd25b0449cf097b101ac8b06c7db5373f77f647bc2d2cf573ae3c29150d96cafd3eaafa3cf.png" alt="image" /></p>
+<blockquote>
+<p>Linker scripts are text files.
+<a href="https://sourceware.org/binutils/docs/ld/Script-Format.html">https://sourceware.org/binutils/docs/ld/Script-Format.html</a>, right. because of its text files, it has a rules</p>
+</blockquote>
+<p><a href="https://sourceware.org/binutils/docs/ld/Script-Format.html">https://sourceware.org/binutils/docs/ld/Script-Format.html</a></p>
+<p>there that I thing the <a href="https://sourceware.org/binutils/docs/ld/Simple-Commands.html">roadmap</a></p>
+<h1 id="x86_64-playground"><a class="header" href="#x86_64-playground">x86_64 playground</a></h1>
+<p>use this IF You want do some nice playground (that actually run'able). also</p>
+<p><img src="sysprog//assets/da44ad9dc3ca483888496cf6ae6eeb1dde0d441c946c22dfa298409cc6de31afcc6be80822a5b001730e1c556b885d1674663d618a6d98086f0b238f.png" alt="image" /></p>
+<p>in this blog, each <code>.text</code> section from many <code>*.o</code> file, will be merged together. I'll proof it</p>
+<h2 id="create-entrypoint"><a class="header" href="#create-entrypoint">create entrypoint</a></h2>
+<p>save this file as <code>startup.S</code>, this contain <code>_start</code> that will be our entry</p>
+<p>see? its call <code>main</code></p>
+<pre><code class="language-asm">// startup.S
+.global _start
+_start:
+    call main
+    mov $60, %rax 
+    mov %eax, %edi
+    syscall
+
+</code></pre>
+<h2 id="create-our-main"><a class="header" href="#create-our-main">create our main</a></h2>
+<pre><code class="language-c">/* main.c */
+int global_var = 42;
+
+extern int lib_call(const char *str);
+
+static inline long sys_write(int fd, const void *buf, unsigned long count) {
+        long ret;
+        __asm__ volatile("syscall"
+                         : "=a"(ret)
+                         : "a"(1), "D"(fd), "S"(buf), "d"(count)
+                         : "rcx", "r11", "memory");
+        return ret;
+}
+
+static inline __attribute__((noreturn)) void sys_exit(int status) {
+        __asm__ volatile("syscall"
+                         :
+                         : "a"(60),
+                           "D"(status)
+                         : "rcx", "r11", "memory");
+        __builtin_unreachable();
+}
+
+int main(void) {
+        lib_call("a"); 
+        sys_write(1, "hey\n", 4);
+        while (1) {
+        }
+        return 0;
+}
+
+</code></pre>
+<p>but where lib_call go off? let's create <code>extern.c</code></p>
+<h2 id="the-externo-library"><a class="header" href="#the-externo-library">the <code>extern.o</code> library</a></h2>
+<pre><code class="language-c">int lib_call(const char *str) {
+        (void)str;
+
+        static int count;
+        count++;
+}
+</code></pre>
+<h2 id="linker"><a class="header" href="#linker">linker</a></h2>
+<p>then, the <code>linker.ld</code> (this is the our experiment)</p>
+<pre><code class="language-ld">ENTRY(_start)
+
+SECTIONS {
+    . = 0x100000;
+
+    .text : {
+        *(.text*)
+    }
+
+    .rodata : {
+        *(.rodata*)
+    }
+
+    .data : {
+        *(.data*)
+    }
+
+    .bss : {
+        *(.bss*) *(COMMON)
+    }
+}
+
+</code></pre>
+<h2 id="makefile"><a class="header" href="#makefile">makefile</a></h2>
+<pre><code class="language-makefile">mk_extern: extern.c
+	clang -c extern.c -o extern.o 
+
+mk_main: main.c
+	clang -c main.c -o main.o 
+
+mk_startup: startup.S
+	clang -c startup.S -o startup.o 
+
+mk_all: mk_startup mk_main mk_extern
+	clang -v -nostdlib -no-pie -T linker.ld startup.o main.o extern.o -o prog.elf
+
+clean: 
+	rm -f main.o
+	rm -f extern.o
+	rm -f prog.elf
+</code></pre>
+<p>compile with <code>make mk_all</code></p>
+<h1 id="binary-analysis"><a class="header" href="#binary-analysis">binary analysis</a></h1>
+<p>let's decompile each object file with <code>objdump -d -s .text &lt;filename&gt;</code>, and here the result</p>
+<h2 id="externc"><a class="header" href="#externc">extern.c</a></h2>
+<pre><code class="language-txt">/**
+ * this is objdump for extern.c
+ */
+ 
+fadhil_riyanto@integral2: 21:58:36 08/16/25 $ objdump -d -j .text ./extern.o
+
+./extern.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 &lt;lib_call&gt;:
+   0:	55                   	push   %rbp
+   1:	48 89 e5             	mov    %rsp,%rbp
+   4:	48 89 7d f0          	mov    %rdi,-0x10(%rbp)
+   8:	8b 05 00 00 00 00    	mov    0x0(%rip),%eax        # e &lt;lib_call+0xe&gt;
+   e:	83 c0 01             	add    $0x1,%eax
+  11:	89 05 00 00 00 00    	mov    %eax,0x0(%rip)        # 17 &lt;lib_call+0x17&gt;
+  17:	8b 45 fc             	mov    -0x4(%rbp),%eax
+  1a:	5d                   	pop    %rbp
+  1b:	c3                   	ret
+
+</code></pre>
+<h2 id="mainc"><a class="header" href="#mainc">main.c</a></h2>
+<pre><code class="language-txt">
+/**
+ * this is objdump for main.c
+ */
+fadhil_riyanto@integral2: 22:22:47 08/16/25 $ objdump -d -j .text ./main.o
+
+./main.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 &lt;main&gt;:
+   0:	55                   	push   %rbp
+   1:	48 89 e5             	mov    %rsp,%rbp
+   4:	48 83 ec 10          	sub    $0x10,%rsp
+   8:	c7 45 fc 00 00 00 00 	movl   $0x0,-0x4(%rbp)
+   f:	48 8d 3d 00 00 00 00 	lea    0x0(%rip),%rdi        # 16 &lt;main+0x16&gt;
+  16:	e8 00 00 00 00       	call   1b &lt;main+0x1b&gt;
+  1b:	bf 01 00 00 00       	mov    $0x1,%edi
+  20:	48 8d 35 00 00 00 00 	lea    0x0(%rip),%rsi        # 27 &lt;main+0x27&gt;
+  27:	ba 04 00 00 00       	mov    $0x4,%edx
+  2c:	e8 0f 00 00 00       	call   40 &lt;sys_write&gt;
+  31:	eb fe                	jmp    31 &lt;main+0x31&gt;
+  33:	66 66 66 66 2e 0f 1f 	data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+  3a:	84 00 00 00 00 00 
+
+0000000000000040 &lt;sys_write&gt;:
+  40:	55                   	push   %rbp
+  41:	48 89 e5             	mov    %rsp,%rbp
+  44:	89 7d fc             	mov    %edi,-0x4(%rbp)
+  47:	48 89 75 f0          	mov    %rsi,-0x10(%rbp)
+  4b:	48 89 55 e8          	mov    %rdx,-0x18(%rbp)
+  4f:	8b 7d fc             	mov    -0x4(%rbp),%edi
+  52:	48 8b 75 f0          	mov    -0x10(%rbp),%rsi
+  56:	48 8b 55 e8          	mov    -0x18(%rbp),%rdx
+  5a:	b8 01 00 00 00       	mov    $0x1,%eax
+  5f:	0f 05                	syscall
+  61:	48 89 45 e0          	mov    %rax,-0x20(%rbp)
+  65:	48 8b 45 e0          	mov    -0x20(%rbp),%rax
+  69:	5d                   	pop    %rbp
+  6a:	c3                   	ret
+
+</code></pre>
+<h1 id="startups"><a class="header" href="#startups">startup.S</a></h1>
+<pre><code class="language-txt">
+/**
+ * this is objdump for startup.S
+ */
+fadhil_riyanto@integral2: 22:23:17 08/16/25 $ objdump -d -j .text ./startup.o
+
+./startup.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 &lt;_start&gt;:
+   0:	e8 00 00 00 00       	call   5 &lt;_start+0x5&gt;
+   5:	48 c7 c0 3c 00 00 00 	mov    $0x3c,%rax
+   c:	89 c7                	mov    %eax,%edi
+   e:	0f 05                	syscall
+</code></pre>
+<h2 id="overall"><a class="header" href="#overall">overall</a></h2>
+<pre><code class="language-txt">fadhil_riyanto@integral2: 22:25:06 08/16/25 $ objdump -d -j .text prog.elf
+
+prog.elf:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000100000 &lt;_start&gt;:
+  100000:	e8 0b 00 00 00       	call   100010 &lt;main&gt;
+  100005:	48 c7 c0 3c 00 00 00 	mov    $0x3c,%rax
+  10000c:	89 c7                	mov    %eax,%edi
+  10000e:	0f 05                	syscall
+
+0000000000100010 &lt;main&gt;:
+  100010:	55                   	push   %rbp
+  100011:	48 89 e5             	mov    %rsp,%rbp
+  100014:	48 83 ec 10          	sub    $0x10,%rsp
+  100018:	c7 45 fc 00 00 00 00 	movl   $0x0,-0x4(%rbp)
+  10001f:	48 8d 3d 76 00 00 00 	lea    0x76(%rip),%rdi        # 10009c &lt;lib_call+0x1c&gt;
+  100026:	e8 55 00 00 00       	call   100080 &lt;lib_call&gt;
+  10002b:	bf 01 00 00 00       	mov    $0x1,%edi
+  100030:	48 8d 35 67 00 00 00 	lea    0x67(%rip),%rsi        # 10009e &lt;lib_call+0x1e&gt;
+  100037:	ba 04 00 00 00       	mov    $0x4,%edx
+  10003c:	e8 0f 00 00 00       	call   100050 &lt;sys_write&gt;
+  100041:	eb fe                	jmp    100041 &lt;main+0x31&gt;
+  100043:	66 66 66 66 2e 0f 1f 	data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+  10004a:	84 00 00 00 00 00 
+
+0000000000100050 &lt;sys_write&gt;:
+  100050:	55                   	push   %rbp
+  100051:	48 89 e5             	mov    %rsp,%rbp
+  100054:	89 7d fc             	mov    %edi,-0x4(%rbp)
+  100057:	48 89 75 f0          	mov    %rsi,-0x10(%rbp)
+  10005b:	48 89 55 e8          	mov    %rdx,-0x18(%rbp)
+  10005f:	8b 7d fc             	mov    -0x4(%rbp),%edi
+  100062:	48 8b 75 f0          	mov    -0x10(%rbp),%rsi
+  100066:	48 8b 55 e8          	mov    -0x18(%rbp),%rdx
+  10006a:	b8 01 00 00 00       	mov    $0x1,%eax
+  10006f:	0f 05                	syscall
+  100071:	48 89 45 e0          	mov    %rax,-0x20(%rbp)
+  100075:	48 8b 45 e0          	mov    -0x20(%rbp),%rax
+  100079:	5d                   	pop    %rbp
+  10007a:	c3                   	ret
+  10007b:	0f 1f 44 00 00       	nopl   0x0(%rax,%rax,1)
+
+0000000000100080 &lt;lib_call&gt;:
+  100080:	55                   	push   %rbp
+  100081:	48 89 e5             	mov    %rsp,%rbp
+  100084:	48 89 7d f0          	mov    %rdi,-0x10(%rbp)
+  100088:	8b 05 da 00 00 00    	mov    0xda(%rip),%eax        # 100168 &lt;lib_call.count&gt;
+  10008e:	83 c0 01             	add    $0x1,%eax
+  100091:	89 05 d1 00 00 00    	mov    %eax,0xd1(%rip)        # 100168 &lt;lib_call.count&gt;
+  100097:	8b 45 fc             	mov    -0x4(%rbp),%eax
+  10009a:	5d                   	pop    %rbp
+  10009b:	c3                   	ret
+
+</code></pre>
+<p>this show us that <code>.text</code> is actually merged. but how it works?!</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="debug-crash-before-runtime"><a class="header" href="#debug-crash-before-runtime">debug crash before runtime</a></h1>
+<p>thanks for <a href="https://stackoverflow.com/questions/7808769/how-to-debug-a-crash-before-main/30142423#30142423">https://stackoverflow.com/questions/7808769/how-to-debug-a-crash-before-main/30142423#30142423</a></p>
+<p>let's break a thing!</p>
+<p><img src="sysprog//assets/fd3bfc138cf34d4a6315e82866496a62f210c5225282f276ff83d047a7a8258a0e32f4b60eedfaccead95d0231e8d824232ccb3258405f009c6c7662.png" alt="image" /></p>
+<p>this is normal program, the <code>_start</code> is on 0x10000000, let break it</p>
+<p><img src="sysprog//assets/fc8cfdc88625223f15646b6a434679b74cf897357b8f22277ce34485ab153c6cc6fff6312d93e38c055ae80ae050befcbed886dc918495fa51564083.png" alt="image" /></p>
+<p>as you can see, its start from 0x0, let run it
+<img src="sysprog//assets/25ddfac225ad3c18aef56108bd78764e13db657688988492e197a1ad5dda6c9b6d0b171fc2aca6b2a91fb4028de8959a509b0d3d3ab856c85921f083.png" alt="image" /></p>
+<p>notes: the hey is previos attempt. nvm, now how debug it</p>
+<h1 id="run-as-usual-gdb"><a class="header" href="#run-as-usual-gdb">run as usual GDB</a></h1>
+<p><img src="sysprog//assets/7f97a9c81ae053c0929ec6a9e5215388f3352ffcc18e8ef3f909472a5f9dff523019ffe433448227902744ba4bef1b94d9499ef7a20acb781e547cbe.png" alt="image" /></p>
+<p>here the entrypoint is 0x0</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="nm"><a class="header" href="#nm">nm</a></h1>
 <p>nm is a abbr of name, in linux. this tool is used to inspect binary section</p>
 <p>example
@@ -2012,6 +2403,407 @@ int main() {
     119b:       c9                      leave
     119c:       c3                      ret
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="gnu-debugger-notes"><a class="header" href="#gnu-debugger-notes">GNU Debugger notes</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="bare-metal-programming"><a class="header" href="#bare-metal-programming">Bare-metal programming</a></h1>
+<p>there has some intresting post if you want do this all stuff locally</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="rasberry-pi-bare-metal-kernel-lab-setup"><a class="header" href="#rasberry-pi-bare-metal-kernel-lab-setup">Rasberry PI bare metal kernel lab setup</a></h1>
+<p>today is 17 august, 2025
+lets make small kernel that only can doing addition.</p>
+<h1 id="assembly"><a class="header" href="#assembly">assembly</a></h1>
+<pre><code class="language-asm">        .text
+start:
+        mov r0, #5
+        mov r1, #4
+        add r2, r1, r0
+
+stop:   b stop
+</code></pre>
+<p>compile it with</p>
+<ul>
+<li><code>arm-none-eabi-as -mcpu=cortex-a7 -o prog.o hello_aarch64.S</code></li>
+<li><code>arm-none-eabi-ld -Ttext=0x8000 -o prog.elf prog.o</code></li>
+<li><code>arm-none-eabi-objcopy -O binary prog.elf prog.bin</code></li>
+</ul>
+<p>run it</p>
+<ul>
+<li><code>qemu-system-arm -M raspi2b -kernel prog.bin -serial /dev/null -nographic</code></li>
+</ul>
+<p>here the R2</p>
+<p><img src="bare-metal//assets/3f6f851264236ecd703b05881b4fbb226349a52f16c59f9764225a046ca5ee5131a2f502d67eff6b8248a46bfd92bf69ce501db4032de14238bd4256.png" alt="image" /></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="rp2040-boot"><a class="header" href="#rp2040-boot">RP2040 boot</a></h1>
+<p>first, lets look at this docs</p>
+<p><img src="bare-metal//assets/998ec4b763d9f5425da4db21da99228af9adbd259ec40252256c75100747460e8fb538967e28a5a64fdf51c8e0a606de7f6e4bcdcaabc362584b8d02.png" alt="image" /></p>
+<p>I'll prove this</p>
+<ul>
+<li>1st, please look at this cmake, they says <code>bootrom_rt0.S</code>, which is <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/CMakeLists.txt#L39">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/CMakeLists.txt#L39</a></li>
+<li>2nd, the contents
+<img src="bare-metal//assets/805816ee1020531480c86e19163bbbc0425bbf9a0d26b0e181a6366be635690b2892c35657469fb8336baae679588ed7029b55155fa9a9d40fb92ba2.png" alt="image" /></li>
+</ul>
+<h1 id="the-strange-header"><a class="header" href="#the-strange-header">the strange header</a></h1>
+<p>in <code>bootrom_rt0.S</code> contains a strange header like this</p>
+<pre><code class="language-c">#include "hardware/regs/addressmap.h"
+#include "hardware/regs/pads_bank0.h"
+#include "hardware/regs/resets.h"
+#include "hardware/regs/sio.h"
+#include "hardware/regs/watchdog.h"
+#include "hardware/regs/syscfg.h"
+#include "hardware/regs/clocks.h"
+#include "hardware/regs/vreg_and_chip_reset.h"
+#include "hardware/regs/m0plus.h"
+#include "git_info.h"
+</code></pre>
+<p>warn:
+this is just my speculation, the real location is in <a href="https://github.com/raspberrypi/pico-sdk/tree/master/src/rp2040/hardware_regs/include/hardware/regs">https://github.com/raspberrypi/pico-sdk/tree/master/src/rp2040/hardware_regs/include/hardware/regs</a>, but the theory IDK. i just matching the file</p>
+<p>please inform me if you find something intresting in <a href="https://github.com/raspberrypi/pico-sdk/blob/master/src/CMakeLists.txt">https://github.com/raspberrypi/pico-sdk/blob/master/src/CMakeLists.txt</a></p>
+<h1 id="boot-sequence"><a class="header" href="#boot-sequence">boot sequence</a></h1>
+<p>this is the most important stuff</p>
+<ul>
+<li>1st, please look at this cmake, they says <code>bootrom_rt0.S</code>, which is <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/CMakeLists.txt#L39">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/CMakeLists.txt#L39</a></li>
+<li>2nd, the <code>bootrom_rt0.S</code>, this is important <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_rt0.S#L40-L43">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_rt0.S#L40-L43</a></li>
+<li>3st, <code>bootrom_rt0.S</code> jump into <code>main()</code>, <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_rt0.S#L303">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_rt0.S#L303</a></li>
+<li>the boot <code>main()</code> Cmake, <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/CMakeLists.txt#L41">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/CMakeLists.txt#L41</a></li>
+<li><code>main()</code> func, <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L226">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L226</a></li>
+<li>busy loop with ring-oscillator? <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L246">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L246</a></li>
+</ul>
+<p><img src="bare-metal//assets/4f86ceb28ebef18c2f5b021c5bae32803869435991eaf6b2da4ecd70a73c0ff96fd7781040dce01ced5a086a4ab298bcdc0a255d52287b01f648e41a.png" alt="image" /></p>
+<ul>
+<li>jump into <code>_flash_boot()</code>, <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L251">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L251</a></li>
+<li>crc32 checking, <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L75-L77">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L75-L77</a></li>
+<li>intresting stuff, this is calculating the time taken? <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L67-L72">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L67-L72</a></li>
+<li>execute boot2 stage: <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L95">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L95</a></li>
+<li><a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L90">this</a> variable hold pointer into boot2 stage location, which is <code>boot2_load</code></li>
+<li><code>boot2_load</code> <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L44">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L44</a></li>
+<li>boot2 offset calculation, <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L41">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L41</a></li>
+<li>this <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L41">define</a> need a triage, because <code>SRAM_END</code> is 0x20042000, which at end of static ram. is really boot2 stage is lives before the sram ended?</li>
+</ul>
+<h1 id="boot2"><a class="header" href="#boot2">boot2</a></h1>
+<ul>
+<li><code>runtime_init</code> ?, in <a href="https://github.com/raspberrypi/pico-sdk/blob/a1438dff1d38bd9c65dbd693f0e5db4b9ae91779/src/rp2_common/pico_crt0/crt0.S#L572C1-L572C13">crt0.S</a>, like what <a href="https://vanhunteradams.com/Pico/Bootloader/Boot_sequence.html">https://vanhunteradams.com/Pico/Bootloader/Boot_sequence.html</a> mention?</li>
+</ul>
+<p><img src="bare-metal//assets/9b97cd61d49ec79790a82a11ded40e61c8cf8563ccbf0d274bb2176aaac35c85d38ac9dbd1647a35f8f093a6a6ab81cb52d1b2182fea40662cdf7d5e.png" alt="image" /></p>
+<p>first, we look at this file <a href="https://github.com/raspberrypi/pico-sdk/blob/master/src/rp2_common/pico_crt0/rp2040/memmap_default.ld">memmap_default.ld</a></p>
+<ul>
+<li>here, we know that, they call <code>pico_flash_region.ld</code>, which located on <a href="https://github.com/raspberrypi/pico-sdk/blob/master/src/rp2_common/pico_standard_link/pico_flash_region.template.ld">src/rp2_common/pico_standard_link/pico_flash_region.template.ld</a></li>
+<li>the cmake then convert <code>pico_flash_region.template.ld</code> into <code>pico_flash_region.ld</code> using <a href="https://github.com/raspberrypi/pico-sdk/blob/a1438dff1d38bd9c65dbd693f0e5db4b9ae91779/src/rp2_common/pico_standard_link/CMakeLists.txt#L126">cmake</a></li>
+</ul>
+<p><a href="https://github.com/raspberrypi/pico-sdk/blob/a1438dff1d38bd9c65dbd693f0e5db4b9ae91779/src/rp2_common/pico_standard_link/CMakeLists.txt#L118-L120">this</a> code idk what its used for, also where the variable coming-off</p>
+<h1 id="boot2-revision"><a class="header" href="#boot2-revision">boot2 revision</a></h1>
+<p>this is the actual boot2 is located</p>
+<ul>
+<li><a href="https://github.com/raspberrypi/pico-sdk/tree/master/src/rp2040/boot_stage2">https://github.com/raspberrypi/pico-sdk/tree/master/src/rp2040/boot_stage2</a></li>
+<li>inside will have many files, all of them is bootloader, but with different hardware. in my case I USE w25q080, THIS is how I know it
+<img src="bare-metal//assets/5eedcea5cb67eae04f32366d829efa9fbad1cb8b6fe52e7eec210003cbb998fc084083b06469d2b1fc6229f9d77afabb866f9500e1b13656b5c4569a.png" alt="image" /></li>
+</ul>
+<h1 id="linker-script"><a class="header" href="#linker-script">linker script</a></h1>
+<p>there has various linker scripts</p>
+<ul>
+<li><a href="https://github.com/raspberrypi/pico-sdk/blob/master/src/rp2040/boot_stage2/boot_stage2.ld">boot_stage2</a></li>
+<li><a href="https://github.com/raspberrypi/pico-sdk/blob/master/src/rp2_common/pico_crt0/rp2040/memmap_default.ld">memmap_default.ld</a></li>
+<li><a href="https://github.com/raspberrypi/pico-sdk/blob/master/src/rp2_common/pico_standard_link/pico_flash_region.template.ld">pico_flash_region</a>, this is included on <code>memmap_default.ld</code></li>
+</ul>
+<p>if we merge both <code>memmap_default.ld</code> and <code>pico_flash_region.ld</code>, we will got this</p>
+<pre><code class="language-c">MEMORY
+{
+    FLASH(rx) : ORIGIN = 0x10000000, LENGTH = ${PICO_FLASH_SIZE_BYTES_STRING}
+    RAM(rwx) : ORIGIN =  0x20000000, LENGTH = 256k
+    SCRATCH_X(rwx) : ORIGIN = 0x20040000, LENGTH = 4k
+    SCRATCH_Y(rwx) : ORIGIN = 0x20041000, LENGTH = 4k
+}
+</code></pre>
+<p>see missing part? yes, that is <code>PICO_FLASH_SIZE_BYTES_STRING</code>, lets find out in our *.elf.map</p>
+<p><img src="bare-metal//assets/1cd8416a8065c0f0be4d8ccb319c644d5d2ec1f2b6ecfec3ecfb3c24c921238a1da5662379c6fd9eaa0c10d8f39166634c646b5b1caf491465ccc922.png" alt="image" /></p>
+<p><img src="bare-metal//assets/823238e7e864c31772fe710047ad3355085924b1d49f46723a18fd60a5494a90466d8991ecd3cfcc9a990d7bf44a8979e37f409a0408498ef71c54ad.png" alt="image" /></p>
+<p>that is 2048K</p>
+<h1 id="issue-that-i-find"><a class="header" href="#issue-that-i-find">Issue that I find</a></h1>
+<p>I think <code>arm-none-eabi-objdump</code> is mistaken arm-thumb-1 instruction as full 32 bit arm, so they just say <code>.word 0xdeadbeef</code></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="picotool-build"><a class="header" href="#picotool-build">picotool build</a></h1>
+<h2 id="os-setup"><a class="header" href="#os-setup">os setup</a></h2>
+<pre><code class="language-sh">sudo pacman -S cmake arm-none-eabi-gcc arm-none-eabi-newlib
+</code></pre>
+<h2 id="setup-picosdk"><a class="header" href="#setup-picosdk">setup picosdk</a></h2>
+<pre><code class="language-sh">git clone https://github.com/raspberrypi/pico-sdk.git
+cd pico-sdk
+git submodule update --init
+export PICO_SDK_PATH=$PWD
+</code></pre>
+<h2 id="build-picotool"><a class="header" href="#build-picotool">build picotool</a></h2>
+<pre><code class="language-sh">git clone https://github.com/raspberrypi/picotool.git
+cd picotool
+mkdir build
+cd build
+cmake ..
+make
+</code></pre>
+<p>if you get cmake error minimum etc..., use <code>cmake .. -DCMAKE_POLICY_VERSION_MINIMUM=3.5</code> instead</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="debug-pico-with-another-pico"><a class="header" href="#debug-pico-with-another-pico">debug pico with another pico</a></h1>
+<p>first, we need a patch this stuff https://review.openocd.org/c/openocd/+/8223/3/src/flash/nor/spi.c#187</p>
+<h1 id="optional-dry-run"><a class="header" href="#optional-dry-run">optional dry run</a></h1>
+<pre><code class="language-sh">pacman -S mingw-w64-x86_64-toolchain git make libtool pkg-config autoconf automake texinfo mingw-w64-x86_64-libusb
+</code></pre>
+<p>then run</p>
+<pre><code class="language-sh">git clone https://github.com/raspberrypi/openocd.git --branch picoprobe --depth=1
+cd openocd
+nvim /src/flash/nor/spi.c
+</code></pre>
+<p>then add patch</p>
+<p>after that</p>
+<h1 id="build"><a class="header" href="#build">build</a></h1>
+<pre><code class="language-sh">./bootstrap
+./configure --enable-picoprobe --disable-werror
+make -j4
+sudo make install
+</code></pre>
+<h1 id="flash-elf"><a class="header" href="#flash-elf">flash ELF</a></h1>
+<pre><code class="language-sh">sudo openocd -f interface/cmsis-dap.cfg -f target/rp2040.cfg -c "adapter speed 5000" -c "program blink.elf verify reset exit"
+</code></pre>
+<h1 id="just-debugging"><a class="header" href="#just-debugging">just debugging</a></h1>
+<pre><code class="language-sh">sudo openocd -f interface/cmsis-dap.cfg -f target/rp2040.cfg -c "adapter speed 5000"
+
+```sh
+arm-none-eabi-gdb blink.elf
+&gt; target remote localhost:3333
+&gt; monitor reset init
+&gt; continue
+</code></pre>
+<p>wiring position: <img src="bare-metal//assets/ffd3b015a7065c6a5188c94644ad5f017417ed0e7e010f92a6b4baff4e07d2da9be208c33b42527fb4bf2e6bbad3a0fd735c20ce4020101264e9aa77.png" alt="image" /></p>
+<p><img src="bare-metal//assets/0470af216a4453ea5bfbded85fd6d523d2eac2fa64d59787e0c17ad13789eac7f54f1dd97bb273e4730c31ec8328f324db69cbb7a13852c789b482d7.png" alt="image" /></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="pico-sdk-install--cmake-template"><a class="header" href="#pico-sdk-install--cmake-template">PICO SDK install &amp; cmake template</a></h1>
+<p>install step is very easy,</p>
+<pre><code class="language-sh">git clone https://github.com/raspberrypi/pico-sdk.git
+cd pico-sdk
+git submodule update --init
+</code></pre>
+<h1 id="cmake-template"><a class="header" href="#cmake-template">CMAKE Template</a></h1>
+<p>this is my own standard of pico rp2040 chip cmake build template</p>
+<pre><code class="language-C">cmake_minimum_required(VERSION 3.13)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+include(/home/fadhil_riyanto/git_clone/pico-sdk/pico_sdk_init.cmake)
+
+pico_sdk_init()
+
+project(hello_usb C CXX ASM)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
+
+
+add_executable(hello_usb hello_usb.c)
+target_link_libraries(hello_usb pico_stdlib)
+
+# # enable usb output, disable uart output
+# pico_enable_stdio_usb(hello_usb 1)
+# pico_enable_stdio_uart(hello_usb 0)
+
+pico_add_extra_outputs(hello_usb)
+</code></pre>
+<p>if you ask about</p>
+<blockquote>
+<blockquote>
+<p>what uses of <code>pico_sdk_init</code>, or <code>pico_enable_stdio_usb</code>, please read it yourself on <a href="https://github.com/raspberrypi/pico-sdk/blob/9a4113fbbae65ee82d8cd6537963bc3d3b14bcca/pico_sdk_init.cmake#L44-L49">https://github.com/raspberrypi/pico-sdk/blob/9a4113fbbae65ee82d8cd6537963bc3d3b14bcca/pico_sdk_init.cmake#L44-L49</a>, thats is a macro!</p>
+</blockquote>
+</blockquote>
+<p>feel free to change <code>include(/home/fadhil_riyanto/git_clone/pico-sdk/pico_sdk_init.cmake)</code> with your own SDK Path</p>
+<p><img src="bare-metal//assets/3cd8678ed1023faefda7a4811168e691c0c03b33959a8272ce79f4833dba63016f479fe6da574e7b9dd0cfab422e1c05562aae820819ae717115691c.png" alt="image" /></p>
+<p><img src="bare-metal//assets/647a46c8f9f938fa98e322298755afe0249e3cfe64d7ffcddd8626d6a31f07e8cf9f3e1fd131d2ce12001631a942c041f072916f19e416e26f2b1da9.png" alt="image" /></p>
+<h1 id="vscode-autocomplete-settings"><a class="header" href="#vscode-autocomplete-settings">vscode autocomplete settings</a></h1>
+<p>create file named <code>.vscode/c_cpp_properties.json</code></p>
+<p>fill with</p>
+<pre><code class="language-json">{
+  "configurations": [
+    {
+      "name": "Linux",
+      "compileCommands": "${workspaceFolder}/build/compile_commands.json",
+      "intelliSenseMode": "linux-gcc-x64",
+      "compilerPath": "/usr/bin/g++",
+      "cStandard": "c11",
+      "cppStandard": "c++17"
+    }
+  ],
+  "version": 4
+}
+
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="arm-none-eabi-gdb-debugging-with-openocd"><a class="header" href="#arm-none-eabi-gdb-debugging-with-openocd">arm-none-eabi-gdb debugging with openocd</a></h1>
+<p>the simplest thing to debug your RP2040 chip is using secondary pico as picoprobe, then running openocd.
+I assume you're was ready with your pico debugprobe</p>
+<h1 id="identify-your-tty"><a class="header" href="#identify-your-tty">identify your TTY</a></h1>
+<p>check with <code>sudo dmesg</code>, the run a command like this <code>sudo chmod 666 /dev/ttyACM0</code></p>
+<h1 id="openocd"><a class="header" href="#openocd">openocd</a></h1>
+<pre><code class="language-sh">openocd -f interface/cmsis-dap.cfg -f target/rp2040.cfg -c "adapter speed 5000"
+</code></pre>
+<h1 id="cmake"><a class="header" href="#cmake">cmake</a></h1>
+<p>make sure your ELF was build with <code>cmake -DCMAKE_BUILD_TYPE=Debug -DPICO_BOARD=pico ..</code></p>
+<h1 id="flashing"><a class="header" href="#flashing">flashing</a></h1>
+<pre><code class="language-sh">openocd -f interface/cmsis-dap.cfg -f target/rp2040.cfg -c "adapter speed 5000" -c "program hello_usb.elf verify reset exit"
+</code></pre>
+<p>without sudo</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="analysis-how-printf-rp2040-work-under-low-level-stuff"><a class="header" href="#analysis-how-printf-rp2040-work-under-low-level-stuff">analysis how printf rp2040 work under low level stuff</a></h1>
+<p>in order to know how printf works in rp2040 uart bridge, lets compile simple program, compile as debug, then run GDB</p>
+<p>consider this very simple hello world</p>
+<pre><code class="language-c">#include &lt;pico/printf.h&gt;
+#include &lt;pico/time.h&gt;
+
+int main() {
+    int n = 0;
+    stdio_init_all();
+    while (true) {
+        printf("Hello, world! %d\n", n);
+        sleep_ms(1000);
+        n = n + 1;
+    }
+}
+</code></pre>
+<h1 id="analysis"><a class="header" href="#analysis">analysis</a></h1>
+<p><img src="bare-metal//assets/c9a172f5c6ce190e648f88df4af894d4d115b23d2128cad758833395f62d3f5e5d2ef9cb3dc4d695806f538fa26510bf6bc0da2b995b7fceeaff4899.png" alt="image" /></p>
+<p>see?</p>
+<pre><code class="language-c">=&gt; 0x100002b4 &lt;+12&gt;:    bl      0x10003a64 &lt;__wrap_printf&gt;
+</code></pre>
+<p>its call <code>__wrap_printf</code> which mean, the backend call <code>-Wl,--wrap=printf</code> internally, but if we reffer to <code>/home/fadhil_riyanto/git_clone/pico-sdk/src/rp2_common/pico_stdio/stdio.c:347</code></p>
+<p><img src="bare-metal//assets/44f66f5c4e0c51a2c0b4bc3885079beb5de306725363b91ba2a38898bf59d0e76fe467ec3abf98eb4881aaf0ce408cf5ebd19b28747ef3720bb99107.png" alt="image" /></p>
+<p>the signature is different, this function has signature</p>
+<pre><code class="language-c">int __printflike(1, 0) PRIMARY_STDIO_FUNC(printf)(const char* format, ...)
+</code></pre>
+<p>so, what exactly happen?</p>
+<h1 id="result"><a class="header" href="#result">result</a></h1>
+<p>lets look at stdio.c line 289</p>
+<p><img src="bare-metal//assets/a00ffec057742b32cb76c8db0d3da75c299ceba49a218edf9d559fb31eb9ae029da9b798e2d255ca0af5754dcd7ac62929645ad3aa63155c62bf61a8.png" alt="image" /></p>
+<p>when the macro <code>PICO_STDIO_SHORT_CIRCUIT_CLIB_FUNCS</code> is active, we replace the function name by <code>WRAPPER_FUNC(x)</code>, not <code>stdio_printf</code></p>
+<p>after that, lets jump into <a href="https://github.com/raspberrypi/pico-sdk/blob/9a4113fbbae65ee82d8cd6537963bc3d3b14bcca/src/rp2_common/pico_platform_compiler/include/pico/platform/compiler.h#L185">https://github.com/raspberrypi/pico-sdk/blob/9a4113fbbae65ee82d8cd6537963bc3d3b14bcca/src/rp2_common/pico_platform_compiler/include/pico/platform/compiler.h#L185</a>, very clear definition</p>
+<p>so, basically. this function
+<img src="bare-metal//assets/b0dbbe24380b5411221dbffcf2cb8409180135d704b9ede610a1e8f3e032a9ce6071551b9c2628a7d85fec6dcb88aa3f8b529d15999cdf75570fdab8.png" alt="image" /></p>
+<p>call <code>__wrap_printf</code></p>
+<p>make sense?</p>
+<h1 id=""><a class="header" href="#"></a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="rp2040-chip-memory-layout"><a class="header" href="#rp2040-chip-memory-layout">RP2040 chip memory layout</a></h1>
+<p>pembagian nya ada di sini:
+<img src="bare-metal//assets/dfd7de595d88027938f56b7e764d7dce7dfa1ef8dfad07f788a65565041f7442f2bc1b1df44d8fe2528858fcf2cfda1d3c4c1eb3fb3d157a644fa18e.png" alt="image" /></p>
+<h1 id="rom"><a class="header" href="#rom">ROM</a></h1>
+<p>Kode untuk rom ini immutable (belum dicoba), dimulai dari 0x00000000 sampai sejauh 16 kB (0x00004000)</p>
+<p>total sram di chip RP2040 ada 264kB (TOTALNYA saja), tapi perlu diketahu bahwa itu semua aslinya dibagi bagi per-area address nya</p>
+<p>jika di docs, sram ini dimulai dari 0x20000000 (summary), tapi secara fisik, dibagi menjadi 6 bank</p>
+<p>dimana</p>
+<p>word addr 0</p>
+<ul>
+<li>bank 0: 0x20000000</li>
+<li>bank 1: 0x20000004</li>
+<li>bank 2: 0x20000008</li>
+<li>bank 3: 0x2000000c</li>
+</ul>
+<p>word addr 1</p>
+<ul>
+<li>bank 0: 0x20000010</li>
+<li>bank 1: 0x20000014</li>
+<li>bank 2: 0x20000018</li>
+<li>bank 3: 0x2000001c</li>
+</ul>
+<p>word addr 2</p>
+<ul>
+<li>bank 0: 0x20000020</li>
+<li>bank 1: 0x20000024</li>
+<li>bank 2: 0x20000028</li>
+<li>bank 3: 0x2000002c</li>
+</ul>
+<p>dst</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="stdio_init_all-analysis"><a class="header" href="#stdio_init_all-analysis">stdio_init_all() analysis</a></h1>
+<p>first, lets debug this with real hardware &amp; openocd</p>
+<p>do not forget to add breakpoint in this func
+<img src="bare-metal//assets/d79a009da96a33c92b6b2ab63c28ed1181c1737c08fc3a9c81e1a8307687ceea6cf4823ebfccb102464099ec2aca35f2ba6c030577ac2097826aa79f.png" alt="image" /></p>
+<p>the sequence of execution:</p>
+<ul>
+<li><code>/home/fadhil_riyanto/git_clone/pico-sdk/src/rp2_common/pico_stdio/stdio.c:200</code> -&gt; stdio_init_all()</li>
+<li><code>/home/fadhil_riyanto/git_clone/pico-sdk/src/rp2_common/pico_stdio_uart/stdio_uart.c:37</code> -&gt; stdio_uart_init()</li>
+<li><code>/home/fadhil_riyanto/git_clone/pico-sdk/src/rp2_common/pico_stdio_uart/stdio_uart.c:93</code> -&gt; stdio_uart_init_full()</li>
+<li><code>/home/fadhil_riyanto/git_clone/pico-sdk/src/rp2_common/hardware_gpio/gpio.c:38</code> -&gt; gpio_set_function()</li>
+<li><code>/home/fadhil_riyanto/git_clone/pico-sdk/src/rp2_common/hardware_uart/uart.c:42</code> -&gt; uart_init()</li>
+</ul>
+<p>WIP (SOON)</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="pico_default_asm_volatile"><a class="header" href="#pico_default_asm_volatile">pico_default_asm_volatile</a></h1>
+<p>after a long time, I discover this macro from this screenshoot</p>
+<p><img src="bare-metal//assets/fe28d3decea5adad85287258acbfe1798633ddb0a31f160672716fc61632ab2866b9c0a853b77973296555b2e411342cee912b0cbc9a990ecacbed37.png" alt="image" /></p>
+<p>and I found it</p>
+<p><a href="https://github.com/raspberrypi/pico-sdk/blob/9a4113fbbae65ee82d8cd6537963bc3d3b14bcca/src/rp2_common/pico_platform_compiler/include/pico/platform/compiler.h#L149-L159">https://github.com/raspberrypi/pico-sdk/blob/9a4113fbbae65ee82d8cd6537963bc3d3b14bcca/src/rp2_common/pico_platform_compiler/include/pico/platform/compiler.h#L149-L159</a></p>
+<pre><code class="language-c">#define pico_default_asm_volatile(...) __asm volatile (".syntax unified\n" __VA_ARGS__)
+</code></pre>
+<p>and the explanation why use <code>__VA_ARGS__</code>: <a href="https://gcc.gnu.org/onlinedocs/cpp/Variadic-Macros.html">https://gcc.gnu.org/onlinedocs/cpp/Variadic-Macros.html</a></p>
+<p>here the example</p>
+<p><img src="bare-metal//assets/3f10433700ab0dbc062496ebf165befd3f1f55a283d912a7efcc09bf8dc6329ae0812cc1e0acb3e5b3a0fc39f3399bd794c66054ff1f919c3df6e703.png" alt="image" /></p>
+<p><img src="bare-metal//assets/7e4c168002be67f1892819134d389599878fa6ba856daa874fdb6273681b437fea071e16dbc52e877969d5efad3eff65283ab0337d9a054bb703e65b.png" alt="image" /></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="rp2040-sram-layout"><a class="header" href="#rp2040-sram-layout">RP2040 sram layout</a></h1>
+<p>the static ram is contains 6 section of ram, which is two 4KB and four 64 KB ram</p>
+<p>RAM start at address <code>0x20000000</code></p>
+<p><code>0x20040000</code> and <code>0x20041000</code> is a start address of 4KB area wide</p>
+<p>and, this is section about 64KB wide ram
+<code>0x20000000</code> - <code>0x20010000</code> (64 kb)
+<code>0x20010000</code> - <code>0x20020000</code> (64 kb)
+<code>0x20020000</code> - <code>0x20030000</code> (64 kb)
+<code>0x20030000</code> - <code>0x20040000</code> (64 kb)</p>
+<p>this is MIRROR of 64 kb region (stripped)
+0x21000000
+0x21010000
+0x21020000
+0x21030000</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="mapping-all-pico-sdk-cmakeliststxt"><a class="header" href="#mapping-all-pico-sdk-cmakeliststxt">mapping all pico-sdk CmakeLists.txt</a></h1>
+<p>SOON</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="dump-firmware-for-from-0x0--0x4000"><a class="header" href="#dump-firmware-for-from-0x0--0x4000">dump firmware for from 0x0 ~ 0x4000</a></h1>
+<p>this is how you can dump first 16Kbytes</p>
+<p>based on this docs, its feel intresting look inside about rom</p>
+<p><img src="bare-metal//assets/36fa643113ee83bacaed05afdcf1f991a3abb9babc8dda99ff8c29a0022aab2dc2b1a5a2d99db2363b4b1f0fc99a2ec4136dae53c41e814030e60f0d.png" alt="image" /></p>
+<p>let's dump it</p>
+<h1 id="openocd-1"><a class="header" href="#openocd-1">openocd</a></h1>
+<p>this tutorial uses secondary pico, which connected with other pico's</p>
+<pre><code>openocd -f interface/cmsis-dap.cfg -f target/rp2040.cfg -c "adapter speed 5000"
+</code></pre>
+<p>after it</p>
+<pre><code>telnet localhost 4444
+&gt; halt
+&gt; dump_image pico_first_16kb_bootloader.bin 0x0 0x4000
+</code></pre>
+<p>show the binary</p>
+<pre><code class="language-sh">arm-none-eabi-objdump -D -b binary -marm -Mforce-thumb ./pico_first_16kb_bootloader.bin
+</code></pre>
+<p><img src="bare-metal//assets/66f6af036ba7e606bba4caebe6e3a9f80a0acfbf57678feead6f9ae2744ff4c15c9746f9c917780fd3206d00c207dd30a221170fce83c5ef4c55616f.png" alt="image" /></p>
+<h1 id="another-way"><a class="header" href="#another-way">another way</a></h1>
+<p>let's use GDB stuff, first download <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/releases/tag/b2">this</a>, run as regular gdb debug mode + openocd. then dump</p>
+<p><img src="bare-metal//assets/e0eaca53bc870194ce824091d84157932092e68ce61d038635d8119634ddc73948f567954b535c53cadef2c690779326140113b4e2a16632ffdf21a8.png" alt="image" /></p>
+<p>here the intresting part</p>
+<p><img src="bare-metal//assets/f96682752a323620a2e45aded89bdde392df227a03e62d2239247a515b19cba2a7ed8af1557562455ff2eef5d015f22d1043f823a7de6c3eb0a49d64.png" alt="image" /></p>
+<p>which part of <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_rt0.S#L48">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_rt0.S#L48</a></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="pico-bootrom-linker-script"><a class="header" href="#pico-bootrom-linker-script">pico bootrom linker script</a></h1>
+<p>here you can access it, <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom.ld">link</a></p>
+<pre><code class="language-txt">MEMORY {
+    ROM(rx) : ORIGIN = 0x00000000, LENGTH = 16K
+    SRAM(rwx) : ORIGIN = 0x20000000, LENGTH = 264K
+    USBRAM(rw) : ORIGIN = 0x50100400, LENGTH = 3K
+}
+
+SECTIONS {
+    . = ORIGIN(ROM);
+    .text : {
+        KEEP(*(.vectors))
+        *(.text*)
+        KEEP(*(.rodata.keep*))
+        *(.rodata*)
+        this_is_the_end_my_only_friend_the_end = .;
+        . = ALIGN(LENGTH(ROM));
+    } &gt;ROM =0x00be
+
+    .data : {
+        *(.data*)
+    } &gt;USBRAM
+
+    .bss : {
+        *(.bss*)
+    } &gt;USBRAM
+
+    ASSERT(__irq5_vector == __vectors + 0x40 + 5 * 4, "too much data in middle of vector table")
+    ASSERT(SIZEOF(.data) == 0,
+        "ERROR: do not use static memory in bootrom! (.data)")
+
+     /* Leave room above the stack for stage 2 load, so that stage 2
+       can image SRAM from its beginning */
+    _stacktop = ORIGIN(SRAM) + LENGTH(SRAM) - 256;
+}
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="arm"><a class="header" href="#arm">ARM</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="thumb-thumb-2-arm-aarch64-introduction"><a class="header" href="#thumb-thumb-2-arm-aarch64-introduction">Thumb, Thumb-2, ARM, AArch64 introduction</a></h1>
 <h2 id="thumb"><a class="header" href="#thumb">Thumb</a></h2>
@@ -2385,7 +3177,7 @@ false &lt;--- confirm
 <p>and then, we return something like this from our function</p>
 <pre><code class="language-rust">return Err("connection reset".into())</code></pre>
 <p>how the <code>into()</code> works?</p>
-<h1 id="analysis"><a class="header" href="#analysis">analysis</a></h1>
+<h1 id="analysis-1"><a class="header" href="#analysis-1">analysis</a></h1>
 <p>look at <a href="https://github.com/rust-lang/rust/blob/6e830462330a9e34d8176e86d4580dd0820c6fd5/library/alloc/src/boxed/convert.rs#L658">this</a> snippet</p>
 <pre><code class="language-rust">#[cfg(not(no_global_oom_handling))]
 #[stable(feature = "rust1", since = "1.0.0")]
@@ -2528,7 +3320,7 @@ ii+1 orig i
 <p>all docs: <a href="https://doc.rust-lang.org/cargo/reference/build-scripts.html">https://doc.rust-lang.org/cargo/reference/build-scripts.html</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rust-tonic-grpc-server-build-process"><a class="header" href="#rust-tonic-grpc-server-build-process">Rust tonic gRPC server build process</a></h1>
 <p>topik ini khusus membahas gRPC di rust,</p>
-<h2 id="build"><a class="header" href="#build">build</a></h2>
+<h2 id="build-1"><a class="header" href="#build-1">build</a></h2>
 <p>contoh template build rs:</p>
 <pre><code class="language-rust">use std::{env, path::PathBuf};
 
@@ -2598,321 +3390,6 @@ async fn main() {
 <li><code>rustup +nightly component add miri</code></li>
 <li>lets run cool stuff: <code>cargo +nightly miri run --target s390x-unknown-linux-gnu</code></li>
 </ul>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="embedtronics"><a class="header" href="#embedtronics">Embedtronics</a></h1>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="rp2040-boot"><a class="header" href="#rp2040-boot">RP2040 boot</a></h1>
-<p>first, lets look at this docs</p>
-<p><img src="embedtronics//assets/998ec4b763d9f5425da4db21da99228af9adbd259ec40252256c75100747460e8fb538967e28a5a64fdf51c8e0a606de7f6e4bcdcaabc362584b8d02.png" alt="image" /></p>
-<p>I'll prove this</p>
-<ul>
-<li>1st, please look at this cmake, they says <code>bootrom_rt0.S</code>, which is <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/CMakeLists.txt#L39">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/CMakeLists.txt#L39</a></li>
-<li>2nd, the contents
-<img src="embedtronics//assets/805816ee1020531480c86e19163bbbc0425bbf9a0d26b0e181a6366be635690b2892c35657469fb8336baae679588ed7029b55155fa9a9d40fb92ba2.png" alt="image" /></li>
-</ul>
-<h1 id="the-strange-header"><a class="header" href="#the-strange-header">the strange header</a></h1>
-<p>in <code>bootrom_rt0.S</code> contains a strange header like this</p>
-<pre><code class="language-c">#include "hardware/regs/addressmap.h"
-#include "hardware/regs/pads_bank0.h"
-#include "hardware/regs/resets.h"
-#include "hardware/regs/sio.h"
-#include "hardware/regs/watchdog.h"
-#include "hardware/regs/syscfg.h"
-#include "hardware/regs/clocks.h"
-#include "hardware/regs/vreg_and_chip_reset.h"
-#include "hardware/regs/m0plus.h"
-#include "git_info.h"
-</code></pre>
-<p>warn:
-this is just my speculation, the real location is in <a href="https://github.com/raspberrypi/pico-sdk/tree/master/src/rp2040/hardware_regs/include/hardware/regs">https://github.com/raspberrypi/pico-sdk/tree/master/src/rp2040/hardware_regs/include/hardware/regs</a>, but the theory IDK. i just matching the file</p>
-<p>please inform me if you find something intresting in <a href="https://github.com/raspberrypi/pico-sdk/blob/master/src/CMakeLists.txt">https://github.com/raspberrypi/pico-sdk/blob/master/src/CMakeLists.txt</a></p>
-<h1 id="boot-sequence"><a class="header" href="#boot-sequence">boot sequence</a></h1>
-<p>this is the most important stuff</p>
-<ul>
-<li>1st, please look at this cmake, they says <code>bootrom_rt0.S</code>, which is <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/CMakeLists.txt#L39">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/CMakeLists.txt#L39</a></li>
-<li>2nd, the <code>bootrom_rt0.S</code>, this is important <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_rt0.S#L40-L43">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_rt0.S#L40-L43</a></li>
-<li>3st, <code>bootrom_rt0.S</code> jump into <code>main()</code>, <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_rt0.S#L303">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_rt0.S#L303</a></li>
-<li>the boot <code>main()</code> Cmake, <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/CMakeLists.txt#L41">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/CMakeLists.txt#L41</a></li>
-<li><code>main()</code> func, <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L226">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L226</a></li>
-<li>busy loop with ring-oscillator? <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L246">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L246</a></li>
-</ul>
-<p><img src="embedtronics//assets/4f86ceb28ebef18c2f5b021c5bae32803869435991eaf6b2da4ecd70a73c0ff96fd7781040dce01ced5a086a4ab298bcdc0a255d52287b01f648e41a.png" alt="image" /></p>
-<ul>
-<li>jump into <code>_flash_boot()</code>, <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L251">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L251</a></li>
-<li>crc32 checking, <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L75-L77">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L75-L77</a></li>
-<li>intresting stuff, this is calculating the time taken? <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L67-L72">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L67-L72</a></li>
-<li>execute boot2 stage: <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L95">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L95</a></li>
-<li><a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L90">this</a> variable hold pointer into boot2 stage location, which is <code>boot2_load</code></li>
-<li><code>boot2_load</code> <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L44">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L44</a></li>
-<li>boot2 offset calculation, <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L41">https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L41</a></li>
-<li>this <a href="https://github.com/raspberrypi/pico-bootrom-rp2040/blob/ef22cd8ede5bc007f81d7f2416b48db90f313434/bootrom/bootrom_main.c#L41">define</a> need a triage, because <code>SRAM_END</code> is 0x20042000, which at end of static ram. is really boot2 stage is lives before the sram ended?</li>
-</ul>
-<h1 id="boot2"><a class="header" href="#boot2">boot2</a></h1>
-<ul>
-<li><code>runtime_init</code> ?, in <a href="https://github.com/raspberrypi/pico-sdk/blob/a1438dff1d38bd9c65dbd693f0e5db4b9ae91779/src/rp2_common/pico_crt0/crt0.S#L572C1-L572C13">crt0.S</a>, like what <a href="https://vanhunteradams.com/Pico/Bootloader/Boot_sequence.html">https://vanhunteradams.com/Pico/Bootloader/Boot_sequence.html</a> mention?</li>
-</ul>
-<p><img src="embedtronics//assets/9b97cd61d49ec79790a82a11ded40e61c8cf8563ccbf0d274bb2176aaac35c85d38ac9dbd1647a35f8f093a6a6ab81cb52d1b2182fea40662cdf7d5e.png" alt="image" /></p>
-<p>first, we look at this file <a href="https://github.com/raspberrypi/pico-sdk/blob/master/src/rp2_common/pico_crt0/rp2040/memmap_default.ld">memmap_default.ld</a></p>
-<ul>
-<li>here, we know that, they call <code>pico_flash_region.ld</code>, which located on <a href="https://github.com/raspberrypi/pico-sdk/blob/master/src/rp2_common/pico_standard_link/pico_flash_region.template.ld">src/rp2_common/pico_standard_link/pico_flash_region.template.ld</a></li>
-<li>the cmake then convert <code>pico_flash_region.template.ld</code> into <code>pico_flash_region.ld</code> using <a href="https://github.com/raspberrypi/pico-sdk/blob/a1438dff1d38bd9c65dbd693f0e5db4b9ae91779/src/rp2_common/pico_standard_link/CMakeLists.txt#L126">cmake</a></li>
-</ul>
-<p><a href="https://github.com/raspberrypi/pico-sdk/blob/a1438dff1d38bd9c65dbd693f0e5db4b9ae91779/src/rp2_common/pico_standard_link/CMakeLists.txt#L118-L120">this</a> code idk what its used for, also where the variable coming-off</p>
-<h1 id="boot2-revision"><a class="header" href="#boot2-revision">boot2 revision</a></h1>
-<p>this is the actual boot2 is located</p>
-<ul>
-<li><a href="https://github.com/raspberrypi/pico-sdk/tree/master/src/rp2040/boot_stage2">https://github.com/raspberrypi/pico-sdk/tree/master/src/rp2040/boot_stage2</a></li>
-<li>inside will have many files, all of them is bootloader, but with different hardware. in my case I USE w25q080, THIS is how I know it
-<img src="embedtronics//assets/5eedcea5cb67eae04f32366d829efa9fbad1cb8b6fe52e7eec210003cbb998fc084083b06469d2b1fc6229f9d77afabb866f9500e1b13656b5c4569a.png" alt="image" /></li>
-</ul>
-<h1 id="linker-script"><a class="header" href="#linker-script">linker script</a></h1>
-<p>there has various linker scripts</p>
-<ul>
-<li><a href="https://github.com/raspberrypi/pico-sdk/blob/master/src/rp2040/boot_stage2/boot_stage2.ld">boot_stage2</a></li>
-<li><a href="https://github.com/raspberrypi/pico-sdk/blob/master/src/rp2_common/pico_crt0/rp2040/memmap_default.ld">memmap_default.ld</a></li>
-<li><a href="https://github.com/raspberrypi/pico-sdk/blob/master/src/rp2_common/pico_standard_link/pico_flash_region.template.ld">pico_flash_region</a>, this is included on <code>memmap_default.ld</code></li>
-</ul>
-<p>if we merge both <code>memmap_default.ld</code> and <code>pico_flash_region.ld</code>, we will got this</p>
-<pre><code class="language-c">MEMORY
-{
-    FLASH(rx) : ORIGIN = 0x10000000, LENGTH = ${PICO_FLASH_SIZE_BYTES_STRING}
-    RAM(rwx) : ORIGIN =  0x20000000, LENGTH = 256k
-    SCRATCH_X(rwx) : ORIGIN = 0x20040000, LENGTH = 4k
-    SCRATCH_Y(rwx) : ORIGIN = 0x20041000, LENGTH = 4k
-}
-</code></pre>
-<p>see missing part? yes, that is <code>PICO_FLASH_SIZE_BYTES_STRING</code>, lets find out in our *.elf.map</p>
-<p><img src="embedtronics//assets/1cd8416a8065c0f0be4d8ccb319c644d5d2ec1f2b6ecfec3ecfb3c24c921238a1da5662379c6fd9eaa0c10d8f39166634c646b5b1caf491465ccc922.png" alt="image" /></p>
-<p><img src="embedtronics//assets/823238e7e864c31772fe710047ad3355085924b1d49f46723a18fd60a5494a90466d8991ecd3cfcc9a990d7bf44a8979e37f409a0408498ef71c54ad.png" alt="image" /></p>
-<p>that is 2048K</p>
-<h1 id="issue-that-i-find"><a class="header" href="#issue-that-i-find">Issue that I find</a></h1>
-<p>I think <code>arm-none-eabi-objdump</code> is mistaken arm-thumb-1 instruction as full 32 bit arm, so they just say <code>.word 0xdeadbeef</code></p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="picotool-build"><a class="header" href="#picotool-build">picotool build</a></h1>
-<h2 id="os-setup"><a class="header" href="#os-setup">os setup</a></h2>
-<pre><code class="language-sh">sudo pacman -S cmake arm-none-eabi-gcc arm-none-eabi-newlib
-</code></pre>
-<h2 id="setup-picosdk"><a class="header" href="#setup-picosdk">setup picosdk</a></h2>
-<pre><code class="language-sh">git clone https://github.com/raspberrypi/pico-sdk.git
-cd pico-sdk
-git submodule update --init
-export PICO_SDK_PATH=$PWD
-</code></pre>
-<h2 id="build-picotool"><a class="header" href="#build-picotool">build picotool</a></h2>
-<pre><code class="language-sh">git clone https://github.com/raspberrypi/picotool.git
-cd picotool
-mkdir build
-cd build
-cmake ..
-make
-</code></pre>
-<p>if you get cmake error minimum etc..., use <code>cmake .. -DCMAKE_POLICY_VERSION_MINIMUM=3.5</code> instead</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="debug-pico-with-another-pico"><a class="header" href="#debug-pico-with-another-pico">debug pico with another pico</a></h1>
-<p>first, we need a patch this stuff https://review.openocd.org/c/openocd/+/8223/3/src/flash/nor/spi.c#187</p>
-<h1 id="optional-dry-run"><a class="header" href="#optional-dry-run">optional dry run</a></h1>
-<pre><code class="language-sh">pacman -S mingw-w64-x86_64-toolchain git make libtool pkg-config autoconf automake texinfo mingw-w64-x86_64-libusb
-</code></pre>
-<p>then run</p>
-<pre><code class="language-sh">git clone https://github.com/raspberrypi/openocd.git --branch picoprobe --depth=1
-cd openocd
-nvim /src/flash/nor/spi.c
-</code></pre>
-<p>then add patch</p>
-<p>after that</p>
-<h1 id="build-1"><a class="header" href="#build-1">build</a></h1>
-<pre><code class="language-sh">./bootstrap
-./configure --enable-picoprobe --disable-werror
-make -j4
-sudo make install
-</code></pre>
-<h1 id="flash-elf"><a class="header" href="#flash-elf">flash ELF</a></h1>
-<pre><code class="language-sh">sudo openocd -f interface/cmsis-dap.cfg -f target/rp2040.cfg -c "adapter speed 5000" -c "program blink.elf verify reset exit"
-</code></pre>
-<h1 id="just-debugging"><a class="header" href="#just-debugging">just debugging</a></h1>
-<pre><code class="language-sh">sudo openocd -f interface/cmsis-dap.cfg -f target/rp2040.cfg -c "adapter speed 5000"
-
-```sh
-arm-none-eabi-gdb blink.elf
-&gt; target remote localhost:3333
-&gt; monitor reset init
-&gt; continue
-</code></pre>
-<p>wiring position: <img src="embedtronics//assets/ffd3b015a7065c6a5188c94644ad5f017417ed0e7e010f92a6b4baff4e07d2da9be208c33b42527fb4bf2e6bbad3a0fd735c20ce4020101264e9aa77.png" alt="image" /></p>
-<p><img src="embedtronics//assets/0470af216a4453ea5bfbded85fd6d523d2eac2fa64d59787e0c17ad13789eac7f54f1dd97bb273e4730c31ec8328f324db69cbb7a13852c789b482d7.png" alt="image" /></p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="pico-sdk-install--cmake-template"><a class="header" href="#pico-sdk-install--cmake-template">PICO SDK install &amp; cmake template</a></h1>
-<p>install step is very easy,</p>
-<pre><code class="language-sh">git clone https://github.com/raspberrypi/pico-sdk.git
-cd pico-sdk
-git submodule update --init
-</code></pre>
-<h1 id="cmake-template"><a class="header" href="#cmake-template">CMAKE Template</a></h1>
-<p>this is my own standard of pico rp2040 chip cmake build template</p>
-<pre><code class="language-C">cmake_minimum_required(VERSION 3.13)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-include(/home/fadhil_riyanto/git_clone/pico-sdk/pico_sdk_init.cmake)
-
-pico_sdk_init()
-
-project(hello_usb C CXX ASM)
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 17)
-
-
-add_executable(hello_usb hello_usb.c)
-target_link_libraries(hello_usb pico_stdlib)
-
-# # enable usb output, disable uart output
-# pico_enable_stdio_usb(hello_usb 1)
-# pico_enable_stdio_uart(hello_usb 0)
-
-pico_add_extra_outputs(hello_usb)
-</code></pre>
-<p>if you ask about</p>
-<blockquote>
-<blockquote>
-<p>what uses of <code>pico_sdk_init</code>, or <code>pico_enable_stdio_usb</code>, please read it yourself on <a href="https://github.com/raspberrypi/pico-sdk/blob/9a4113fbbae65ee82d8cd6537963bc3d3b14bcca/pico_sdk_init.cmake#L44-L49">https://github.com/raspberrypi/pico-sdk/blob/9a4113fbbae65ee82d8cd6537963bc3d3b14bcca/pico_sdk_init.cmake#L44-L49</a>, thats is a macro!</p>
-</blockquote>
-</blockquote>
-<p>feel free to change <code>include(/home/fadhil_riyanto/git_clone/pico-sdk/pico_sdk_init.cmake)</code> with your own SDK Path</p>
-<p><img src="embedtronics//assets/3cd8678ed1023faefda7a4811168e691c0c03b33959a8272ce79f4833dba63016f479fe6da574e7b9dd0cfab422e1c05562aae820819ae717115691c.png" alt="image" /></p>
-<p><img src="embedtronics//assets/647a46c8f9f938fa98e322298755afe0249e3cfe64d7ffcddd8626d6a31f07e8cf9f3e1fd131d2ce12001631a942c041f072916f19e416e26f2b1da9.png" alt="image" /></p>
-<h1 id="vscode-autocomplete-settings"><a class="header" href="#vscode-autocomplete-settings">vscode autocomplete settings</a></h1>
-<p>create file named <code>.vscode/c_cpp_properties.json</code></p>
-<p>fill with</p>
-<pre><code class="language-json">{
-  "configurations": [
-    {
-      "name": "Linux",
-      "compileCommands": "${workspaceFolder}/build/compile_commands.json",
-      "intelliSenseMode": "linux-gcc-x64",
-      "compilerPath": "/usr/bin/g++",
-      "cStandard": "c11",
-      "cppStandard": "c++17"
-    }
-  ],
-  "version": 4
-}
-
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="arm-none-eabi-gdb-debugging-with-openocd"><a class="header" href="#arm-none-eabi-gdb-debugging-with-openocd">arm-none-eabi-gdb debugging with openocd</a></h1>
-<p>the simplest thing to debug your RP2040 chip is using secondary pico as picoprobe, then running openocd.
-I assume you're was ready with your pico debugprobe</p>
-<h1 id="identify-your-tty"><a class="header" href="#identify-your-tty">identify your TTY</a></h1>
-<p>check with <code>sudo dmesg</code>, the run a command like this <code>sudo chmod 666 /dev/ttyACM0</code></p>
-<h1 id="openocd"><a class="header" href="#openocd">openocd</a></h1>
-<pre><code class="language-sh">openocd -f interface/cmsis-dap.cfg -f target/rp2040.cfg -c "adapter speed 5000"
-</code></pre>
-<h1 id="cmake"><a class="header" href="#cmake">cmake</a></h1>
-<p>make sure your ELF was build with <code>cmake -DCMAKE_BUILD_TYPE=Debug -DPICO_BOARD=pico ..</code></p>
-<h1 id="flashing"><a class="header" href="#flashing">flashing</a></h1>
-<pre><code class="language-sh">openocd -f interface/cmsis-dap.cfg -f target/rp2040.cfg -c "adapter speed 5000" -c "program hello_usb.elf verify reset exit"
-</code></pre>
-<p>without sudo</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="analysis-how-printf-rp2040-work-under-low-level-stuff"><a class="header" href="#analysis-how-printf-rp2040-work-under-low-level-stuff">analysis how printf rp2040 work under low level stuff</a></h1>
-<p>in order to know how printf works in rp2040 uart bridge, lets compile simple program, compile as debug, then run GDB</p>
-<p>consider this very simple hello world</p>
-<pre><code class="language-c">#include &lt;pico/printf.h&gt;
-#include &lt;pico/time.h&gt;
-
-int main() {
-    int n = 0;
-    stdio_init_all();
-    while (true) {
-        printf("Hello, world! %d\n", n);
-        sleep_ms(1000);
-        n = n + 1;
-    }
-}
-</code></pre>
-<h1 id="analysis-1"><a class="header" href="#analysis-1">analysis</a></h1>
-<p><img src="embedtronics//assets/c9a172f5c6ce190e648f88df4af894d4d115b23d2128cad758833395f62d3f5e5d2ef9cb3dc4d695806f538fa26510bf6bc0da2b995b7fceeaff4899.png" alt="image" /></p>
-<p>see?</p>
-<pre><code class="language-c">=&gt; 0x100002b4 &lt;+12&gt;:    bl      0x10003a64 &lt;__wrap_printf&gt;
-</code></pre>
-<p>its call <code>__wrap_printf</code> which mean, the backend call <code>-Wl,--wrap=printf</code> internally, but if we reffer to <code>/home/fadhil_riyanto/git_clone/pico-sdk/src/rp2_common/pico_stdio/stdio.c:347</code></p>
-<p><img src="embedtronics//assets/44f66f5c4e0c51a2c0b4bc3885079beb5de306725363b91ba2a38898bf59d0e76fe467ec3abf98eb4881aaf0ce408cf5ebd19b28747ef3720bb99107.png" alt="image" /></p>
-<p>the signature is different, this function has signature</p>
-<pre><code class="language-c">int __printflike(1, 0) PRIMARY_STDIO_FUNC(printf)(const char* format, ...)
-</code></pre>
-<p>so, what exactly happen?</p>
-<h1 id="result"><a class="header" href="#result">result</a></h1>
-<p>lets look at stdio.c line 289</p>
-<p><img src="embedtronics//assets/a00ffec057742b32cb76c8db0d3da75c299ceba49a218edf9d559fb31eb9ae029da9b798e2d255ca0af5754dcd7ac62929645ad3aa63155c62bf61a8.png" alt="image" /></p>
-<p>when the macro <code>PICO_STDIO_SHORT_CIRCUIT_CLIB_FUNCS</code> is active, we replace the function name by <code>WRAPPER_FUNC(x)</code>, not <code>stdio_printf</code></p>
-<p>after that, lets jump into <a href="https://github.com/raspberrypi/pico-sdk/blob/9a4113fbbae65ee82d8cd6537963bc3d3b14bcca/src/rp2_common/pico_platform_compiler/include/pico/platform/compiler.h#L185">https://github.com/raspberrypi/pico-sdk/blob/9a4113fbbae65ee82d8cd6537963bc3d3b14bcca/src/rp2_common/pico_platform_compiler/include/pico/platform/compiler.h#L185</a>, very clear definition</p>
-<p>so, basically. this function
-<img src="embedtronics//assets/b0dbbe24380b5411221dbffcf2cb8409180135d704b9ede610a1e8f3e032a9ce6071551b9c2628a7d85fec6dcb88aa3f8b529d15999cdf75570fdab8.png" alt="image" /></p>
-<p>call <code>__wrap_printf</code></p>
-<p>make sense?</p>
-<h1 id=""><a class="header" href="#"></a></h1>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="rp2040-chip-memory-layout"><a class="header" href="#rp2040-chip-memory-layout">RP2040 chip memory layout</a></h1>
-<p>pembagian nya ada di sini:
-<img src="embedtronics//assets/dfd7de595d88027938f56b7e764d7dce7dfa1ef8dfad07f788a65565041f7442f2bc1b1df44d8fe2528858fcf2cfda1d3c4c1eb3fb3d157a644fa18e.png" alt="image" /></p>
-<h1 id="rom"><a class="header" href="#rom">ROM</a></h1>
-<p>Kode untuk rom ini immutable (belum dicoba), dimulai dari 0x00000000 sampai sejauh 16 kB (0x00004000)</p>
-<p>total sram di chip RP2040 ada 264kB (TOTALNYA saja), tapi perlu diketahu bahwa itu semua aslinya dibagi bagi per-area address nya</p>
-<p>jika di docs, sram ini dimulai dari 0x20000000 (summary), tapi secara fisik, dibagi menjadi 6 bank</p>
-<p>dimana</p>
-<p>word addr 0</p>
-<ul>
-<li>bank 0: 0x20000000</li>
-<li>bank 1: 0x20000004</li>
-<li>bank 2: 0x20000008</li>
-<li>bank 3: 0x2000000c</li>
-</ul>
-<p>word addr 1</p>
-<ul>
-<li>bank 0: 0x20000010</li>
-<li>bank 1: 0x20000014</li>
-<li>bank 2: 0x20000018</li>
-<li>bank 3: 0x2000001c</li>
-</ul>
-<p>word addr 2</p>
-<ul>
-<li>bank 0: 0x20000020</li>
-<li>bank 1: 0x20000024</li>
-<li>bank 2: 0x20000028</li>
-<li>bank 3: 0x2000002c</li>
-</ul>
-<p>dst</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="stdio_init_all-analysis"><a class="header" href="#stdio_init_all-analysis">stdio_init_all() analysis</a></h1>
-<p>first, lets debug this with real hardware &amp; openocd</p>
-<p>do not forget to add breakpoint in this func
-<img src="embedtronics//assets/d79a009da96a33c92b6b2ab63c28ed1181c1737c08fc3a9c81e1a8307687ceea6cf4823ebfccb102464099ec2aca35f2ba6c030577ac2097826aa79f.png" alt="image" /></p>
-<p>the sequence of execution:</p>
-<ul>
-<li><code>/home/fadhil_riyanto/git_clone/pico-sdk/src/rp2_common/pico_stdio/stdio.c:200</code> -&gt; stdio_init_all()</li>
-<li><code>/home/fadhil_riyanto/git_clone/pico-sdk/src/rp2_common/pico_stdio_uart/stdio_uart.c:37</code> -&gt; stdio_uart_init()</li>
-<li><code>/home/fadhil_riyanto/git_clone/pico-sdk/src/rp2_common/pico_stdio_uart/stdio_uart.c:93</code> -&gt; stdio_uart_init_full()</li>
-<li><code>/home/fadhil_riyanto/git_clone/pico-sdk/src/rp2_common/hardware_gpio/gpio.c:38</code> -&gt; gpio_set_function()</li>
-<li><code>/home/fadhil_riyanto/git_clone/pico-sdk/src/rp2_common/hardware_uart/uart.c:42</code> -&gt; uart_init()</li>
-</ul>
-<p>WIP (SOON)</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="pico_default_asm_volatile"><a class="header" href="#pico_default_asm_volatile">pico_default_asm_volatile</a></h1>
-<p>after a long time, I discover this macro from this screenshoot</p>
-<p><img src="embedtronics//assets/fe28d3decea5adad85287258acbfe1798633ddb0a31f160672716fc61632ab2866b9c0a853b77973296555b2e411342cee912b0cbc9a990ecacbed37.png" alt="image" /></p>
-<p>and I found it</p>
-<p><a href="https://github.com/raspberrypi/pico-sdk/blob/9a4113fbbae65ee82d8cd6537963bc3d3b14bcca/src/rp2_common/pico_platform_compiler/include/pico/platform/compiler.h#L149-L159">https://github.com/raspberrypi/pico-sdk/blob/9a4113fbbae65ee82d8cd6537963bc3d3b14bcca/src/rp2_common/pico_platform_compiler/include/pico/platform/compiler.h#L149-L159</a></p>
-<pre><code class="language-c">#define pico_default_asm_volatile(...) __asm volatile (".syntax unified\n" __VA_ARGS__)
-</code></pre>
-<p>and the explanation why use <code>__VA_ARGS__</code>: <a href="https://gcc.gnu.org/onlinedocs/cpp/Variadic-Macros.html">https://gcc.gnu.org/onlinedocs/cpp/Variadic-Macros.html</a></p>
-<p>here the example</p>
-<p><img src="embedtronics//assets/3f10433700ab0dbc062496ebf165befd3f1f55a283d912a7efcc09bf8dc6329ae0812cc1e0acb3e5b3a0fc39f3399bd794c66054ff1f919c3df6e703.png" alt="image" /></p>
-<p><img src="embedtronics//assets/7e4c168002be67f1892819134d389599878fa6ba856daa874fdb6273681b437fea071e16dbc52e877969d5efad3eff65283ab0337d9a054bb703e65b.png" alt="image" /></p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="rp2040-sram-layout"><a class="header" href="#rp2040-sram-layout">RP2040 sram layout</a></h1>
-<p>the static ram is contains 6 section of ram, which is two 4KB and four 64 KB ram</p>
-<p>RAM start at address <code>0x20000000</code></p>
-<p><code>0x20040000</code> and <code>0x20041000</code> is a start address of 4KB area wide</p>
-<p>and, this is section about 64KB wide ram
-<code>0x20000000</code> - <code>0x20010000</code> (64 kb)
-<code>0x20010000</code> - <code>0x20020000</code> (64 kb)
-<code>0x20020000</code> - <code>0x20030000</code> (64 kb)
-<code>0x20030000</code> - <code>0x20040000</code> (64 kb)</p>
-<p>this is MIRROR of 64 kb region (stripped)
-0x21000000
-0x21010000
-0x21020000
-0x21030000</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="mapping-all-pico-sdk-cmakeliststxt"><a class="header" href="#mapping-all-pico-sdk-cmakeliststxt">mapping all pico-sdk CmakeLists.txt</a></h1>
-<p>SOON</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="math"><a class="header" href="#math">Math</a></h1>
 <p>Welcome in this section.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="set-operations-formula"><a class="header" href="#set-operations-formula">Set operations formula</a></h1>
@@ -3525,6 +4002,88 @@ export function DataCenter(
 <h2 id="server-send-challenge"><a class="header" href="#server-send-challenge">server send challenge</a></h2>
 </li>
 </ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="self-signed-cert"><a class="header" href="#self-signed-cert">Self signed cert</a></h1>
+<p>preface, this <a href="https://serverfault.com/questions/9708/what-is-a-pem-file-and-how-does-it-differ-from-other-openssl-generated-key-file">answer</a> will make you understanding</p>
+<ul>
+<li>.csr - This is a Certificate Signing Request. Some applications can generate these for submission to certificate-authorities. The actual format is PKCS10 which is defined in RFC 2986. It includes some/all of the key details of the requested certificate such as subject, organization, state, whatnot, as well as the public key of the certificate to get signed. These get signed by the CA and a certificate is returned. The returned certificate is the public certificate (which includes the public key but not the private key), which itself can be in a couple of formats.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="openssl-todo"><a class="header" href="#openssl-todo">openssl todo</a></h1>
+<p>here what I want to learn about cryptography</p>
+<ul>
+<li><a href="crypto//crypto/symmetric-block-chiper.html">Symmetric encryption (AES, DES)</a>
+<ul>
+<li><a href="crypto//crypto/HMAC-SHA256.html">HMAC-SHA256</a></li>
+</ul>
+</li>
+<li>Asymmetric encryption (RSA, ECC)</li>
+<li>Hashing (SHA, MD5)</li>
+<li>Digital signatures</li>
+<li>Certificates &amp; PKI (Public Key Infrastructure)</li>
+</ul>
+<p>footnote:</p>
+<ul>
+<li><a href="https://robertheaton.com/2013/07/29/padding-oracle-attack/">padding oracle attack</a></li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="generating-rsa-public-key-from-private-key"><a class="header" href="#generating-rsa-public-key-from-private-key">generating RSA public key from private key</a></h1>
+<ul>
+<li><a href="https://docs.openssl.org/3.2/man1/openssl-format-options/#format-options">https://docs.openssl.org/3.2/man1/openssl-format-options/#format-options</a></li>
+<li><a href="https://knowledge.digicert.com/general-information/openssl-quick-reference-guide">https://knowledge.digicert.com/general-information/openssl-quick-reference-guide</a></li>
+<li><a href="https://developers.yubico.com/PIV/Guides/Generating_keys_using_OpenSSL.html">https://developers.yubico.com/PIV/Guides/Generating_keys_using_OpenSSL.html</a></li>
+</ul>
+<h2 id="generating-private-key"><a class="header" href="#generating-private-key">generating private key</a></h2>
+<pre><code>openssl genrsa -out private.key 8192
+</code></pre>
+<p>this command will generate private key with length</p>
+<p>let's extract public key from newly generated private key</p>
+<pre><code>openssl rsa -pubout -in ./private.key -outform PEM -out public.key
+
+# or, whatever
+
+openssl rsa -outform PEM -in ./private.key -pubout -out public.pem
+</code></pre>
+<h2 id="-1"><a class="header" href="#-1"></a></h2>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="symmetric-block-chiper"><a class="header" href="#symmetric-block-chiper">symmetric block chiper</a></h1>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Symmetric-key_algorithm">https://en.wikipedia.org/wiki/Symmetric-key_algorithm</a>
+in simply terms, symmetric block chiper is a way where encryption and decryption is uses same key. for example</li>
+</ul>
+<p><img src="crypto//assets/f8841d9a7fe98686ae23a987e817c78e2e1ad7e2f2a888bbced99421f2ea341fca3c2d4c8d4bf7a2fa75669a63be6efeaaa1de75f35f0914af6858f8.png" alt="image" /></p>
+<p>credit: wikipedia.org</p>
+<p>CLUE: just like zip file</p>
+<p>this is example of symmetric key algorithm</p>
+<ul>
+<li>AES-128</li>
+<li>AES-192</li>
+<li>AES-256</li>
+<li>ARIA-128</li>
+<li>ARIA-192</li>
+<li>ARIA-256</li>
+<li>CAMELLIA-128</li>
+<li>CAMELLIA-192</li>
+<li>CAMELLIA-256</li>
+<li>DES</li>
+<li>DES3</li>
+</ul>
+<p>example</p>
+<h1 id="aes"><a class="header" href="#aes">AES</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="salt"><a class="header" href="#salt">salt</a></h1>
+<p>what is salt?
+salt is sodium chloride (damn)</p>
+<h1 id="in-cryptography"><a class="header" href="#in-cryptography">in cryptography</a></h1>
+<p>salt is a "extra entropy" that breaks precalculated hash.
+the simple way to do is concat password with salt and hash them, let's see this scenario</p>
+<pre><code class="language-php">php &gt; echo hash("sha256", "a-password");
+e9fad6b0fee5a53813e888b6a3c63a843395ab112b51495a30c1b00a0e5f89e0
+</code></pre>
+<p>withou salt, if <code>attacker</code> has precomputed hash, it might found that <code>e9fad6b0fee5a53813e888b6a3c63a843395ab112b51495a30c1b00a0e5f89e0</code> is correlated with <code>a-password</code>, let's add salt</p>
+<pre><code class="language-php">php &gt; $a = new Random\Engine\Secure();
+php &gt; $salt = $a-&gt;generate();
+php &gt; echo bin2hex($salt) . "::" . hash("sha256", $salt . "a-password");
+39fa561b306cc437::46ac00f5ca786405fd91205d377a83e4e35ed954b7bd6a9078d24215b8135d78
+</code></pre>
+<p>and, the <code>39fa561b306cc437::46ac00f5ca786405fd91205d377a83e4e35ed954b7bd6a9078d24215b8135d78</code> you can store in your db table.</p>
+<p>we generate a CSPRNG (Cryptographically Secure Pseudorandom Number Generator), Then concat them as a salt. this is not protect a password from attacking, but make a attacker harder because its need to be re-compute the value (which is heavy, e.g bruteforcing)</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="hmac-sha256"><a class="header" href="#hmac-sha256">HMAC-SHA256</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="server"><a class="header" href="#server">Server</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="cgit-setup"><a class="header" href="#cgit-setup">Cgit setup</a></h1>
 <p>Ku mau share pengalaman bikin self hosting git server, pakai cgit, biar engga kalah aja sama git.kernel.org dan kernel.dk wkwk</p>
@@ -5483,6 +6042,50 @@ sudo resize2fs /dev/ubuntu-vg/ubuntu-lv
 </ul>
 </li>
 </ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="umask"><a class="header" href="#umask">umask</a></h1>
+<pre><code class="language-txt">    Permission | Binary | Octal  | User  | Group | Other |
+    ======================================================
+      r        |  100   |   4    |       |       |       |
+      w        |  010   |   2    |       |       |       |
+      x        |  001   |   1    |       |       |       |
+    =======================================================
+</code></pre>
+<p>for example</p>
+<h3 id="-2"><a class="header" href="#-2"></a></h3>
+<ul>
+<li>the owner of file has read, write, and execute</li>
+<li>file group only read and execute</li>
+<li>the other only can read</li>
+</ul>
+<p>the permission is like this</p>
+<pre><code>u   g   o
+rwx r-x  r--
+</code></pre>
+<p>aka, because rwx has total point of 4 + 2 + 1, so the permission for user is 7
+because group only have 4 &amp; 1, so the permission is 5
+and last. other only read, which is 4</p>
+<p>the equalivalent command is <code>chmod 754</code></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="wireguard-setup"><a class="header" href="#wireguard-setup">wireguard setup</a></h1>
+<h1 id="peer-a"><a class="header" href="#peer-a">Peer A</a></h1>
+<pre><code class="language-txt">wg genkey &gt; peer_A.key
+wg pubkey &lt; peer_A.key &gt; peer_A.pub
+sudo ip link add dev wg0 type wireguard
+sudo ip addr add 10.0.0.1/24 dev wg0
+sudo wg
+sudo wg set wg0 private-key ./peer_A.key
+sudo wg set wg0 peer wkUbsVDVx4ljxY0lhf6PKE0r8yDD3QWZZSCz2NB9Bmw= allowed-ips 10.0.0.2/32 endpoint 103.246.107.2:43358
+</code></pre>
+<h1 id="peer-b"><a class="header" href="#peer-b">Peer B</a></h1>
+<pre><code class="language-txt">wg genkey &gt; peer_B.key
+wg pubkey &lt; peer_B.key &gt; peer_b.pub
+sudo ip link add dev wg0 type wireguard
+sudo ip addr add 10.0.0.2/24 dev wg0
+sudo wg
+sudo wg set wg0 private-key ./peer_B.key
+wg set wg0 peer mCTr2nPVOAghT5QlxeXUJel9Bm4lGATlxWSzchrjIg4= allowed-ips 10.0.0.1/32 endpoint 20.2.200.57:49503
+</code></pre>
+<p>proof of concept (context: CG-NAT)</p>
+<p><img src="server//assets/ab814abe4712e2984ea8be6e4367d61060c854b73628e2d04bf2303f6a78d0b8562a8be272047b7a4896c210ad826064468ea3b92faf73d82464897b.png" alt="image" /></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="networking"><a class="header" href="#networking">Networking</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="huge-ip-addr-in-firewall-mikrotik"><a class="header" href="#huge-ip-addr-in-firewall-mikrotik">Huge IP addr in firewall mikrotik</a></h1>
 <p>this is the technique to add huge ip addr into firewall without making it 100% cpu usage</p>
@@ -6494,6 +7097,76 @@ if ($token) {
         ]);
     }
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="laravel-database-schema-with-foreign-key"><a class="header" href="#laravel-database-schema-with-foreign-key">Laravel database schema with foreign key</a></h1>
+<p>when creating a foreign key for laravel, the target column must be unique</p>
+<p>example</p>
+<pre><code class="language-php">/* referenced table */
+
+&lt;?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('roles', function (Blueprint $table) {
+            $table-&gt;id()-&gt;autoIncrement();
+            $table-&gt;integer("roles_member_role_id");
+            $table-&gt;foreign("roles_member_role_id")
+                -&gt;references('role_id')
+                -&gt;on('roles_member');
+            $table-&gt;timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('roles');
+    }
+};
+
+</code></pre>
+<p>then the table (that we reference it)</p>
+<pre><code class="language-php">&lt;?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('roles_member', function (Blueprint $table) {
+            $table-&gt;id();
+            $table-&gt;integer("role_id")-&gt;unique();
+            $table-&gt;timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('roles_member');
+    }
+};
+
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="custom-laravel-helper"><a class="header" href="#custom-laravel-helper">custom laravel helper</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="other"><a class="header" href="#other">Other</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="bookmarks-highly-useful-link"><a class="header" href="#bookmarks-highly-useful-link">bookmarks highly useful link</a></h1>
 <h2 id="this-section-is-derived-from-my-original-channel-xorriso"><a class="header" href="#this-section-is-derived-from-my-original-channel-xorriso">this section is derived from my original channel <a href="https://t.me/xorriso">@xorriso</a></a></h2>
@@ -7532,22 +8205,6 @@ Cpp11BracedListStyle: false
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

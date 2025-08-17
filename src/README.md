@@ -34,3 +34,9 @@ Note
 
 
 </div>
+
+# Footnote section
+
+- <a href="https://blog.fadev.org">Fadhil Journal & Notes</a> © 2023 by <a href="github.com/fadhil-riyanto">Fadhil Riyanto</a> is licensed under <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a><img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;">
+- <img src="https://www.gnu.org/graphics/gplv3-127x51.png"> </img>
+- [![Powered by mdBook](https://img.shields.io/badge/powered_by-mdBook-3D3D3D?logo=mdbook)](https://rust-lang.github.io/mdBook/)
