@@ -73,6 +73,19 @@ this is the actual boot2 is located
 - inside will have many files, all of them is bootloader, but with different hardware. in my case I USE w25q080, THIS is how I know it
 ![image](/assets/5eedcea5cb67eae04f32366d829efa9fbad1cb8b6fe52e7eec210003cbb998fc084083b06469d2b1fc6229f9d77afabb866f9500e1b13656b5c4569a.png)
 
+note: how I find it? its manually set program counter register to `0x20041f00`, from somewhere after ctrl + c is fired. we cant stop at 0x20041f00 because at that time. the second boot rom is not loaded yet.
+
+another way, if you was find your "flash hardware driver", let's add breakpoint here, example
+
+![image](/assets/069068d82549fc4332de501c92827479dfeea3a393c5afa696a4ac844891a0c8f748413299b255f15216ff762d0b6b98fc7add71b8489f3ff0d15597.png)
+
+this will stop execution without hassle of hardware breakpoint, or watching program counter value.
+
+
+if you curious how I find magic number `0x20041f00`, please look at this file
+
+![image](/assets/46adc7e59b008bc7a45332671f809d57e5d4b49b4afa81e81290b15afa9d62e12d4eec9f04c0285ce10ef0a275da439bd401f7a55037e05379242080.png)
+
 # linker script
 there has various linker scripts
 
